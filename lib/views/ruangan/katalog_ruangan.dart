@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:inventif/views/alat/qr_scanner_view.dart';
 
 import '../../controllers/ruangan/detail_ruangan_controller.dart';
 import '../../controllers/ruangan/katalog_ruangan_controller.dart';
@@ -221,10 +222,15 @@ class KatalogRuanganScreen extends StatelessWidget {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(
-                  Icons.meeting_room_rounded,
-                  color: Color(0xFF3B3B98),
-                  size: 40,
+                clipBehavior: Clip.antiAlias,
+                child: Image.asset(
+                  room.imagePath,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => const Icon(
+                    Icons.meeting_room_rounded,
+                    color: Color(0xFF3B3B98),
+                    size: 40,
+                  ),
                 ),
               ),
               const SizedBox(width: 16),

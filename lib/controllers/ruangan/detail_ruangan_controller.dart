@@ -11,6 +11,7 @@ class DetailRuanganController {
   String get description => room.description;
   int get capacity => room.capacity;
   List<String> get availableItems => room.availableItems;
+  String get imagePath => room.imagePath;
 
   void openCalendar(BuildContext context) {
     ScaffoldMessenger.of(

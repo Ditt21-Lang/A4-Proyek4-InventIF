@@ -73,7 +73,14 @@ class KatalogAlatView extends StatelessWidget {
                         child: Row(
                           children: [
                             _buildChip('All', false),
-                            _buildChip('Room', false),
+                            _buildChip(
+                              'Room',
+                              false,
+                              onTap: () => Navigator.pushReplacementNamed(
+                                context,
+                                '/katalog-ruangan',
+                              ),
+                            ),
                             _buildChip('Equipment', true),
                             _buildChip('Available', false),
                           ],
@@ -122,16 +129,25 @@ class KatalogAlatView extends StatelessWidget {
                             // 2. Tampilan saat data kosong (tetap bisa di-refresh)
                             if (controller.displayedEquipment.isEmpty) {
                               return RefreshIndicator(
-                                onRefresh: () async => await controller.fetchEquipmentData(),
+                                onRefresh: () async =>
+                                    await controller.fetchEquipmentData(),
                                 color: const Color(0xFFF78233),
                                 child: ListView(
-                                  physics: const AlwaysScrollableScrollPhysics(),
+                                  physics:
+                                      const AlwaysScrollableScrollPhysics(),
                                   children: [
-                                    SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+                                    SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                          0.2,
+                                    ),
                                     const Center(
                                       child: Text(
                                         'Alat tidak ditemukan',
-                                        style: TextStyle(color: Colors.white, fontSize: 16),
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -145,16 +161,19 @@ class KatalogAlatView extends StatelessWidget {
                                 // Memanggil fungsi untuk sedot data ulang dari Firebase
                                 await controller.fetchEquipmentData();
                               },
-                              color: const Color(0xFFF78233), // Warna *loading* oranye
+                              color: const Color(
+                                0xFFF78233,
+                              ), // Warna *loading* oranye
                               backgroundColor: Colors.white,
                               child: ListView.builder(
                                 // TAMBAHAN PENTING: Wajib ada agar list selalu bisa ditarik
                                 // ke bawah, meskipun jumlah barangnya baru 1 atau 2.
                                 physics: const AlwaysScrollableScrollPhysics(),
                                 padding: const EdgeInsets.only(
-                                  left: 20, 
-                                  right: 20, 
-                                  bottom: 100 // Jarak aman agar item terbawah tidak tertutup Navbar
+                                  left: 20,
+                                  right: 20,
+                                  bottom:
+                                      100, // Jarak aman agar item terbawah tidak tertutup Navbar
                                 ),
                                 itemCount: controller.displayedEquipment.length,
                                 itemBuilder: (context, index) {
@@ -181,19 +200,22 @@ class KatalogAlatView extends StatelessWidget {
 
   // --- WIDGET KOMPONEN ---
 
-  Widget _buildChip(String label, bool isActive) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: isActive ? const Color(0xFFF78233) : const Color(0xFFE6E2E6),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
+  Widget _buildChip(String label, bool isActive, {VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isActive ? const Color(0xFFF78233) : const Color(0xFFE6E2E6),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );
@@ -334,11 +356,7 @@ class KatalogAlatView extends StatelessWidget {
               // -------------------------------
             ),
             child: const Center(
-              child: Icon(
-                Icons.home_rounded,
-                color: Colors.black87,
-                size: 34,
-              ),
+              child: Icon(Icons.home_rounded, color: Colors.black87, size: 34),
             ),
           ),
 
@@ -390,18 +408,18 @@ class KatalogAlatView extends StatelessWidget {
               color: const Color(0xFFEBEBEB),
               borderRadius: BorderRadius.circular(18),
               boxShadow: [
-                 BoxShadow(
-                    color: Colors.grey.shade400,
-                    offset: const Offset(4, 4),
-                    blurRadius: 8,
-                    spreadRadius: 1,
-                  ),
-                  const BoxShadow(
-                    color: Colors.white,
-                    offset: Offset(-4, -4),
-                    blurRadius: 8,
-                    spreadRadius: 1,
-                  ),
+                BoxShadow(
+                  color: Colors.grey.shade400,
+                  offset: const Offset(4, 4),
+                  blurRadius: 8,
+                  spreadRadius: 1,
+                ),
+                const BoxShadow(
+                  color: Colors.white,
+                  offset: Offset(-4, -4),
+                  blurRadius: 8,
+                  spreadRadius: 1,
+                ),
               ],
             ),
             child: const Center(

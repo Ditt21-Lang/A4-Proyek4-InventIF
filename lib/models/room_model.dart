@@ -7,6 +7,7 @@ class RoomModel {
   final bool isAvailable;
   final int capacity;
   final List<String> availableItems;
+  final String imagePath;
 
   const RoomModel({
     required this.id,
@@ -15,6 +16,7 @@ class RoomModel {
     required this.isAvailable,
     required this.capacity,
     required this.availableItems,
+    required this.imagePath,
   });
 
   factory RoomModel.fromFirestore(DocumentSnapshot doc) {
@@ -31,7 +33,21 @@ class RoomModel {
       isAvailable: data['isAvailable'] ?? data['available'] ?? true,
       capacity: _toInt(data['capacity'] ?? data['kapasitas'] ?? 0),
       availableItems: _readAvailableItems(data),
+      imagePath: _readImagePath(data, doc.id),
     );
+  }
+
+  static String _readImagePath(Map<String, dynamic> data, String roomId) {
+    final rawPath =
+        data['imagePath'] ?? data['gambar'] ?? data['foto'] ?? data['photo'];
+
+    if (rawPath is String && rawPath.trim().isNotEmpty) {
+      final path = rawPath.trim();
+      if (path.startsWith('assets/')) return path;
+      return 'assets/images/ruangan/$path';
+    }
+
+    return 'assets/images/ruangan/$roomId.png';
   }
 
   static List<String> _readAvailableItems(Map<String, dynamic> data) {

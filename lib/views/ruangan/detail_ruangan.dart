@@ -43,7 +43,7 @@ class DetailRuanganScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  const _PhotoSection(),
+                  _PhotoSection(imagePath: controller.imagePath),
                   const SizedBox(height: 20),
                   _DescriptionSection(controller: controller),
                   const SizedBox(height: 24),
@@ -72,7 +72,7 @@ class _RoomDetailBackground extends StatelessWidget {
           child: DecoratedBox(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/images/polban_zoom.jpeg'),
+                image: AssetImage('assets/images/bg_gedung.png'),
                 fit: BoxFit.cover,
                 alignment: Alignment.center,
               ),
@@ -139,7 +139,9 @@ class _BackButton extends StatelessWidget {
 }
 
 class _PhotoSection extends StatelessWidget {
-  const _PhotoSection();
+  final String imagePath;
+
+  const _PhotoSection({required this.imagePath});
 
   @override
   Widget build(BuildContext context) {
@@ -153,7 +155,7 @@ class _PhotoSection extends StatelessWidget {
           Expanded(
             child: Row(
               children: [
-                const Expanded(child: _PhotoPlaceholder()),
+                Expanded(child: _RoomPhoto(imagePath: imagePath)),
                 const SizedBox(width: 10),
                 const Icon(
                   Icons.chevron_right_rounded,
@@ -169,8 +171,10 @@ class _PhotoSection extends StatelessWidget {
   }
 }
 
-class _PhotoPlaceholder extends StatelessWidget {
-  const _PhotoPlaceholder();
+class _RoomPhoto extends StatelessWidget {
+  final String imagePath;
+
+  const _RoomPhoto({required this.imagePath});
 
   @override
   Widget build(BuildContext context) {
@@ -193,8 +197,17 @@ class _PhotoPlaceholder extends StatelessWidget {
           borderRadius: BorderRadius.circular(2),
           border: Border.all(color: const Color(0xFFD3D5E2)),
         ),
-        child: const Center(
-          child: Icon(Icons.image_outlined, color: Color(0xFF8C90A8), size: 42),
+        clipBehavior: Clip.antiAlias,
+        child: Image.asset(
+          imagePath,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => const Center(
+            child: Icon(
+              Icons.image_outlined,
+              color: Color(0xFF8C90A8),
+              size: 42,
+            ),
+          ),
         ),
       ),
     );
