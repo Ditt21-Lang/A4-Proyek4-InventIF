@@ -64,6 +64,40 @@ Jika menggunakan API Key atau URL khusus, salin file .env (pastikan package flut
 ```
 cp .env.example .env
 ```
+## 4. Setup Firebase (Wajib untuk Semua Anggota Tim)
+
+Karena aplikasi InventIF kini menggunakan Cloud Firestore sebagai *database* terpusat, setiap anggota tim **wajib** melakukan konfigurasi Firebase CLI di laptop masing-masing agar bisa menjalankan aplikasi secara lokal.
+
+Pastikan posisi terminal Anda berada di dalam folder proyek `A4-Proyek4-InventIF`.
+
+**Langkah 1: Install Firebase Tools (via Node.js)**
+```bash
+npm install -g firebase-tools
+```
+**Langkah 2: Login ke Firebase**
+```bash
+firebase login
+```
+(Ketik Y jika ditanya, lalu browser akan terbuka. Silakan login menggunakan akun Google yang sudah diberi akses/diundang ke proyek Firebase InventIF).
+**Langkah 3: Install FlutterFire CLI**
+```bash
+dart pub global activate flutterfire_cli
+```
+**Langkah 4: Sinkronisasi Proyek & Generate File Konfigurasi**
+Jalankan perintah ini untuk mengunduh konfigurasi database ke lokal Anda.
+(Catatan: Perintah set NODE_OPTIONS digunakan untuk membungkam peringatan bawaan Node.js yang seringkali membuat proses konfigurasi FlutterFire menjadi error / FormatException).
+
+Untuk Windows (Command Prompt / VS Code Terminal):
+```bash
+set NODE_OPTIONS="--no-warnings"
+flutterfire configure --project=inventif-c98ab
+```
+Untuk Mac/Linux:
+```bash
+export NODE_OPTIONS="--no-warnings"
+flutterfire configure --project=inventif-c98ab
+```
+(Tekan Enter untuk menyetujui platform default yang dipilihkan, biasanya Android, iOS, macOS, Web. Tunggu hingga file lib/firebase_options.dart berhasil dibuat).
 ---
 # 💻 Menjalankan di Mode Development
 
