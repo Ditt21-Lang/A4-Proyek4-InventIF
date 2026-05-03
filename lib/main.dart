@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'views/auth/login_view.dart';
-import 'views/alat/katalog_alat_view.dart';
-import 'controllers/alat/katalog_alat_controller.dart';
-import 'controllers/catalog/katalog_ruangan_controller.dart';
-import 'views/catalog/katalog_ruangan.dart';
+import 'controllers/ruangan/katalog_ruangan_controller.dart';
+import 'views/ruangan/katalog_ruangan.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,8 +42,6 @@ class MyApp extends StatelessWidget {
 
       routes: {
         '/login': (context) => const LoginView(),
-        '/katalog-alat': (context) =>
-            KatalogAlatView(controller: KatalogAlatController()),
         '/katalog-ruangan': (context) =>
             KatalogRuanganScreen(controller: KatalogRuanganController()),
       },

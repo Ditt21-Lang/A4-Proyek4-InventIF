@@ -1,45 +1,36 @@
 import 'package:flutter/material.dart';
-import '../../controllers/alat/katalog_alat_controller.dart';
-import '../../models/equipment_model.dart';
-import 'qr_scanner_view.dart';
 
-class KatalogAlatView extends StatelessWidget {
-  final KatalogAlatController controller;
+import '../../controllers/ruangan/detail_ruangan_controller.dart';
+import '../../controllers/ruangan/katalog_ruangan_controller.dart';
+import '../../models/room_model.dart';
+import 'detail_ruangan.dart';
 
-  const KatalogAlatView({Key? key, required this.controller}) : super(key: key);
+class KatalogRuanganScreen extends StatelessWidget {
+  final KatalogRuanganController controller;
+
+  const KatalogRuanganScreen({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // backgroundColor: const Color(0xFF3B3B98), <- HAPUS INI
       body: Container(
-        // 1. Set Background Gambar Gedung pada Container terluar
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/images/bg_gedung.png'),
             fit: BoxFit.cover,
-            alignment: Alignment.topCenter, // Agar fokus ke bagian atas gambar
+            alignment: Alignment.topCenter,
           ),
         ),
         child: Column(
           children: [
-            // 2. Beri jarak kosong transparan di atas agar gambar gedung terlihat
-            // Menggunakan 15% dari tinggi layar
             SizedBox(height: MediaQuery.of(context).size.height * 0.15),
-
-            // 3. Kontainer Biru Utama (Melengkung di atas)
             Expanded(
               child: Container(
                 width: double.infinity,
                 decoration: const BoxDecoration(
                   color: Color(0xFF3B3B98),
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(
-                      40,
-                    ), // Ini untuk efek melengkung di sudut atas
-                  ),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
                 ),
-                // Gunakan ClipRRect agar konten ListView di dalamnya tidak melebihi lengkungan
                 child: ClipRRect(
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(40),
@@ -47,10 +38,7 @@ class KatalogAlatView extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(
-                        height: 24,
-                      ), // Jarak dari ujung lengkungan ke teks judul
-                      // HEADER TITLE
+                      const SizedBox(height: 24),
                       const Padding(
                         padding: EdgeInsets.symmetric(
                           horizontal: 20,
@@ -65,30 +53,26 @@ class KatalogAlatView extends StatelessWidget {
                           ),
                         ),
                       ),
-
-                      // CHIPS (Tab Equipment Aktif)
                       SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Row(
                           children: [
                             _buildChip('All', false),
+                            _buildChip('Room', true),
                             _buildChip(
-                              'Room',
+                              'Equipment',
                               false,
                               onTap: () => Navigator.pushReplacementNamed(
                                 context,
-                                '/katalog-ruangan',
+                                '/katalog-alat',
                               ),
                             ),
-                            _buildChip('Equipment', true),
                             _buildChip('Available', false),
                           ],
                         ),
                       ),
                       const SizedBox(height: 16),
-
-                      // SEARCH BAR
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Container(
@@ -97,7 +81,7 @@ class KatalogAlatView extends StatelessWidget {
                             borderRadius: BorderRadius.circular(25),
                           ),
                           child: TextField(
-                            onChanged: controller.searchEquipment,
+                            onChanged: controller.searchRooms,
                             decoration: const InputDecoration(
                               hintText: 'Search Facilities',
                               hintStyle: TextStyle(color: Colors.grey),
@@ -115,22 +99,17 @@ class KatalogAlatView extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 20),
-
-                      // LISTVIEW (Data vs Skeleton Loading)
                       Expanded(
                         child: AnimatedBuilder(
                           animation: controller,
                           builder: (context, child) {
-                            // 1. Tampilkan Skeleton Loading saat sedang proses ambil data
                             if (controller.isLoading) {
                               return _buildSkeletonLoading();
                             }
 
-                            // 2. Tampilan saat data kosong (tetap bisa di-refresh)
-                            if (controller.displayedEquipment.isEmpty) {
+                            if (controller.displayedRooms.isEmpty) {
                               return RefreshIndicator(
-                                onRefresh: () async =>
-                                    await controller.fetchEquipmentData(),
+                                onRefresh: controller.fetchRoomData,
                                 color: const Color(0xFFF78233),
                                 child: ListView(
                                   physics:
@@ -143,7 +122,7 @@ class KatalogAlatView extends StatelessWidget {
                                     ),
                                     const Center(
                                       child: Text(
-                                        'Alat tidak ditemukan',
+                                        'Ruangan tidak ditemukan',
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontSize: 16,
@@ -155,30 +134,22 @@ class KatalogAlatView extends StatelessWidget {
                               );
                             }
 
-                            // 3. TAMPILAN LIST DATA + FITUR PULL TO REFRESH
                             return RefreshIndicator(
-                              onRefresh: () async {
-                                // Memanggil fungsi untuk sedot data ulang dari Firebase
-                                await controller.fetchEquipmentData();
-                              },
-                              color: const Color(
-                                0xFFF78233,
-                              ), // Warna *loading* oranye
+                              onRefresh: controller.fetchRoomData,
+                              color: const Color(0xFFF78233),
                               backgroundColor: Colors.white,
                               child: ListView.builder(
-                                // TAMBAHAN PENTING: Wajib ada agar list selalu bisa ditarik
-                                // ke bawah, meskipun jumlah barangnya baru 1 atau 2.
                                 physics: const AlwaysScrollableScrollPhysics(),
                                 padding: const EdgeInsets.only(
                                   left: 20,
                                   right: 20,
-                                  bottom:
-                                      100, // Jarak aman agar item terbawah tidak tertutup Navbar
+                                  bottom: 100,
                                 ),
-                                itemCount: controller.displayedEquipment.length,
+                                itemCount: controller.displayedRooms.length,
                                 itemBuilder: (context, index) {
-                                  return _buildEquipmentCard(
-                                    controller.displayedEquipment[index],
+                                  return _buildRoomCard(
+                                    context,
+                                    controller.displayedRooms[index],
                                   );
                                 },
                               ),
@@ -197,8 +168,6 @@ class KatalogAlatView extends StatelessWidget {
       bottomNavigationBar: _buildBottomNavigationBar(context),
     );
   }
-
-  // --- WIDGET KOMPONEN ---
 
   Widget _buildChip(String label, bool isActive, {VoidCallback? onTap}) {
     return GestureDetector(
@@ -221,11 +190,7 @@ class KatalogAlatView extends StatelessWidget {
     );
   }
 
-  Widget _buildEquipmentCard(EquipmentModel equipment) {
-    Color statusColor = equipment.status == 'Available'
-        ? Colors.green
-        : Colors.amber;
-
+  Widget _buildRoomCard(BuildContext context, RoomModel room) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(12),
@@ -233,75 +198,84 @@ class KatalogAlatView extends StatelessWidget {
         color: const Color(0xFFE6E2E6),
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            // Hapus komentar di bawah ini jika assets gambar sudah tersedia di pubspec.yaml
-            // child: Image.asset(equipment.imagePath, fit: BoxFit.contain),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  equipment.name,
-                  style: const TextStyle(
-                    color: Color(0xFFF78233), // Warna font oranye
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => DetailRuanganScreen(
+                  controller: DetailRuanganController(room: room),
                 ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: statusColor,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    equipment.status,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+              ),
+            );
+          },
+          child: Row(
+            children: [
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.meeting_room_rounded,
+                  color: Color(0xFF3B3B98),
+                  size: 40,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      room.name,
+                      style: const TextStyle(
+                        color: Color(0xFFF78233),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 8),
+                    Text(
+                      room.description,
+                      style: const TextStyle(
+                        color: Colors.black87,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              const Icon(Icons.chevron_right_rounded, color: Colors.black54),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
-  // Widget khusus untuk membuat efek Skeleton Loading (Mockup ke-2)
   Widget _buildSkeletonLoading() {
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      itemCount: 4, // Menampilkan 4 kotak kosong
+      itemCount: 4,
       itemBuilder: (context, index) {
         return Container(
           margin: const EdgeInsets.only(bottom: 16),
-          height: 104, // Estimasi tinggi kartu asli
+          height: 104,
           decoration: BoxDecoration(
-            color: const Color(0xFFE6E2E6).withOpacity(0.8),
+            color: const Color(0xFFE6E2E6).withValues(alpha: 0.8),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Row(
             children: [
               Padding(
-                padding: const EdgeInsets.all(12.0),
+                padding: const EdgeInsets.all(12),
                 child: Container(
                   width: 80,
                   height: 80,
@@ -318,7 +292,6 @@ class KatalogAlatView extends StatelessWidget {
     );
   }
 
-  // Tambahkan (BuildContext context) di dalam kurung
   Widget _buildBottomNavigationBar(BuildContext context) {
     return Container(
       height: 90,
@@ -331,14 +304,12 @@ class KatalogAlatView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // 1. Icon Home (Active) - Sekarang ditambah efek Shadow Timbul
           Container(
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: const Color(0xFFF78233), // Warna tetap oranye
+              color: const Color(0xFFF78233),
               borderRadius: BorderRadius.circular(18),
-              // --- TAMBAHAN SHADOW DI SINI ---
               boxShadow: [
                 BoxShadow(
                   color: Colors.grey.shade400,
@@ -353,14 +324,11 @@ class KatalogAlatView extends StatelessWidget {
                   spreadRadius: 1,
                 ),
               ],
-              // -------------------------------
             ),
             child: const Center(
               child: Icon(Icons.home_rounded, color: Colors.black87, size: 34),
             ),
           ),
-
-          // 2. Icon Scanner (Inactive)
           GestureDetector(
             onTap: () {
               Navigator.push(
@@ -398,9 +366,6 @@ class KatalogAlatView extends StatelessWidget {
               ),
             ),
           ),
-
-          // 3. Icon Profile (Inactive)
-          // Icon Profile
           Container(
             width: 60,
             height: 60,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../controllers/catalog/detail_ruangan_controller.dart';
+import '../../controllers/ruangan/detail_ruangan_controller.dart';
 
 class DetailRuanganScreen extends StatelessWidget {
   final DetailRuanganController controller;
