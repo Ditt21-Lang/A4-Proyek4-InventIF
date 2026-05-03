@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "825976225113",
+    "project_id": "inventif-c98ab",
+    "storage_bucket": "inventif-c98ab.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:825976225113:android:fbe1afb570245f836b2048",
+        "android_client_info": {
+          "package_name": "com.example.inventif"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJg2G3AU_bzaJUv4s5m22Zhy6x94hshuY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
