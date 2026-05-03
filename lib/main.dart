@@ -4,12 +4,12 @@ import 'firebase_options.dart';
 import 'views/auth/login_view.dart';
 import 'views/alat/katalog_alat_view.dart';
 import 'controllers/alat/katalog_alat_controller.dart';
+import 'controllers/catalog/katalog_ruangan_controller.dart';
+import 'views/catalog/katalog_ruangan.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(const MyApp());
 }
@@ -46,6 +46,8 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginView(),
         '/katalog-alat': (context) =>
             KatalogAlatView(controller: KatalogAlatController()),
+        '/katalog-ruangan': (context) =>
+            KatalogRuanganScreen(controller: KatalogRuanganController()),
       },
       // home: const MyHomePage(title: 'Flutter Demo Home Page'),
       debugShowCheckedModeBanner: false,

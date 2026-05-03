@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:inventif/views/catalog/katalog_ruangan.dart';
+
+import '../../controllers/catalog/detail_ruangan_controller.dart';
 
 class DetailRuanganScreen extends StatelessWidget {
-  final Facility facility;
+  final DetailRuanganController controller;
 
-  const DetailRuanganScreen({super.key, required this.facility});
+  const DetailRuanganScreen({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -44,16 +45,10 @@ class DetailRuanganScreen extends StatelessWidget {
                   const SizedBox(height: 10),
                   const _PhotoSection(),
                   const SizedBox(height: 20),
-                  _DescriptionSection(facility: facility),
+                  _DescriptionSection(controller: controller),
                   const SizedBox(height: 24),
                   _CalendarButton(
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Calendar belum tersedia'),
-                        ),
-                      );
-                    },
+                    onTap: () => controller.openCalendar(context),
                   ),
                 ],
               ),
@@ -70,79 +65,38 @@ class _RoomDetailBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFF3737A0), Color(0xFF272887), Color(0xFF222779)],
-        ),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            top: 74,
-            right: -64,
-            child: _AngledPanel(
-              width: 260,
-              height: 116,
-              opacity: 0.12,
-              angle: -0.23,
-            ),
-          ),
-          Positioned(
-            top: 266,
-            left: -60,
-            child: _AngledPanel(
-              width: 320,
-              height: 138,
-              opacity: 0.09,
-              angle: 0.35,
-            ),
-          ),
-          Positioned(
-            bottom: -18,
-            left: 92,
-            right: 92,
-            child: Container(
-              height: 5,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        const Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/polban_zoom.jpeg'),
+                fit: BoxFit.cover,
+                alignment: Alignment.center,
               ),
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AngledPanel extends StatelessWidget {
-  final double width;
-  final double height;
-  final double opacity;
-  final double angle;
-
-  const _AngledPanel({
-    required this.width,
-    required this.height,
-    required this.opacity,
-    required this.angle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Transform.rotate(
-      angle: angle,
-      child: Container(
-        width: width,
-        height: height,
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: opacity),
-          borderRadius: BorderRadius.circular(8),
         ),
-      ),
+        Positioned.fill(
+          child: Container(
+            color: const Color(0xFF222779).withValues(alpha: 0.78),
+          ),
+        ),
+        Positioned(
+          bottom: 14,
+          left: 92,
+          right: 92,
+          child: Container(
+            height: 5,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -248,22 +202,32 @@ class _PhotoPlaceholder extends StatelessWidget {
 }
 
 class _DescriptionSection extends StatelessWidget {
-  final Facility facility;
+  final DetailRuanganController controller;
 
-  const _DescriptionSection({required this.facility});
+  const _DescriptionSection({required this.controller});
 
   @override
   Widget build(BuildContext context) {
+    final availableItems = controller.availableItems;
+
     return _DetailCard(
-      height: 100,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const _SectionTitle('Description'),
           const SizedBox(height: 8),
-          _BulletText('Tersedia ${facility.chairCount} kursi dan meja'),
+          _BulletText(controller.description),
           const SizedBox(height: 5),
-          _BulletText('Mampu menampung hingga ${facility.capacity} orang'),
+          _BulletText('Mampu menampung hingga ${controller.capacity} orang'),
+          if (availableItems.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            const _SectionTitle('Barang Tersedia'),
+            const SizedBox(height: 8),
+            for (final item in availableItems) ...[
+              _BulletText(item),
+              const SizedBox(height: 5),
+            ],
+          ],
         ],
       ),
     );
@@ -322,9 +286,9 @@ class _CalendarButton extends StatelessWidget {
 
 class _DetailCard extends StatelessWidget {
   final Widget child;
-  final double height;
+  final double? height;
 
-  const _DetailCard({required this.child, required this.height});
+  const _DetailCard({required this.child, this.height});
 
   @override
   Widget build(BuildContext context) {
