@@ -3,37 +3,31 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class RoomModel {
   final String id;
   final String name;
+  final List<String> barangTersedia;
   final String description;
-  final bool isAvailable;
-  final int capacity;
-  final List<String> availableItems;
-  final String imagePath;
+  final String gambar;
+  final String capacity;
 
-  const RoomModel({
+  RoomModel({
     required this.id,
     required this.name,
+    required this.barangTersedia,
     required this.description,
-    required this.isAvailable,
+    required this.gambar,
     required this.capacity,
-    required this.availableItems,
-    required this.imagePath,
   });
 
   factory RoomModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>? ?? {};
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
     return RoomModel(
       id: doc.id,
-      name: data['name'] ?? data['nama'] ?? data['roomName'] ?? 'Unknown Room',
-      description:
-          data['description'] ??
-          data['deskripsi'] ??
-          data['detail'] ??
-          'Tidak ada deskripsi',
-      isAvailable: data['isAvailable'] ?? data['available'] ?? true,
-      capacity: _toInt(data['capacity'] ?? data['kapasitas'] ?? 0),
-      availableItems: _readAvailableItems(data),
-      imagePath: _readImagePath(data, doc.id),
+      name: data['name'] ?? 'Unknown Room',
+      // Memastikan tipe data Firebase Array menjadi List<String> Dart
+      barangTersedia: List<String>.from(data['barangTersedia'] ?? []),
+      description: data['description'] ?? 'Tidak ada deskripsi',
+      gambar: data['gambar'] ?? 'assets/placeholder.png',
+      capacity: data['capacity']?.toString() ?? '0',
     );
   }
 

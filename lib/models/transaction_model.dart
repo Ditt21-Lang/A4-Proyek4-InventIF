@@ -1,50 +1,95 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class TransactionModel {
-  final String id;              // Kode Peminjaman
-  final String borrowerId;      // NIM/NIP Peminjam
-  final List<String> equipmentIds; // Kode Barang (Bisa lebih dari 1 alat)
-  final DateTime startDate;     // Tanggal Pinjam
-  final String approverId;      // NIP (Penyetuju)
-  final DateTime endDate;       // Tanggal Pengembalian
-  final String details;         // Detail Peminjaman
-  final String status;          // Status
+/// Kelas bantuan untuk memetakan Array of Objects di dalam transaksi
+class TransactionItem {
+  final String id;
+  final String name;
+  final String type; // 'room' atau 'equipment'
 
-  TransactionModel({
-    required this.id,
-    required this.borrowerId,
-    required this.equipmentIds,
-    required this.startDate,
-    required this.approverId,
-    required this.endDate,
-    required this.details,
-    required this.status,
+  TransactionItem({
+    required this.id, 
+    required this.name, 
+    required this.type
   });
 
-  // Fungsi penerjemah dari data Firebase ke objek Dart/Flutter
+  // Menerjemahkan dari Map Firebase ke Object Dart
+  factory TransactionItem.fromMap(Map<String, dynamic> map) {
+    return TransactionItem(
+      id: map['id'] ?? '',
+      name: map['name'] ?? '',
+      type: map['type'] ?? 'equipment',
+    );
+  }
+  
+  // Berguna saat Anda ingin menulis (Create) data transaksi baru ke Firebase
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'type': type,
+    };
+  }
+}
+
+/// Kelas Utama Transaksi
+class TransactionModel {
+  final String transactionId;
+  final String borrowerId;
+  final String borrowerName;
+  final List<TransactionItem> items; // Menggunakan kelas bantuan di atas
+  final String category;
+  final DateTime startDate;
+  final DateTime endDate;
+  final DateTime? actualReturnDate;  // Nullable (?) karena belum tentu sudah dikembalikan
+  final String details;
+  final String? eventName;           // Nullable (?) karena alat tidak butuh nama event
+  final String? attachmentUrl;       // Nullable (?) opsional jika ada surat
+  final String status;
+  final DateTime createdAt;
+
+  TransactionModel({
+    required this.transactionId,
+    required this.borrowerId,
+    required this.borrowerName,
+    required this.items,
+    required this.category,
+    required this.startDate,
+    required this.endDate,
+    this.actualReturnDate,
+    required this.details,
+    this.eventName,
+    this.attachmentUrl,
+    required this.status,
+    required this.createdAt,
+  });
+
   factory TransactionModel.fromFirestore(DocumentSnapshot doc) {
-    Map data = doc.data() as Map<String, dynamic>;
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    
+    // Mapping khusus untuk Array of Objects (items)
+    var itemsList = data['items'] as List? ?? [];
+    List<TransactionItem> parsedItems = itemsList
+        .map((item) => TransactionItem.fromMap(item as Map<String, dynamic>))
+        .toList();
 
     return TransactionModel(
-      id: doc.id,
-      borrowerId: data['NIM/NIP Peminjam'] ?? '',
+      transactionId: doc.id,
+      borrowerId: data['borrowerId'] ?? '',
+      borrowerName: data['borrowerName'] ?? 'Unknown',
+      items: parsedItems,
+      category: data['category'] ?? 'mixed',
       
-      // Karena di Firebase bentuknya List (Array), kita pastikan jadi List<String>
-      equipmentIds: List<String>.from(data['Kode Barang'] ?? []),
+      startDate: data['startDate'] != null ? (data['startDate'] as Timestamp).toDate() : DateTime.now(),
+      endDate: data['endDate'] != null ? (data['endDate'] as Timestamp).toDate() : DateTime.now(),
       
-      // Menerjemahkan Timestamp khas Firebase menjadi DateTime khas Flutter
-      startDate: data['Tanggal Pinjam'] != null 
-          ? (data['Tanggal Pinjam'] as Timestamp).toDate() 
-          : DateTime.now(),
-          
-      approverId: data['NIP'] ?? '',
+      // Nullable handling
+      actualReturnDate: data['actualReturnDate'] != null ? (data['actualReturnDate'] as Timestamp).toDate() : null,
+      eventName: data['eventName'],
+      attachmentUrl: data['attachmentUrl'],
       
-      endDate: data['Tanggal Pengembalian'] != null 
-          ? (data['Tanggal Pengembalian'] as Timestamp).toDate() 
-          : DateTime.now(),
-          
-      details: data['Detail Peminjaman'] ?? '',
-      status: data['status'] ?? 'Unknown',
+      details: data['details'] ?? '',
+      status: data['status'] ?? 'Draft',
+      createdAt: data['createdAt'] != null ? (data['createdAt'] as Timestamp).toDate() : DateTime.now(),
     );
   }
 }
