@@ -11,8 +11,6 @@ class ListPengajuanScreen extends StatefulWidget {
 
 class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
   final ListPengajuanController _controller = ListPengajuanController();
-  
-  // Ubah default ke 'Borrowed' karena tab Pending sudah tidak ada
   String _selectedStatus = 'Borrowed'; 
   final int _selectedIndex = 1; 
 
@@ -65,15 +63,13 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                
-                // TAB FILTER: Sekarang cuma ada 2 tab dan posisinya di tengah
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       _buildFilterTab('Borrowed', 'Borrowed'),
-                      const SizedBox(width: 16), // Jarak pemisah antar tab
+                      const SizedBox(width: 16),
                       _buildFilterTab('History', 'History'),
                     ],
                   ),
@@ -141,9 +137,9 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
     return GestureDetector(
       onTap: () => setState(() => _selectedStatus = statusDb),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8), // Padding dilebarkan sedikit
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive ? const Color(0xFFF48A42) : const Color(0xFFD3D3D3), // Warna abu-abu kalau tidak aktif
+          color: isActive ? const Color(0xFFF48A42) : const Color(0xFFD3D3D3),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
@@ -151,7 +147,7 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
           style: TextStyle(
             color: isActive ? Colors.white : Colors.grey[700],
             fontWeight: FontWeight.bold,
-            fontSize: 14, // Font dibesarkan sedikit
+            fontSize: 14,
           ),
         ),
       ),
@@ -178,7 +174,6 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Name: ${item.namaPeminjam}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)),
-                    // Order ID diganti jadi Borrow Date
                     const Text('Borrow date: 16/08/26', style: TextStyle(fontSize: 12, color: Colors.black54)),
                   ],
                 ),
@@ -190,11 +185,9 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
           Text('• ${item.namaItem}', style: const TextStyle(fontSize: 12, color: Colors.black87)),
           const SizedBox(height: 16),
           
-          // LOGIKA 2 STATUS
           if (_selectedStatus == 'Borrowed')
             Align(
-              alignment: Alignment.center, // Posisi tombol di tengah sesuai desain
-              // Tombol aksi untuk menyelesaikan peminjaman
+              alignment: Alignment.center,
               child: _buildButton('Returned / Selesai', const [Color(0xFFF48A42), Color(0xFFE65C00)], () {
                 _controller.updateStatus(item.id, 'History');
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -219,7 +212,7 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(colors: gradientColors),
-        borderRadius: BorderRadius.circular(20), // Dibuat lebih melengkung membulat
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Material(
         color: Colors.transparent,
@@ -227,7 +220,7 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
           onTap: onTap,
           borderRadius: BorderRadius.circular(20),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 8), // Tombol dibikin lebih panjang
+            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 8),
             child: Text(label, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
           ),
         ),
