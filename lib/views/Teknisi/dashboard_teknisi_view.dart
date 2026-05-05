@@ -162,11 +162,11 @@ class _DashboardTeknisiScreenState extends State<DashboardTeknisiScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Name: ${item.namaPeminjam}',
+                      'Name: ${item.borrowerName}',
                       style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
                     ),
                     Text(
-                      item.namaItem,
+                      item.itemNames,
                       style: const TextStyle(fontSize: 14, color: Colors.black54),
                     ),
                   ],
@@ -188,7 +188,7 @@ class _DashboardTeknisiScreenState extends State<DashboardTeknisiScreen> {
                   _controller.confirmSubmission(item.id);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('${item.namaItem} ACC sukses!'), 
+                      content: Text('${item.itemNames} ACC sukses!'), 
                       duration: const Duration(seconds: 1),
                       behavior: SnackBarBehavior.floating,
                     ),
@@ -206,6 +206,7 @@ class _DashboardTeknisiScreenState extends State<DashboardTeknisiScreen> {
       ),
     );
   }
+
   Widget _buildNavItem(IconData icon, int index, String routeName) {
     bool isActive = _selectedIndex == index;
     return GestureDetector(

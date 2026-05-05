@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../controllers/Teknisi/list_pengajuan_controller.dart';
-import '../../models/Teknisi/transaksi_model.dart';
+import '../../models/Teknisi/transaksi_model.dart'; 
 
 class ListPengajuanScreen extends StatefulWidget {
   const ListPengajuanScreen({super.key});
@@ -11,8 +11,16 @@ class ListPengajuanScreen extends StatefulWidget {
 
 class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
   final ListPengajuanController _controller = ListPengajuanController();
-  String _selectedStatus = 'Borrowed'; 
+  String _selectedStatus = 'Waiting'; 
   final int _selectedIndex = 1; 
+
+  String _formatTanggal(DateTime? date) {
+    if (date == null) return 'Belum ada tanggal';
+    String day = date.day.toString().padLeft(2, '0');
+    String month = date.month.toString().padLeft(2, '0');
+    String year = date.year.toString().substring(2);
+    return '$day/$month/$year';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,9 +76,9 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _buildFilterTab('Borrowed', 'Borrowed'),
+                      _buildFilterTab('Borrowed', 'Waiting'),
                       const SizedBox(width: 16),
-                      _buildFilterTab('History', 'History'),
+                      _buildFilterTab('History', 'Approved'),
                     ],
                   ),
                 ),
@@ -173,8 +181,8 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Name: ${item.namaPeminjam}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)),
-                    const Text('Borrow date: 16/08/26', style: TextStyle(fontSize: 12, color: Colors.black54)),
+                    Text('Name: ${item.borrowerName}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)),
+                    Text('Borrow date: ${_formatTanggal(item.startDate)}', style: const TextStyle(fontSize: 12, color: Colors.black54)),
                   ],
                 ),
               ),
@@ -182,26 +190,26 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
           ),
           const SizedBox(height: 12),
           const Text('Items:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black87)),
-          Text('• ${item.namaItem}', style: const TextStyle(fontSize: 12, color: Colors.black87)),
+          Text('• ${item.itemNames}', style: const TextStyle(fontSize: 12, color: Colors.black87)),
           const SizedBox(height: 16),
           
-          if (_selectedStatus == 'Borrowed')
+          if (_selectedStatus == 'Waiting')
             Align(
               alignment: Alignment.center,
-              child: _buildButton('Returned / Selesai', const [Color(0xFFF48A42), Color(0xFFE65C00)], () {
-                _controller.updateStatus(item.id, 'History');
+              child: _buildButton('Approve', const [Color(0xFFF48A42), Color(0xFFE65C00)], () {
+                _controller.updateStatus(item.id, 'Approved');
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('${item.namaItem} selesai dipinjam!'), 
+                    content: Text('${item.itemNames} berhasil di-Approve!'), 
                     duration: const Duration(seconds: 1),
                   ),
                 );
               }),
             )
-          else if (_selectedStatus == 'History')
+          else if (_selectedStatus == 'Approved')
              const Align(
                alignment: Alignment.center,
-               child: Text('Dikembalikan', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic)),
+               child: Text('Masuk History (Approved)', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic)),
              )
         ],
       ),

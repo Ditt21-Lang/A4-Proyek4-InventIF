@@ -8,7 +8,7 @@ class DashboardTeknisiController extends ChangeNotifier {
   Stream<List<TransaksiModel>> get transaksiPendingStream {
     return _firestore
         .collection('transactions') 
-        .where('status', isEqualTo: 'Pending')
+        .where('status', isEqualTo: 'Waiting')
         .snapshots()
         .map((snapshot) {
           return snapshot.docs
