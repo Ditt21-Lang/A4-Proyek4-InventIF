@@ -12,8 +12,8 @@ class ListPengajuanScreen extends StatefulWidget {
 class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
   final ListPengajuanController _controller = ListPengajuanController();
   
- 
-  String _selectedStatus = 'Pending'; 
+  // Ubah default ke 'Borrowed' karena tab Pending sudah tidak ada
+  String _selectedStatus = 'Borrowed'; 
   final int _selectedIndex = 1; 
 
   @override
@@ -47,7 +47,6 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
             child: Column(
               children: [
                 const SizedBox(height: 20),
-
                 const Text('Request List', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 20),
 
@@ -66,18 +65,21 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
+                
+                // TAB FILTER: Sekarang cuma ada 2 tab dan posisinya di tengah
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _buildFilterTab('Pending', 'Pending'),
-                      _buildFilterTab('Ready to Collect', 'Approved'),
                       _buildFilterTab('Borrowed', 'Borrowed'),
+                      const SizedBox(width: 16), // Jarak pemisah antar tab
+                      _buildFilterTab('History', 'History'),
                     ],
                   ),
                 ),
                 const SizedBox(height: 20),
+                
                 Expanded(
                   child: StreamBuilder<List<TransaksiModel>>(
                     stream: _controller.getFilteredStream(_selectedStatus),
@@ -133,14 +135,15 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
       ),
     );
   }
+
   Widget _buildFilterTab(String label, String statusDb) {
     bool isActive = _selectedStatus == statusDb;
     return GestureDetector(
       onTap: () => setState(() => _selectedStatus = statusDb),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8), // Padding dilebarkan sedikit
         decoration: BoxDecoration(
-          color: isActive ? const Color(0xFFF48A42) : Colors.white,
+          color: isActive ? const Color(0xFFF48A42) : const Color(0xFFD3D3D3), // Warna abu-abu kalau tidak aktif
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
@@ -148,7 +151,7 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
           style: TextStyle(
             color: isActive ? Colors.white : Colors.grey[700],
             fontWeight: FontWeight.bold,
-            fontSize: 12,
+            fontSize: 14, // Font dibesarkan sedikit
           ),
         ),
       ),
@@ -175,7 +178,8 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Name: ${item.namaPeminjam}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)),
-                    Text('Order ID: ${item.id}', style: const TextStyle(fontSize: 12, color: Colors.black54)),
+                    // Order ID diganti jadi Borrow Date
+                    const Text('Borrow date: 16/08/26', style: TextStyle(fontSize: 12, color: Colors.black54)),
                   ],
                 ),
               ),
@@ -185,29 +189,26 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
           const Text('Items:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black87)),
           Text('• ${item.namaItem}', style: const TextStyle(fontSize: 12, color: Colors.black87)),
           const SizedBox(height: 16),
-          if (_selectedStatus == 'Pending')
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildButton('Reject', const [Color(0xFFE53935), Color(0xFFC62828)], () {
-                  _controller.updateStatus(item.id, 'Rejected');
-                }),
-                _buildButton('Approve', const [Color(0xFFF48A42), Color(0xFFE65C00)], () {
-                  _controller.updateStatus(item.id, 'Approved');
-                }),
-              ],
+          
+          // LOGIKA 2 STATUS
+          if (_selectedStatus == 'Borrowed')
+            Align(
+              alignment: Alignment.center, // Posisi tombol di tengah sesuai desain
+              // Tombol aksi untuk menyelesaikan peminjaman
+              child: _buildButton('Returned / Selesai', const [Color(0xFFF48A42), Color(0xFFE65C00)], () {
+                _controller.updateStatus(item.id, 'History');
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('${item.namaItem} selesai dipinjam!'), 
+                    duration: const Duration(seconds: 1),
+                  ),
+                );
+              }),
             )
-          else if (_selectedStatus == 'Approved')
-             Align(
-               alignment: Alignment.centerRight,
-               child: _buildButton('Borrowed', const [Color(0xFFF48A42), Color(0xFFE65C00)], () {
-                 _controller.updateStatus(item.id, 'Borrowed');
-               }),
-             )
-          else if (_selectedStatus == 'Borrowed')
+          else if (_selectedStatus == 'History')
              const Align(
-               alignment: Alignment.centerRight,
-               child: Text('Item is currently borrowed', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic)),
+               alignment: Alignment.center,
+               child: Text('Dikembalikan', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic)),
              )
         ],
       ),
@@ -218,16 +219,16 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(colors: gradientColors),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(20), // Dibuat lebih melengkung membulat
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(20),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-            child: Text(label, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 8), // Tombol dibikin lebih panjang
+            child: Text(label, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
           ),
         ),
       ),
