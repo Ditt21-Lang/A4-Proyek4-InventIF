@@ -135,7 +135,7 @@ class _UserProfileViewState extends State<UserProfileView> {
                     const SizedBox(height: 14),
                     _buildMenuButton(
                       icon: Icons.logout_outlined,
-                      label: 'Sign Out',
+                      label: 'Log Out',
                       onPressed: () {
                         _signOut();
                       },

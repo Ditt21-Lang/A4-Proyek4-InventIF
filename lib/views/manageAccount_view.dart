@@ -147,7 +147,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
         final fileExtension = image.path.substring(image.path.lastIndexOf('.') + 1).toLowerCase();
         
         if (!validExtensions.contains(fileExtension)) {
-          _showErrorSnackBar('Format file tidak didukung. Gunakan: JPG, PNG, atau PDF');
+          _showErrorSnackBar('Unsupported file format. Use: JPG, PNG, or PDF');
           return;
         }
 
@@ -179,34 +179,34 @@ class _ManageAccountViewState extends State<ManageAccountView> {
             _ktmFileName = fileName;
             _ktmController.text = newFilePath;
           });
-          _showSuccessSnackBar('File KTM berhasil diupload');
+          _showSuccessSnackBar('KTM file uploaded successfully');
         } else {
-          _showErrorSnackBar('Gagal menyimpan path file KTM ke database');
+          _showErrorSnackBar('Failed to save KTM file path to database');
         }
       }
     } catch (e) {
       print('Error uploading KTM: $e');
-      _showErrorSnackBar('Gagal mengupload file: ${e.toString()}');
+      _showErrorSnackBar('Failed to upload file: ${e.toString()}');
     }
   }
 
   Future<void> _openKTMFile() async {
     if (_ktmController.text.isEmpty) {
-      _showErrorSnackBar('⚠️ Belum ada file KTM. Silahkan upload terlebih dahulu.');
+      _showErrorSnackBar('No KTM file yet. Please upload first.');
       return;
     }
 
     try {
       final file = File(_ktmController.text);
       if (file.existsSync()) {
-        _showSuccessSnackBar('File KTM ditemukan: ${file.path}');
+        _showSuccessSnackBar('KTM file found: ${file.path}');
         // TODO: Open file dengan package 'open_file' untuk preview
       } else {
-        _showErrorSnackBar('File KTM tidak ditemukan. Path: ${_ktmController.text}');
+        _showErrorSnackBar('KTM file not found. Path: ${_ktmController.text}');
       }
     } catch (e) {
       print('Error opening KTM: $e');
-      _showErrorSnackBar('Gagal membuka file: ${e.toString()}');
+      _showErrorSnackBar('Failed to open file: ${e.toString()}');
     }
   }
 
@@ -306,7 +306,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
       backgroundColor: primaryBlue,
       body: Column(
         children: [
-          // ── Header (cream background) ──────────────────────────
+          // Header (cream background) 
           Container(
             color: creamColor,
             padding: EdgeInsets.only(
@@ -318,7 +318,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Back button – cream dengan shadow lebih besar
+                // Back button
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
                   child: Container(
@@ -386,7 +386,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
             ),
           ),
 
-          // ── Scrollable content (blue background) ───────────────
+          // Scrollable content (blue background)
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
@@ -496,14 +496,14 @@ class _ManageAccountViewState extends State<ManageAccountView> {
             ),
           ),
 
-          // ── Bottom Navigation Bar ───────────────────────────────
+          // Bottom Navigation Bar
           _buildBottomNavigationBar(context),
         ],
       ),
     );
   }
 
-  // ── Section (collapsed & expanded) ──────────────────────────────
+  // Section (collapsed & expanded)
   Widget _buildSection({
     required String title,
     required IconData icon,
@@ -563,7 +563,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
     );
   }
 
-  // ── Navy input field (Personal Info) ────────────────────────────
+  // Navy input field (Personal Info)
   Widget _buildNavyField({
     required String label,
     required TextEditingController controller,
@@ -613,7 +613,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
     );
   }
 
-  // ── KTM field with Upload & Open File buttons ──────────────────
+  // KTM field with Upload & Open File buttons
   Widget _buildKtmField() {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -715,7 +715,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
     );
   }
 
-  // ── Password field ───────────────────────────────────────────────
+  // Password field
   Widget _buildPasswordField({
     required String label,
     required String hint,
@@ -778,7 +778,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
     );
   }
 
-  // ── Current Password field (masked, no eye icon) ────────────────
+  // Current Password field (masked, no eye icon)
   Widget _buildCurrentPasswordField({
     required String label,
     required TextEditingController controller,
@@ -821,7 +821,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
     );
   }
 
-  // ── Contact field with Verify button ────────────────────────────
+  // Contact field with Verify button
   Widget _buildContactField({
     required String label,
     required TextEditingController controller,
@@ -878,7 +878,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
     );
   }
 
-  // ── Save / Update button ─────────────────────────────────────────
+  // Save / Update button
   Widget _buildSaveButton({
     required String label,
     required bool isLoading,
@@ -923,7 +923,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
     );
   }
 
-  // ── Bottom Navigation Bar ────────────────────────────────────────
+  // Bottom Navigation Bar
   Widget _buildBottomNavigationBar(BuildContext context) {
     return Container(
       height: 90,
