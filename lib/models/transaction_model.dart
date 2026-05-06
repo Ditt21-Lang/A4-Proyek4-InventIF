@@ -6,11 +6,7 @@ class TransactionItem {
   final String name;
   final String type; // 'room' atau 'equipment'
 
-  TransactionItem({
-    required this.id, 
-    required this.name, 
-    required this.type
-  });
+  TransactionItem({required this.id, required this.name, required this.type});
 
   // Menerjemahkan dari Map Firebase ke Object Dart
   factory TransactionItem.fromMap(Map<String, dynamic> map) {
@@ -20,7 +16,7 @@ class TransactionItem {
       type: map['type'] ?? 'equipment',
     );
   }
-  
+
   // Berguna saat Anda ingin menulis (Create) data transaksi baru ke Firebase
   Map<String, dynamic> toMap() {
     return {
@@ -40,10 +36,11 @@ class TransactionModel {
   final String category;
   final DateTime startDate;
   final DateTime endDate;
-  final DateTime? actualReturnDate;  // Nullable (?) karena belum tentu sudah dikembalikan
+  final DateTime?
+      actualReturnDate; // Nullable (?) karena belum tentu sudah dikembalikan
   final String details;
-  final String? eventName;           // Nullable (?) karena alat tidak butuh nama event
-  final String? attachmentUrl;       // Nullable (?) opsional jika ada surat
+  final String? eventName; // Nullable (?) karena alat tidak butuh nama event
+  final String? attachmentUrl; // Nullable (?) opsional jika ada surat
   final String status;
   final DateTime createdAt;
 
@@ -54,6 +51,16 @@ class TransactionModel {
   String get itemNames {
     if (items.isEmpty) return 'Unknown Item';
     return items.map((item) => item.name).join(', ');
+  }
+
+  String get displayTitle {
+    if (eventName != null && eventName!.trim().isNotEmpty) {
+      return eventName!;
+    }
+    if (details.trim().isNotEmpty) {
+      return details;
+    }
+    return itemNames;
   }
 
   TransactionModel({
@@ -74,7 +81,7 @@ class TransactionModel {
 
   factory TransactionModel.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-    
+
     // Mapping khusus untuk Array of Objects (items)
     var itemsList = data['items'] as List? ?? [];
     List<TransactionItem> parsedItems = itemsList
@@ -87,18 +94,42 @@ class TransactionModel {
       borrowerName: data['borrowerName'] ?? 'Unknown',
       items: parsedItems,
       category: data['category'] ?? 'mixed',
-      
-      startDate: data['startDate'] != null ? (data['startDate'] as Timestamp).toDate() : DateTime.now(),
-      endDate: data['endDate'] != null ? (data['endDate'] as Timestamp).toDate() : DateTime.now(),
-      
+
+      startDate: data['startDate'] != null
+          ? (data['startDate'] as Timestamp).toDate()
+          : DateTime.now(),
+      endDate: data['endDate'] != null
+          ? (data['endDate'] as Timestamp).toDate()
+          : DateTime.now(),
+
       // Nullable handling
-      actualReturnDate: data['actualReturnDate'] != null ? (data['actualReturnDate'] as Timestamp).toDate() : null,
+      actualReturnDate: data['actualReturnDate'] != null
+          ? (data['actualReturnDate'] as Timestamp).toDate()
+          : null,
       eventName: data['eventName'],
       attachmentUrl: data['attachmentUrl'],
-      
+
       details: data['details'] ?? '',
       status: data['status'] ?? 'Draft',
-      createdAt: data['createdAt'] != null ? (data['createdAt'] as Timestamp).toDate() : DateTime.now(),
+      createdAt: data['createdAt'] != null
+          ? (data['createdAt'] as Timestamp).toDate()
+          : DateTime.now(),
     );
+  }
+
+  bool containsItem(String itemId, {String? type}) {
+    return items.any((item) {
+      final matchesId = item.id == itemId;
+      final matchesType =
+          type == null || item.type.toLowerCase() == type.toLowerCase();
+      return matchesId && matchesType;
+    });
+  }
+
+  bool overlapsDate(DateTime date) {
+    final dayStart = DateTime(date.year, date.month, date.day);
+    final dayEnd = dayStart.add(const Duration(days: 1));
+
+    return startDate.isBefore(dayEnd) && endDate.isAfter(dayStart);
   }
 }

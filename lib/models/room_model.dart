@@ -23,10 +23,9 @@ class RoomModel {
     return RoomModel(
       id: doc.id,
       name: data['name'] ?? 'Unknown Room',
-      // Memastikan tipe data Firebase Array menjadi List<String> Dart
-      barangTersedia: List<String>.from(data['barangTersedia'] ?? []),
+      barangTersedia: _readAvailableItems(data),
       description: data['description'] ?? 'Tidak ada deskripsi',
-      gambar: data['gambar'] ?? 'assets/placeholder.png',
+      gambar: _readImagePath(data, doc.id),
       capacity: data['capacity']?.toString() ?? '0',
     );
   }
@@ -58,18 +57,12 @@ class RoomModel {
     final itemEntries = data.entries.where((entry) {
       final key = entry.key.toLowerCase();
       return key.startsWith('barang') || key.startsWith('item');
-    }).toList()..sort((a, b) => a.key.compareTo(b.key));
+    }).toList()
+      ..sort((a, b) => a.key.compareTo(b.key));
 
     return itemEntries
         .map((entry) => entry.value.toString().trim())
         .where((item) => item.isNotEmpty)
         .toList();
-  }
-
-  static int _toInt(dynamic value) {
-    if (value is int) return value;
-    if (value is num) return value.toInt();
-    if (value is String) return int.tryParse(value) ?? 0;
-    return 0;
   }
 }
