@@ -1,62 +1,95 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-enum TransactionType { room, equipment }
-
-class TransactionModel {
+/// Kelas bantuan untuk memetakan Array of Objects di dalam transaksi
+class TransactionItem {
   final String id;
+  final String name;
   final String type; // 'room' atau 'equipment'
+
+  TransactionItem({
+    required this.id, 
+    required this.name, 
+    required this.type
+  });
+
+  // Menerjemahkan dari Map Firebase ke Object Dart
+  factory TransactionItem.fromMap(Map<String, dynamic> map) {
+    return TransactionItem(
+      id: map['id'] ?? '',
+      name: map['name'] ?? '',
+      type: map['type'] ?? 'equipment',
+    );
+  }
+  
+  // Berguna saat Anda ingin menulis (Create) data transaksi baru ke Firebase
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'type': type,
+    };
+  }
+}
+
+/// Kelas Utama Transaksi
+class TransactionModel {
+  final String transactionId;
   final String borrowerId;
   final String borrowerName;
-  final String borrowerEmail;
-  final List<String> itemIds; // ID Ruangan atau ID Alat-alat
-  final String itemName;      // Nama Ruangan atau Nama Alat utama
+  final List<TransactionItem> items; // Menggunakan kelas bantuan di atas
+  final String category;
   final DateTime startDate;
   final DateTime endDate;
-  final String details;       // Tujuan acara (untuk ruangan) atau detail peminjaman
+  final DateTime? actualReturnDate;  // Nullable (?) karena belum tentu sudah dikembalikan
+  final String details;
+  final String? eventName;           // Nullable (?) karena alat tidak butuh nama event
+  final String? attachmentUrl;       // Nullable (?) opsional jika ada surat
   final String status;
-  final String? approverId;
-  final String? category;     // Kategori (khusus ruangan, misal: 'Seminar')
+  final DateTime createdAt;
 
   TransactionModel({
-    required this.id,
-    required this.type,
+    required this.transactionId,
     required this.borrowerId,
     required this.borrowerName,
-    required this.borrowerEmail,
-    required this.itemIds,
-    required this.itemName,
+    required this.items,
+    required this.category,
     required this.startDate,
     required this.endDate,
+    this.actualReturnDate,
     required this.details,
+    this.eventName,
+    this.attachmentUrl,
     required this.status,
-    this.approverId,
-    this.category,
+    required this.createdAt,
   });
 
   factory TransactionModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>? ?? {};
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     
-    // Mencoba mendeteksi tipe jika tidak ada
-    String type = data['type'] ?? (data['roomId'] != null ? 'room' : 'equipment');
-    
+    // Mapping khusus untuk Array of Objects (items)
+    var itemsList = data['items'] as List? ?? [];
+    List<TransactionItem> parsedItems = itemsList
+        .map((item) => TransactionItem.fromMap(item as Map<String, dynamic>))
+        .toList();
+
     return TransactionModel(
-      id: doc.id,
-      type: type,
-      borrowerId: (data['borrowerId'] ?? data['NIM/NIP Peminjam'] ?? '').toString(),
-      borrowerName: (data['borrowerName'] ?? 'Unknown Borrower').toString(),
-      borrowerEmail: (data['borrowerEmail'] ?? '').toString(),
-      itemIds: data['itemIds'] != null 
-          ? List<String>.from(data['itemIds'])
-          : (data['Kode Barang'] != null 
-              ? List<String>.from(data['Kode Barang'])
-              : (data['roomId'] != null ? [data['roomId'].toString()] : [])),
-      itemName: (data['itemName'] ?? data['roomName'] ?? '').toString(),
-      startDate: _readDateTime(data['startDate'] ?? data['Tanggal Pinjam'] ?? data['startAt']),
-      endDate: _readDateTime(data['endDate'] ?? data['Tanggal Pengembalian'] ?? data['endAt']),
-      details: (data['details'] ?? data['Detail Peminjaman'] ?? data['eventName'] ?? data['title'] ?? '').toString(),
-      status: (data['status'] ?? 'pending').toString(),
-      approverId: (data['approverId'] ?? data['NIP'] ?? '').toString(),
-      category: (data['category'] ?? 'General').toString(),
+      transactionId: doc.id,
+      borrowerId: data['borrowerId'] ?? '',
+      borrowerName: data['borrowerName'] ?? 'Unknown',
+      items: parsedItems,
+      category: data['category'] ?? 'mixed',
+      
+      startDate: data['startDate'] != null ? (data['startDate'] as Timestamp).toDate() : DateTime.now(),
+      endDate: data['endDate'] != null ? (data['endDate'] as Timestamp).toDate() : DateTime.now(),
+      
+      // Nullable handling
+      actualReturnDate: data['actualReturnDate'] != null ? (data['actualReturnDate'] as Timestamp).toDate() : null,
+      eventName: data['eventName'],
+      attachmentUrl: data['attachmentUrl'],
+      
+      details: data['details'] ?? '',
+      status: data['status'] ?? 'Draft',
+      createdAt: data['createdAt'] != null ? (data['createdAt'] as Timestamp).toDate() : DateTime.now(),
     );
   }
 
