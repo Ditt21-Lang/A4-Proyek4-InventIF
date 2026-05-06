@@ -3,20 +3,30 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class UserModel {
   final String uid;
   final String email;
-  final String? fullName;
+  final String fullName;
+  final String? nickname;
+  final String? studentID;
+  final String? identifier; // NIM atau unique identifier
+  final String? dateOfBirth;
+  final String? ktm;
   final String? phoneNumber;
-  final String role; // 'user', 'teknisi', 'TU', etc.
   final String? profileImage;
+  final String role; // 'user', 'teknisi', 'coordinator'
   final DateTime createdAt;
   final bool isActive;
 
   UserModel({
     required this.uid,
     required this.email,
-    this.fullName,
+    required this.fullName,
+    this.nickname,
+    this.studentID,
+    this.identifier,
+    this.dateOfBirth,
+    this.ktm,
     this.phoneNumber,
-    required this.role,
     this.profileImage,
+    required this.role,
     required this.createdAt,
     this.isActive = true,
   });
@@ -26,11 +36,16 @@ class UserModel {
   Map<String, dynamic> toMap() {
     return {
       'uid': uid,
-      'Email': email, 
-      'Fullname': fullName, 
-      'phoneNumber': phoneNumber,
-      'role': role,
+      'Email': email,
+      'Fullname': fullName,
+      'nickname': nickname ?? '',
+      'studentID': studentID ?? '',
+      'identifier': identifier ?? '',
+      'dateOfBirth': dateOfBirth ?? '',
+      'ktm': ktm ?? '',
+      'phoneNumber': phoneNumber ?? '',
       'profileImage': profileImage,
+      'role': role,
       'createdAt': createdAt,
       'isActive': isActive,
     };
@@ -42,10 +57,15 @@ class UserModel {
     return UserModel(
       uid: map['uid'] ?? '',
       email: map['Email'] ?? map['email'] ?? '',
-      fullName: map['Fullname'] ?? map['fullName'], 
-      phoneNumber: map['phoneNumber'],
-      role: map['role'] ?? 'user',
+      fullName: map['Fullname'] ?? map['fullName'] ?? 'User',
+      nickname: map['nickname'] ?? '',
+      studentID: map['studentID'] ?? '',
+      identifier: map['identifier'] ?? '',
+      dateOfBirth: map['dateOfBirth'] ?? '',
+      ktm: map['ktm'] ?? '',
+      phoneNumber: map['phoneNumber'] ?? '',
       profileImage: map['profileImage'],
+      role: map['role'] ?? 'user',
       createdAt: map['createdAt'] != null
           ? (map['createdAt'] as Timestamp).toDate()
           : DateTime.now(),
@@ -58,9 +78,14 @@ class UserModel {
     String? uid,
     String? email,
     String? fullName,
+    String? nickname,
+    String? studentID,
+    String? identifier,
+    String? dateOfBirth,
+    String? ktm,
     String? phoneNumber,
-    String? role,
     String? profileImage,
+    String? role,
     DateTime? createdAt,
     bool? isActive,
   }) {
@@ -68,9 +93,14 @@ class UserModel {
       uid: uid ?? this.uid,
       email: email ?? this.email,
       fullName: fullName ?? this.fullName,
+      nickname: nickname ?? this.nickname,
+      studentID: studentID ?? this.studentID,
+      identifier: identifier ?? this.identifier,
+      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+      ktm: ktm ?? this.ktm,
       phoneNumber: phoneNumber ?? this.phoneNumber,
-      role: role ?? this.role,
       profileImage: profileImage ?? this.profileImage,
+      role: role ?? this.role,
       createdAt: createdAt ?? this.createdAt,
       isActive: isActive ?? this.isActive,
     );
@@ -78,6 +108,6 @@ class UserModel {
 
   @override
   String toString() {
-    return 'UserModel(uid: $uid, email: $email, role: $role, isActive: $isActive)';
+    return 'UserModel(uid: $uid, email: $email, fullName: $fullName, role: $role, isActive: $isActive)';
   }
 }
