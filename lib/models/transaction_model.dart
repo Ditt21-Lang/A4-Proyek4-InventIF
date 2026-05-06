@@ -47,6 +47,15 @@ class TransactionModel {
   final String status;
   final DateTime createdAt;
 
+  // Alias agar UI Teknisi tetap bisa memanggil .id
+  String get id => transactionId;
+
+  // Menggabungkan array items menjadi satu teks String yang dipisahkan koma
+  String get itemNames {
+    if (items.isEmpty) return 'Unknown Item';
+    return items.map((item) => item.name).join(', ');
+  }
+
   TransactionModel({
     required this.transactionId,
     required this.borrowerId,

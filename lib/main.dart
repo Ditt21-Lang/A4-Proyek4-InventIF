@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-// import 'views/auth/login_view.dart';
 import 'views/alat/katalog_alat_view.dart';
 import 'controllers/alat/katalog_alat_controller.dart';
 import 'views/ruangan/katalog_ruangan.dart';
 import 'controllers/ruangan/katalog_ruangan_controller.dart';
 import 'views/auth/login_view.dart';
+import 'views/Teknisi/dashboard_teknisi_view.dart';
+import 'views/Teknisi/list_pengajuan_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,12 +46,16 @@ class MyApp extends StatelessWidget {
       // ),
       // initialRoute: '/katalog-alat',
 
+      // initialRoute: '/dashboard-teknisi',
+
       routes: {
         '/login': (context) => const LoginView(),
         '/katalog-alat': (context) =>
             KatalogAlatView(controller: KatalogAlatController()),
         '/katalog-ruangan': (context) =>
             KatalogRuanganScreen(controller: KatalogRuanganController()),
+        '/dashboard-teknisi': (context) => const DashboardTeknisiScreen(),
+        '/list-pengajuan': (context) => const ListPengajuanScreen(),
       },
       // home: const MyHomePage(title: 'Flutter Demo Home Page'),
       debugShowCheckedModeBanner: false,

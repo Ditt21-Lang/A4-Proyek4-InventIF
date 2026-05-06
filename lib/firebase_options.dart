@@ -78,4 +78,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'inventif-c98ab.firebasestorage.app',
     iosBundleId: 'com.example.inventif',
   );
+
 }
