@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../controllers/ruangan/calendar_ruangan_controller.dart';
 import '../../controllers/ruangan/detail_ruangan_controller.dart';
+import 'calendar_ruangan.dart';
 
 class DetailRuanganScreen extends StatelessWidget {
   final DetailRuanganController controller;
@@ -47,14 +49,23 @@ class DetailRuanganScreen extends StatelessWidget {
                   const SizedBox(height: 20),
                   _DescriptionSection(controller: controller),
                   const SizedBox(height: 24),
-                  _CalendarButton(
-                    onTap: () => controller.openCalendar(context),
-                  ),
+                  _CalendarButton(onTap: () => _openCalendar(context)),
                 ],
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _openCalendar(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CalendarRuanganScreen(
+          controller: CalendarRuanganController(room: controller.room),
+        ),
       ),
     );
   }

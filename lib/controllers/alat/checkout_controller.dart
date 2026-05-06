@@ -19,18 +19,22 @@ class CheckoutController extends ChangeNotifier {
       FirebaseFirestore db = FirebaseFirestore.instance;
       WriteBatch batch = db.batch();
 
-      // KEMBALIKAN KE COLLECTION 'transactions'
+      // MENGGUNAKAN FORMAT TransactionModel YANG BARU
       DocumentReference transactionRef = db.collection('transactions').doc();
       
       batch.set(transactionRef, {
-        'Kode Peminjaman': transactionRef.id, 
-        'NIM/NIP Peminjam': 'NIM-DUMMY-123', 
-        'Kode Barang': cartItems.map((e) => e.id).toList(), 
-        'Tanggal Pinjam': startDate, 
-        'NIP': '', 
-        'Tanggal Pengembalian': endDate, 
-        'Detail Peminjaman': 'Peminjaman mandiri aplikasi InventIF',
+        'type': 'equipment',
+        'borrowerId': 'NIM-DUMMY-123', 
+        'borrowerName': 'Dummy Borrower',
+        'borrowerEmail': 'dummy@student.telkomuniversity.ac.id',
+        'itemIds': cartItems.map((e) => e.id).toList(), 
+        'itemName': cartItems.map((e) => e.name).join(', '),
+        'startDate': Timestamp.fromDate(startDate), 
+        'endDate': Timestamp.fromDate(endDate), 
+        'details': 'Peminjaman mandiri aplikasi InventIF',
         'status': 'Dipinjam', 
+        'approverId': '',
+        'category': 'Equipment',
       });
 
       // UBAH STATUS BARANG FISIK MENJADI "In Use"

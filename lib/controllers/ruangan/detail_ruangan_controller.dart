@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 import '../../models/room_model.dart';
 
 class DetailRuanganController {
@@ -12,10 +10,4 @@ class DetailRuanganController {
   int get capacity => room.capacity;
   List<String> get availableItems => room.availableItems;
   String get imagePath => room.imagePath;
-
-  void openCalendar(BuildContext context) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Calendar belum tersedia')));
-  }
 }
