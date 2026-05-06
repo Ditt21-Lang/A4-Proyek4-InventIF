@@ -6,7 +6,7 @@ class SelfCheckoutView extends StatefulWidget {
   final List<EquipmentModel> equipments;
 
   const SelfCheckoutView({Key? key, required this.equipments})
-      : super(key: key);
+    : super(key: key);
 
   @override
   State<SelfCheckoutView> createState() => _SelfCheckoutViewState();
@@ -74,7 +74,7 @@ class _SelfCheckoutViewState extends State<SelfCheckoutView> {
           }
         }
 
-        // PENGAMAN EKSTRA: Jika setelah ubah tanggal ternyata harinya jadi SAMA, 
+        // PENGAMAN EKSTRA: Jika setelah ubah tanggal ternyata harinya jadi SAMA,
         // kita otomatis samakan jam akhirnya jika jam akhir ternyata lebih kecil.
         if (_isSameDay()) {
           int startMins = _startTime.hour * 60 + _startTime.minute;
@@ -111,7 +111,9 @@ class _SelfCheckoutViewState extends State<SelfCheckoutView> {
 
     if (picked != null) {
       // Validasi 1: Harus di antara 07:00 - 17:00
-      if (picked.hour < 7 || picked.hour > 17 || (picked.hour == 17 && picked.minute > 0)) {
+      if (picked.hour < 7 ||
+          picked.hour > 17 ||
+          (picked.hour == 17 && picked.minute > 0)) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -135,7 +137,9 @@ class _SelfCheckoutViewState extends State<SelfCheckoutView> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Return time cannot be earlier than start time on the same day'),
+                content: Text(
+                  'Return time cannot be earlier than start time on the same day',
+                ),
                 backgroundColor: Colors.redAccent,
                 behavior: SnackBarBehavior.floating,
               ),
@@ -227,11 +231,7 @@ class _SelfCheckoutViewState extends State<SelfCheckoutView> {
             ),
             const SizedBox(height: 8),
             Center(
-              child: Container(
-                width: 250,
-                height: 1.5,
-                color: Colors.white54,
-              ),
+              child: Container(width: 250, height: 1.5, color: Colors.white54),
             ),
             const SizedBox(height: 24),
 
@@ -280,14 +280,14 @@ class _SelfCheckoutViewState extends State<SelfCheckoutView> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Condition: ${equipment.condition}',
-                                style: const TextStyle(
-                                  color: Colors.black87,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
+                              // const SizedBox(height: 4),
+                              // Text(
+                              //   'Condition: ${equipment.condition}',
+                              //   style: const TextStyle(
+                              //     color: Colors.black87,
+                              //     fontWeight: FontWeight.w600,
+                              //   ),
+                              // ),
                             ],
                           ),
                         ),
@@ -315,18 +315,29 @@ class _SelfCheckoutViewState extends State<SelfCheckoutView> {
                   child: GestureDetector(
                     onTap: () => _selectDate(context, true),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFE6E2E6),
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.calendar_today_outlined, color: Colors.black87, size: 20),
+                          const Icon(
+                            Icons.calendar_today_outlined,
+                            color: Colors.black87,
+                            size: 20,
+                          ),
                           const SizedBox(width: 12),
                           Text(
                             _formatDate(_startDate),
-                            style: const TextStyle(fontSize: 15, color: Colors.black54, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              fontSize: 15,
+                              color: Colors.black54,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ],
                       ),
@@ -338,18 +349,29 @@ class _SelfCheckoutViewState extends State<SelfCheckoutView> {
                   child: GestureDetector(
                     onTap: () => _selectTime(context, true),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFE6E2E6),
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.access_time, color: Colors.black87, size: 20),
+                          const Icon(
+                            Icons.access_time,
+                            color: Colors.black87,
+                            size: 20,
+                          ),
                           const SizedBox(width: 12),
                           Text(
                             _formatTime(_startTime),
-                            style: const TextStyle(fontSize: 15, color: Colors.black54, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              fontSize: 15,
+                              color: Colors.black54,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ],
                       ),
@@ -376,18 +398,29 @@ class _SelfCheckoutViewState extends State<SelfCheckoutView> {
                   child: GestureDetector(
                     onTap: () => _selectDate(context, false),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFE6E2E6),
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.calendar_today_outlined, color: Colors.black87, size: 20),
+                          const Icon(
+                            Icons.calendar_today_outlined,
+                            color: Colors.black87,
+                            size: 20,
+                          ),
                           const SizedBox(width: 12),
                           Text(
                             _formatDate(_endDate),
-                            style: const TextStyle(fontSize: 15, color: Colors.black54, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              fontSize: 15,
+                              color: Colors.black54,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ],
                       ),
@@ -399,18 +432,29 @@ class _SelfCheckoutViewState extends State<SelfCheckoutView> {
                   child: GestureDetector(
                     onTap: () => _selectTime(context, false),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFE6E2E6),
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.access_time, color: Colors.black87, size: 20),
+                          const Icon(
+                            Icons.access_time,
+                            color: Colors.black87,
+                            size: 20,
+                          ),
                           const SizedBox(width: 12),
                           Text(
                             _formatTime(_endTime),
-                            style: const TextStyle(fontSize: 15, color: Colors.black54, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              fontSize: 15,
+                              color: Colors.black54,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ],
                       ),
@@ -437,8 +481,8 @@ class _SelfCheckoutViewState extends State<SelfCheckoutView> {
                       ),
                     ),
                     // MATIKAN TOMBOL JIKA SEDANG LOADING
-                    onPressed: _checkoutController.isCheckingOut 
-                        ? null 
+                    onPressed: _checkoutController.isCheckingOut
+                        ? null
                         : () async {
                             // --- TAMBAHAN BARU: GABUNGKAN TANGGAL & JAM ---
                             DateTime finalStartDateTime = DateTime(
@@ -459,26 +503,34 @@ class _SelfCheckoutViewState extends State<SelfCheckoutView> {
                             // ---------------------------------------------
 
                             // 1. Eksekusi penyimpanan ke Firebase
-                            bool success = await _checkoutController.processCheckout(
+                            bool
+                            success = await _checkoutController.processCheckout(
                               widget.equipments,
                               finalStartDateTime, // Kirim tanggal & jam yang sudah digabung
-                              finalEndDateTime,   // Kirim tanggal & jam yang sudah digabung
+                              finalEndDateTime, // Kirim tanggal & jam yang sudah digabung
                             );
 
                             // 2. Cek apakah berhasil
                             if (success && mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('Checkout berhasil! Status alat diupdate.'),
+                                  content: Text(
+                                    'Checkout berhasil! Status alat diupdate.',
+                                  ),
                                   backgroundColor: Colors.green,
                                 ),
                               );
                               // 3. Kembali ke halaman utama (Katalog)
-                              Navigator.popUntil(context, ModalRoute.withName('/katalog-alat'));
+                              Navigator.popUntil(
+                                context,
+                                ModalRoute.withName('/katalog-alat'),
+                              );
                             } else if (mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('Gagal melakukan checkout. Coba lagi.'),
+                                  content: Text(
+                                    'Gagal melakukan checkout. Coba lagi.',
+                                  ),
                                   backgroundColor: Colors.red,
                                 ),
                               );
@@ -489,7 +541,10 @@ class _SelfCheckoutViewState extends State<SelfCheckoutView> {
                         ? const SizedBox(
                             height: 24,
                             width: 24,
-                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 3,
+                            ),
                           )
                         : Text(
                             'Checkout (${widget.equipments.length} Items)',
@@ -500,7 +555,7 @@ class _SelfCheckoutViewState extends State<SelfCheckoutView> {
                             ),
                           ),
                   );
-                }
+                },
               ),
             ),
             const SizedBox(height: 30),

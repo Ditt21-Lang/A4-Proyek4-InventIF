@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../controllers/login_controller.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -14,6 +15,112 @@ class _LoginViewState extends State<LoginView> {
 
   bool _obscurePassword = true;
   bool _rememberMe = false;
+  bool _isLoading = false;
+
+  late LoginController _loginController;
+  late TextEditingController _emailController;
+  late TextEditingController _passwordController;
+
+  @override
+  void initState() {
+    super.initState();
+    _loginController = LoginController();
+    _emailController = TextEditingController();
+    _passwordController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  // Handle login
+  Future<void> _handleLogin() async {
+    // Validasi input
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      _showErrorDialog('Email and password are required!');
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    // Panggil login controller
+    Map<String, dynamic> result = await _loginController.login(
+      _emailController.text,
+      _passwordController.text,
+    );
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (mounted) {
+      if (result['success']) {
+        // Login berhasil
+        _showSuccessDialog(result['message']);
+        // TODO: Navigate ke halaman home
+        // Navigator.of(context).pushReplacementNamed('/home');
+      } else {
+        // Login gagal
+        _showErrorDialog(result['message']);
+      }
+    }
+  }
+
+  // Show error dialog
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Show success dialog
+  void _showSuccessDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Success'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Show info dialog
+  void _showInfoDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Information'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,6 +184,9 @@ class _LoginViewState extends State<LoginView> {
                       const SizedBox(height: 15), // Dikurangi dari 25
                       // Field Email
                       TextField(
+                        controller: _emailController,
+                        enabled: !_isLoading,
+                        keyboardType: TextInputType.emailAddress,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 14,
@@ -102,6 +212,8 @@ class _LoginViewState extends State<LoginView> {
                       const SizedBox(height: 12), // Dikurangi dari 15
                       // Field Password
                       TextField(
+                        controller: _passwordController,
+                        enabled: !_isLoading,
                         obscureText: _obscurePassword,
                         style: const TextStyle(
                           color: Colors.white,
@@ -152,11 +264,13 @@ class _LoginViewState extends State<LoginView> {
                                   value: _rememberMe,
                                   side: const BorderSide(color: Colors.white54),
                                   activeColor: primaryOrange,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _rememberMe = value ?? false;
-                                    });
-                                  },
+                                  onChanged: _isLoading
+                                      ? null
+                                      : (value) {
+                                          setState(() {
+                                            _rememberMe = value ?? false;
+                                          });
+                                        },
                                 ),
                               ),
                               const Text(
@@ -169,7 +283,37 @@ class _LoginViewState extends State<LoginView> {
                             ],
                           ),
                           TextButton(
-                            onPressed: () {},
+                            onPressed: _isLoading
+                                ? null
+                                : () async {
+                                    if (_emailController.text.isEmpty) {
+                                      _showErrorDialog(
+                                          'Please enter your email first!');
+                                      return;
+                                    }
+
+                                    setState(() {
+                                      _isLoading = true;
+                                    });
+
+                                    Map<String, dynamic> result =
+                                        await _loginController
+                                            .sendPasswordResetEmail(
+                                      _emailController.text,
+                                    );
+
+                                    setState(() {
+                                      _isLoading = false;
+                                    });
+
+                                    if (mounted) {
+                                      if (result['success']) {
+                                        _showSuccessDialog(result['message']);
+                                      } else {
+                                        _showErrorDialog(result['message']);
+                                      }
+                                    }
+                                  },
                             child: const Text(
                               'Forgot Password?',
                               style: TextStyle(
@@ -188,21 +332,33 @@ class _LoginViewState extends State<LoginView> {
                         height: 45, // Dikurangi dari 50
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: primaryOrange,
+                            backgroundColor: _isLoading
+                                ? primaryOrange.withOpacity(0.6)
+                                : primaryOrange,
                             elevation: 0,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          onPressed: () {},
-                          child: const Text(
-                            'Log In',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
+                          onPressed: _isLoading ? null : _handleLogin,
+                          child: _isLoading
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white),
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Text(
+                                  'Log In',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
                         ),
                       ),
 
@@ -219,7 +375,19 @@ class _LoginViewState extends State<LoginView> {
                             ),
                           ),
                           GestureDetector(
-                            onTap: () {},
+                            onTap: _isLoading
+                                ? null
+                                : () {
+                                    // TODO: Navigate ke halaman register
+                                    // Navigator.of(context).push(
+                                    //   MaterialPageRoute(
+                                    //     builder: (context) =>
+                                    //         const RegisterView(),
+                                    //   ),
+                                    // );
+                                    _showInfoDialog(
+                                        'Register feature will be available soon');
+                                  },
                             child: Text(
                               "Sign Up",
                               style: TextStyle(

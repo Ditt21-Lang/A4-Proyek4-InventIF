@@ -119,7 +119,7 @@ class KatalogRuanganScreen extends StatelessWidget {
                                     SizedBox(
                                       height:
                                           MediaQuery.of(context).size.height *
-                                          0.2,
+                                              0.2,
                                     ),
                                     const Center(
                                       child: Text(
@@ -224,7 +224,7 @@ class KatalogRuanganScreen extends StatelessWidget {
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: Image.asset(
-                  room.imagePath,
+                  room.gambar,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) => const Icon(
                     Icons.meeting_room_rounded,
