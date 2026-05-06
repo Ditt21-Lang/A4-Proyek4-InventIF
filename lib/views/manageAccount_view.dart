@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import '../controllers/manageAccount_controller.dart';
 
@@ -83,26 +84,31 @@ class _ManageAccountViewState extends State<ManageAccountView> {
           _phoneController.text = userData.phoneNumber ?? '';
         });
 
-        // Check for existing KTM file in assets/users/{uid}/
+        // Check for existing KTM file in document directory (writable location)
         if (userData.uid.isNotEmpty) {
-          final userFolder = Directory('assets/users/${userData.uid}');
-          if (userFolder.existsSync()) {
-            try {
-              final files = userFolder.listSync();
-              for (var file in files) {
-                if (file is File && file.path.contains('KTM')) {
-                  final fileName = file.path.split('/').last;
-                  final filePath = file.path;
-                  setState(() {
-                    _ktmFileName = fileName;
-                    _ktmController.text = filePath;
-                  });
-                  break;
+          try {
+            final appDocDir = await getApplicationDocumentsDirectory();
+            final userFolder = Directory('${appDocDir.path}/ktm_files/${userData.uid}');
+            if (userFolder.existsSync()) {
+              try {
+                final files = userFolder.listSync();
+                for (var file in files) {
+                  if (file is File && file.path.contains('KTM')) {
+                    final fileName = file.path.split('/').last;
+                    final filePath = file.path;
+                    setState(() {
+                      _ktmFileName = fileName;
+                      _ktmController.text = filePath;
+                    });
+                    break;
+                  }
                 }
+              } catch (e) {
+                print('Error listing KTM files: $e');
               }
-            } catch (e) {
-              print('Error checking KTM file: $e');
             }
+          } catch (e) {
+            print('Error accessing document directory: $e');
           }
         }
 
@@ -141,20 +147,21 @@ class _ManageAccountViewState extends State<ManageAccountView> {
         final fileExtension = image.path.substring(image.path.lastIndexOf('.') + 1).toLowerCase();
         
         if (!validExtensions.contains(fileExtension)) {
-          _showErrorSnackBar('❌ Format file tidak didukung. Gunakan: JPG, PNG, atau PDF');
+          _showErrorSnackBar('Format file tidak didukung. Gunakan: JPG, PNG, atau PDF');
           return;
         }
 
         final file = File(image.path);
         final fileName = 'KTM.$fileExtension';
         
-        // Create folder path for user: assets/users/{uid}
-        final userFolder = Directory('assets/users/$userUID');
+        // Create folder path in app's document directory (writable location)
+        final appDocDir = await getApplicationDocumentsDirectory();
+        final userFolder = Directory('${appDocDir.path}/ktm_files/$userUID');
         if (!userFolder.existsSync()) {
           userFolder.createSync(recursive: true);
         }
 
-        // Copy file to assets/users/{uid}/KTM.{ext}
+        // Copy file to document directory
         final newFilePath = '${userFolder.path}/$fileName';
         final newFile = await file.copy(newFilePath);
 
@@ -172,14 +179,14 @@ class _ManageAccountViewState extends State<ManageAccountView> {
             _ktmFileName = fileName;
             _ktmController.text = newFilePath;
           });
-          _showSuccessSnackBar('✅ File KTM berhasil diupload');
+          _showSuccessSnackBar('File KTM berhasil diupload');
         } else {
-          _showErrorSnackBar('❌ Gagal menyimpan path file KTM ke database');
+          _showErrorSnackBar('Gagal menyimpan path file KTM ke database');
         }
       }
     } catch (e) {
       print('Error uploading KTM: $e');
-      _showErrorSnackBar('❌ Gagal mengupload file: ${e.toString()}');
+      _showErrorSnackBar('Gagal mengupload file: ${e.toString()}');
     }
   }
 
@@ -192,14 +199,14 @@ class _ManageAccountViewState extends State<ManageAccountView> {
     try {
       final file = File(_ktmController.text);
       if (file.existsSync()) {
-        _showSuccessSnackBar('✅ File KTM ditemukan: ${file.path}');
+        _showSuccessSnackBar('File KTM ditemukan: ${file.path}');
         // TODO: Open file dengan package 'open_file' untuk preview
       } else {
-        _showErrorSnackBar('❌ File KTM tidak ditemukan. Path: ${_ktmController.text}');
+        _showErrorSnackBar('File KTM tidak ditemukan. Path: ${_ktmController.text}');
       }
     } catch (e) {
       print('Error opening KTM: $e');
-      _showErrorSnackBar('❌ Gagal membuka file: ${e.toString()}');
+      _showErrorSnackBar('Gagal membuka file: ${e.toString()}');
     }
   }
 
