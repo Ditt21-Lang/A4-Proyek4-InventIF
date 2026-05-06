@@ -32,22 +32,25 @@ class CalendarRuanganController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final db = FirebaseFirestore.instance;
-      
-      // Coba ambil dari 'transactions' dulu
-      var snapshot = await db
+      final snapshot = await FirebaseFirestore.instance
           .collection('transactions')
-          .where('type', isEqualTo: 'room')
-          .where('itemIds', arrayContains: room.id)
           .get();
-
 
       _bookings
         ..clear()
-        ..addAll(snapshot.docs.map(TransactionModel.fromFirestore));
+        ..addAll(
+          snapshot.docs
+              .map(TransactionModel.fromFirestore)
+              .where(
+                (transaction) =>
+                    transaction.containsItem(room.id, type: 'room'),
+              ),
+        );
       _bookings.sort((a, b) => a.startDate.compareTo(b.startDate));
-      
-      debugPrint('Berhasil mengambil ${_bookings.length} jadwal untuk ${room.name}');
+
+      debugPrint(
+        'Berhasil mengambil ${_bookings.length} jadwal untuk ${room.name}',
+      );
     } catch (e) {
       debugPrint('Gagal mengambil jadwal ruangan: $e');
       _bookings.clear();

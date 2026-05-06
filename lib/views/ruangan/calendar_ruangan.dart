@@ -406,7 +406,7 @@ class _BookingItem extends StatelessWidget {
               ),
               const SizedBox(height: 3),
               Text(
-                booking.details,
+                booking.displayTitle,
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 12,
