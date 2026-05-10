@@ -6,7 +6,7 @@ class SelfCheckoutView extends StatefulWidget {
   final List<EquipmentModel> equipments;
 
   const SelfCheckoutView({Key? key, required this.equipments})
-    : super(key: key);
+      : super(key: key);
 
   @override
   State<SelfCheckoutView> createState() => _SelfCheckoutViewState();
@@ -234,7 +234,6 @@ class _SelfCheckoutViewState extends State<SelfCheckoutView> {
               child: Container(width: 250, height: 1.5, color: Colors.white54),
             ),
             const SizedBox(height: 24),
-
             const Text(
               'List Checkout',
               style: TextStyle(
@@ -244,7 +243,6 @@ class _SelfCheckoutViewState extends State<SelfCheckoutView> {
               ),
             ),
             const SizedBox(height: 12),
-
             Expanded(
               child: ListView.builder(
                 itemCount: widget.equipments.length,
@@ -297,9 +295,7 @@ class _SelfCheckoutViewState extends State<SelfCheckoutView> {
                 },
               ),
             ),
-
             const SizedBox(height: 16),
-
             const Text(
               'Date Time Start',
               style: TextStyle(
@@ -380,9 +376,7 @@ class _SelfCheckoutViewState extends State<SelfCheckoutView> {
                 ),
               ],
             ),
-
             const SizedBox(height: 16),
-
             const Text(
               'Date Time End',
               style: TextStyle(
@@ -463,9 +457,7 @@ class _SelfCheckoutViewState extends State<SelfCheckoutView> {
                 ),
               ],
             ),
-
             const SizedBox(height: 40),
-
             SizedBox(
               width: double.infinity,
               // BUNGKUS DENGAN ANIMATED BUILDER
@@ -503,8 +495,8 @@ class _SelfCheckoutViewState extends State<SelfCheckoutView> {
                             // ---------------------------------------------
 
                             // 1. Eksekusi penyimpanan ke Firebase
-                            bool
-                            success = await _checkoutController.processCheckout(
+                            bool success =
+                                await _checkoutController.processCheckout(
                               widget.equipments,
                               finalStartDateTime, // Kirim tanggal & jam yang sudah digabung
                               finalEndDateTime, // Kirim tanggal & jam yang sudah digabung
@@ -515,16 +507,18 @@ class _SelfCheckoutViewState extends State<SelfCheckoutView> {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Text(
-                                    'Checkout berhasil! Status alat diupdate.',
+                                    'Pesanan dicatat! Akan disinkronkan ke server.',
                                   ),
                                   backgroundColor: Colors.green,
                                 ),
                               );
-                              // 3. Kembali ke halaman utama (Katalog)
-                              Navigator.popUntil(
-                                context,
-                                ModalRoute.withName('/katalog-alat'),
-                              );
+                              // 3. Kembali ke halaman Katalog (Anti Layar Hitam)
+                              Navigator.pushNamedAndRemoveUntil(
+                                  context,
+                                  '/katalog-alat',
+                                  (route) =>
+                                      false // Buang semua riwayat halaman sebelumnya agar memori HP lega
+                                  );
                             } else if (mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(

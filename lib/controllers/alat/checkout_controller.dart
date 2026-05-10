@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Wajib untuk cek user login
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import '../../models/equipment_model.dart';
-import '../../models/user_model.dart'; // Wajib untuk ambil NIM
+import '../../models/user_model.dart';
+import '../../services/offline_service.dart';
 
 class CheckoutController extends ChangeNotifier {
   bool isCheckingOut = false;
+  final OfflineService _offlineService = OfflineService();
 
   Future<bool> processCheckout(
     List<EquipmentModel> cartItems,
@@ -30,8 +33,6 @@ class CheckoutController extends ChangeNotifier {
       UserModel userData =
           UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
 
-      WriteBatch batch = db.batch();
-
       // 3. Format daftar barang agar sesuai dengan format array object di TransactionModel
       List<Map<String, dynamic>> itemsData = cartItems
           .map((e) => {
@@ -41,33 +42,54 @@ class CheckoutController extends ChangeNotifier {
               })
           .toList();
 
-      DocumentReference transactionRef = db.collection('transactions').doc();
+      bool hasConnection =
+          await InternetConnectionChecker.createInstance().hasConnection;
 
-      // 4. Simpan ke Firebase dengan field yang COCOK dengan TransactionModel
-      batch.set(transactionRef, {
-        // UID tetap dijadikan borrowerId agar query di HP pengguna (List Order) berjalan lancar
-        'borrowerId': currentUser.uid,
+      if (hasConnection) {
+        // === MODE ONLINE (Langsung ke Firebase) ===
+        WriteBatch batch = db.batch();
+        DocumentReference transactionRef = db.collection('transactions').doc();
 
-        // Simpan identifier/NIM secara terpisah sebagai referensi untuk Teknisi
-        'borrowerIdentifier': userData.identifier,
-        'borrowerName': userData.fullName ?? 'Unknown',
-        'items': itemsData,
-        'category': 'equipment',
-        'startDate': startDate,
-        'endDate': endDate,
-        'details': 'Peminjaman mandiri aplikasi InventIF',
-        'status': 'Dipinjam',
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+        batch.set(transactionRef, {
+          'borrowerId': currentUser.uid,
+          'borrowerIdentifier': userData.identifier,
+          'borrowerName': userData.fullName ?? 'Unknown',
+          'items': itemsData,
+          'category': 'equipment',
+          'startDate': startDate,
+          'endDate': endDate,
+          'details': 'Peminjaman mandiri aplikasi InventIF',
+          'status': 'In Use',
+          'createdAt': FieldValue.serverTimestamp(),
+        });
 
-      // 5. Ubah status barang fisik di database menjadi "Waiting"
-      for (var equipment in cartItems) {
-        DocumentReference equipmentRef =
-            db.collection('equipments').doc(equipment.id);
-        batch.update(equipmentRef, {'status': 'In Use'});
+        for (var equipment in cartItems) {
+          DocumentReference equipmentRef =
+              db.collection('equipments').doc(equipment.id);
+          batch.update(equipmentRef, {'status': 'In Use'});
+        }
+
+        await batch.commit();
+        debugPrint("Checkout Online Sukses");
+      } else {
+        // === MODE OFFLINE (Simpan ke Hive) ===
+        Map<String, dynamic> offlineData = {
+          'borrowerId': currentUser.uid,
+          'borrowerIdentifier': userData.identifier,
+          'borrowerName': userData.fullName ?? 'Unknown',
+          'items': itemsData,
+          'category': 'equipment',
+          // Ubah ke ISO 8601 String karena Hive lebih ramah dengan String untuk DateTime
+          'startDate': startDate.toIso8601String(),
+          'endDate': endDate.toIso8601String(),
+          'details': 'Peminjaman mandiri aplikasi InventIF',
+          'status': 'In Use',
+        };
+
+        await _offlineService.savePendingRequest(offlineData);
+        debugPrint("Checkout Disimpan Offline");
+        // Note: Status barang di layar tidak langsung berubah sampai HP dapat sinyal
       }
-
-      await batch.commit();
 
       isCheckingOut = false;
       notifyListeners();

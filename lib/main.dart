@@ -8,46 +8,54 @@ import 'controllers/ruangan/katalog_ruangan_controller.dart';
 import 'views/auth/login_view.dart';
 import 'views/Teknisi/dashboard_teknisi_view.dart';
 import 'views/Teknisi/list_pengajuan_view.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'services/network_service.dart';
+
+final GlobalKey<ScaffoldMessengerState> globalMessengerKey =
+    GlobalKey<ScaffoldMessengerState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  await Hive.openBox('pending_requests');
 
-  // Inisialisasi Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final NetworkService _networkService = NetworkService();
+
+  @override
+  void initState() {
+    super.initState();
+    _networkService.startMonitoring();
+  }
+
+  @override
+  void dispose() {
+    _networkService.stopMonitoring();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scaffoldMessengerKey: globalMessengerKey,
       title: 'InventIF',
-      // theme: ThemeData(
-      //   primaryColor: const Color(0xFF2A2C8F),
-      //   // This is the theme of your application.
-      //   //
-      //   // TRY THIS: Try running your application with "flutter run". You'll see
-      //   // the application has a purple toolbar. Then, without quitting the app,
-      //   // try changing the seedColor in the colorScheme below to Colors.green
-      //   // and then invoke "hot reload" (save your changes or press the "hot
-      //   // reload" button in a Flutter-supported IDE, or press "r" if you used
-      //   // the command line to start the app).
-      //   //
-      //   // Notice that the counter didn't reset back to zero; the application
-      //   // state is not lost during the reload. To reset the state, use hot
-      //   // restart instead.
-      //   //
-      //   // This works for code too, not just values: Most code changes can be
-      //   // tested with just a hot reload.
-      //   colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      // ),
-      // initialRoute: '/katalog-alat',
-
-      // initialRoute: '/dashboard-teknisi',
-
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2A2C8F)),
+        useMaterial3: true,
+      ),
+      initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginView(),
         '/katalog-alat': (context) =>
@@ -58,12 +66,7 @@ class MyApp extends StatelessWidget {
         '/list-pengajuan': (context) => const ListPengajuanScreen(),
       },
       // home: const MyHomePage(title: 'Flutter Demo Home Page'),
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2A2C8F)),
-        useMaterial3: true,
-      ),
-      home: KatalogAlatView(controller: KatalogAlatController()),
+      // home: KatalogAlatView(controller: KatalogAlatController()),
     );
   }
 }

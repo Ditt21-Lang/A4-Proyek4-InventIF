@@ -3,6 +3,7 @@ import 'package:inventif/views/list_order_view.dart';
 import '../../controllers/alat/katalog_alat_controller.dart';
 import '../../models/equipment_model.dart';
 import 'qr_scanner_view.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 
 class KatalogAlatView extends StatelessWidget {
   final KatalogAlatController controller;
@@ -130,8 +131,32 @@ class KatalogAlatView extends StatelessWidget {
                             // 2. Tampilan saat data kosong (tetap bisa di-refresh)
                             if (controller.displayedEquipment.isEmpty) {
                               return RefreshIndicator(
-                                onRefresh: () async =>
-                                    await controller.fetchEquipmentData(),
+                                onRefresh: () async {
+                                  // Cek sinyal dulu sebelum menyedot data
+                                  bool hasConnection =
+                                      await InternetConnectionChecker
+                                              .createInstance()
+                                          .hasConnection;
+
+                                  if (!hasConnection) {
+                                    // Munculkan SnackBar penolakan jika offline
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                              'Tidak dapat memuat ulang data saat Offline.'),
+                                          backgroundColor: Colors.orange,
+                                          behavior: SnackBarBehavior.floating,
+                                        ),
+                                      );
+                                    }
+                                    return; // Hentikan fungsi refresh di sini
+                                  }
+
+                                  // Jika online, lanjutkan sedot data ulang dari Firebase
+                                  await controller.fetchEquipmentData();
+                                },
                                 color: const Color(0xFFF78233),
                                 child: ListView(
                                   physics:
