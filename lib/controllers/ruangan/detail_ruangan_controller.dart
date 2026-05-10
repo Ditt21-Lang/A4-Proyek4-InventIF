@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../views/ruangan/calendar_ruangan_view.dart';
+import 'calendar_ruangan_controller.dart';
 import '../../models/room_model.dart';
 
 class DetailRuanganController {
@@ -14,8 +16,13 @@ class DetailRuanganController {
   String get imagePath => room.gambar;
 
   void openCalendar(BuildContext context) {
-    ScaffoldMessenger.of(
+    Navigator.push(
       context,
-    ).showSnackBar(const SnackBar(content: Text('Calendar belum tersedia')));
+      MaterialPageRoute(
+        builder: (_) => CalendarRuanganScreen(
+          controller: CalendarRuanganController(room: room),
+        ),
+      ),
+    );
   }
 }
