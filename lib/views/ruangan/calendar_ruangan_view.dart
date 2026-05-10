@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../controllers/ruangan/calendar_ruangan_controller.dart';
+import '../../controllers/ruangan/request_ruangan_controller.dart';
 import '../../models/transaction_model.dart';
+import 'request_ruangan_view.dart';
 
 class CalendarRuanganScreen extends StatelessWidget {
   final CalendarRuanganController controller;
@@ -57,14 +59,22 @@ class CalendarRuanganScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFFF78233),
         foregroundColor: Colors.white,
-        onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Form request ${controller.room.name} belum tersedia',
+        onPressed: () async {
+          final shouldRefresh = await Navigator.push<bool>(
+            context,
+            MaterialPageRoute(
+              builder: (_) => RequestRuanganScreen(
+                controller: RequestRuanganController(
+                  room: controller.room,
+                  initialDate: controller.selectedDate,
+                ),
               ),
             ),
           );
+
+          if (shouldRefresh == true) {
+            controller.fetchBookings();
+          }
         },
         child: const Icon(Icons.add_rounded),
       ),

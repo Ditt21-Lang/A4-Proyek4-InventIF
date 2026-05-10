@@ -79,6 +79,25 @@ class TransactionModel {
     required this.createdAt,
   });
 
+  Map<String, dynamic> toMap() {
+    return {
+      'borrowerId': borrowerId,
+      'borrowerName': borrowerName,
+      'items': items.map((item) => item.toMap()).toList(),
+      'category': category,
+      'startDate': Timestamp.fromDate(startDate),
+      'endDate': Timestamp.fromDate(endDate),
+      'actualReturnDate': actualReturnDate != null
+          ? Timestamp.fromDate(actualReturnDate!)
+          : null,
+      'details': details,
+      'eventName': eventName,
+      'attachmentUrl': attachmentUrl,
+      'status': status,
+      'createdAt': Timestamp.fromDate(createdAt),
+    };
+  }
+
   factory TransactionModel.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 

@@ -63,7 +63,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2A2C8F)),
         useMaterial3: true,
       ),
-      home: const LoginView(),
+      home: KatalogAlatView(controller: KatalogAlatController()),
     );
   }
 }
