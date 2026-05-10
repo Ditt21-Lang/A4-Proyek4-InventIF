@@ -17,13 +17,28 @@ class ListPengajuanController extends ChangeNotifier {
     });
   }
 
-  Future<void> updateStatus(String id, String statusBaru) async {
+  Future<void> updateStatus(
+      TransactionModel transaction, String newStatus) async {
     try {
-      await _firestore.collection('transactions').doc(id).update({
-        'status': statusBaru,
-      });
+      WriteBatch batch = _firestore.batch();
+
+      // 1. Update transaksi (misal menjadi 'Approved')
+      DocumentReference txRef =
+          _firestore.collection('transactions').doc(transaction.transactionId);
+      batch.update(txRef, {'status': newStatus});
+
+      // 2. Jika Teknisi meng-Approve pengembalian, ubah barang jadi Available
+      if (newStatus == 'Approved') {
+        for (var item in transaction.items) {
+          DocumentReference eqRef =
+              _firestore.collection('equipments').doc(item.id);
+          batch.update(eqRef, {'status': 'Available'});
+        }
+      }
+
+      await batch.commit();
     } catch (e) {
-      debugPrint("Gagal update status: $e");
+      debugPrint('Error mengupdate status: $e');
     }
   }
 }

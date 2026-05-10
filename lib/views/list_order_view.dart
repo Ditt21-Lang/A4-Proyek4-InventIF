@@ -15,7 +15,20 @@ class _ListOrderViewState extends State<ListOrderView> {
 
   // Helper untuk format tanggal singkat (dd MMM yyyy)
   String _formatShortDate(DateTime date) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ];
     return "${date.day} ${months[date.month - 1]} ${date.year}";
   }
 
@@ -28,7 +41,8 @@ class _ListOrderViewState extends State<ListOrderView> {
           // --- BAGIAN ATAS (KREM): PROFIL ---
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -61,7 +75,7 @@ class _ListOrderViewState extends State<ListOrderView> {
                       ),
                     ),
                   ),
-                  
+
                   // Teks Sapaan
                   const Expanded(
                     child: Text(
@@ -88,13 +102,14 @@ class _ListOrderViewState extends State<ListOrderView> {
                       //   fit: BoxFit.cover,
                       // ),
                     ),
-                    child: const Icon(Icons.person, size: 40, color: Colors.white),
+                    child:
+                        const Icon(Icons.person, size: 40, color: Colors.white),
                   ),
                 ],
               ),
             ),
           ),
-          
+
           const SizedBox(height: 10),
 
           // --- BAGIAN BAWAH (BIRU): LIST ORDER ---
@@ -112,7 +127,9 @@ class _ListOrderViewState extends State<ListOrderView> {
                 animation: _controller,
                 builder: (context, child) {
                   if (_controller.isLoading) {
-                    return const Center(child: CircularProgressIndicator(color: Color(0xFFF78233)));
+                    return const Center(
+                        child: CircularProgressIndicator(
+                            color: Color(0xFFF78233)));
                   }
 
                   if (_controller.orders.isEmpty) {
@@ -141,19 +158,11 @@ class _ListOrderViewState extends State<ListOrderView> {
       // --- BOTTOM NAVIGATION BAR ---
       // Anda bisa memisahkan BottomNavigationBar ini menjadi widget tersendiri
       // agar mudah dipakai di banyak halaman.
-      bottomNavigationBar: _buildBottomNavigationBar(context), 
+      bottomNavigationBar: _buildBottomNavigationBar(context),
     );
   }
 
   Widget _buildOrderCard(BuildContext context, TransactionModel transaction) {
-    // Ekstrak nama item pertama untuk ditampilkan sebagai judul utama card
-    String mainTitle = transaction.items.isNotEmpty ? transaction.items.first.name : 'Unknown Item';
-    
-    // Tampilkan jumlah item lain jika lebih dari 1
-    if (transaction.items.length > 1) {
-      mainTitle += ' (+${transaction.items.length - 1} items)';
-    }
-
     // Tentukan warna status
     Color statusColor;
     switch (transaction.status.toLowerCase()) {
@@ -165,7 +174,7 @@ class _ListOrderViewState extends State<ListOrderView> {
       case 'draft':
       case 'waiting':
       case 'pending':
-        statusColor = Colors.orange;
+        statusColor = const Color(0xFFF48A42); // Oranye
         break;
       case 'completed':
       case 'dikembalikan':
@@ -177,76 +186,81 @@ class _ListOrderViewState extends State<ListOrderView> {
 
     return GestureDetector(
       onTap: () {
-         // Navigasi ke Halaman Detail yang kita buat sebelumnya
-         Navigator.push(
-           context,
-           MaterialPageRoute(
-             builder: (context) => TransactionDetailView(transaction: transaction),
-           ),
-         );
+        // Navigasi ke Halaman Detail (pastikan rute ini sudah Anda buat sebelumnya)
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                TransactionDetailView(transaction: transaction),
+          ),
+        );
       },
       child: Container(
-        margin: const EdgeInsets.only(bottom: 20),
+        margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFFD6D1D6), // Warna abu-abu sesuai desain
-          borderRadius: BorderRadius.circular(20),
+          color:
+              const Color(0xFFE0E0E0), // Warna abu-abu seragam dengan Teknisi
+          borderRadius: BorderRadius.circular(16),
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Kotak Putih Placeholder
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-              ),
+            Row(
+              children: [
+                const CircleAvatar(
+                  radius: 25,
+                  // Placeholder avatar, bisa disesuaikan nanti
+                  backgroundImage: NetworkImage(
+                      'https://i2.wp.com/images.genshin-builds.com/genshin/characters/furina/image.png?strip=all&quality=100&w=100'),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Name: ${transaction.borrowerName}',
+                          style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87)),
+                      Text(
+                          'Borrow date: ${_formatShortDate(transaction.startDate)}',
+                          style: const TextStyle(
+                              fontSize: 12, color: Colors.black54)),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 16),
-            
-            // Info Transaksi
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    mainTitle,
-                    style: const TextStyle(
-                      color: Color(0xFFF78233), // Oranye
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Date: ${_formatShortDate(transaction.startDate)}',
-                    style: const TextStyle(
-                      color: Colors.black87,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  // Indikator Status
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: statusColor,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      transaction.status.toUpperCase(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
+            const SizedBox(height: 12),
+            const Text('Items:',
+                style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87)),
+            // Memanggil getter itemNames yang pintar (otomatis gabung string jika lebih dari 1)
+            Text('• ${transaction.itemNames}',
+                style: const TextStyle(fontSize: 12, color: Colors.black87)),
+            const SizedBox(height: 16),
+
+            // Indikator Status di tengah (mirip tombol Approve di Teknisi)
+            Align(
+              alignment: Alignment.center,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 30, vertical: 6),
+                decoration: BoxDecoration(
+                  color: statusColor,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  transaction.status.toUpperCase(),
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold),
+                ),
               ),
             ),
           ],
@@ -271,8 +285,8 @@ class _ListOrderViewState extends State<ListOrderView> {
           // 1. Icon Home (Inactive)
           GestureDetector(
             onTap: () {
-               // Kembali ke halaman utama (Katalog)
-               Navigator.popUntil(context, ModalRoute.withName('/katalog-alat'));
+              // Kembali ke halaman utama (Katalog)
+              Navigator.popUntil(context, ModalRoute.withName('/katalog-alat'));
             },
             child: Container(
               width: 60,
@@ -296,7 +310,8 @@ class _ListOrderViewState extends State<ListOrderView> {
                 ],
               ),
               child: const Center(
-                child: Icon(Icons.home_rounded, color: Colors.black87, size: 34),
+                child:
+                    Icon(Icons.home_rounded, color: Colors.black87, size: 34),
               ),
             ),
           ),
@@ -304,8 +319,8 @@ class _ListOrderViewState extends State<ListOrderView> {
           // 2. Icon Scanner (Inactive)
           GestureDetector(
             onTap: () {
-               // Navigasi ke Scanner. Gunakan pushReplacement agar tumpukan navigasi tidak terlalu dalam
-               Navigator.pushReplacementNamed(context, '/qr-scanner');
+              // Navigasi ke Scanner. Gunakan pushReplacement agar tumpukan navigasi tidak terlalu dalam
+              Navigator.pushReplacementNamed(context, '/qr-scanner');
             },
             child: Container(
               width: 60,

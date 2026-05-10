@@ -217,7 +217,7 @@ class _DashboardTeknisiScreenState extends State<DashboardTeknisiScreen> {
               color: Colors.transparent,
               child: InkWell(
                 onTap: () {
-                  _controller.confirmSubmission(item.id);
+                  _controller.confirmSubmission(item);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('${item.itemNames} ACC sukses!'),

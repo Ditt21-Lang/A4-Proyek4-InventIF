@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:inventif/views/list_order_view.dart';
 import '../../controllers/alat/katalog_alat_controller.dart';
 import '../../models/equipment_model.dart';
 import 'qr_scanner_view.dart';
@@ -139,7 +140,7 @@ class KatalogAlatView extends StatelessWidget {
                                     SizedBox(
                                       height:
                                           MediaQuery.of(context).size.height *
-                                          0.2,
+                                              0.2,
                                     ),
                                     const Center(
                                       child: Text(
@@ -222,9 +223,8 @@ class KatalogAlatView extends StatelessWidget {
   }
 
   Widget _buildEquipmentCard(EquipmentModel equipment) {
-    Color statusColor = equipment.status == 'Available'
-        ? Colors.green
-        : Colors.amber;
+    Color statusColor =
+        equipment.status == 'Available' ? Colors.green : Colors.amber;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -401,32 +401,40 @@ class KatalogAlatView extends StatelessWidget {
 
           // 3. Icon Profile (Inactive)
           // Icon Profile
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: const Color(0xFFEBEBEB),
-              borderRadius: BorderRadius.circular(18),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.shade400,
-                  offset: const Offset(4, 4),
-                  blurRadius: 8,
-                  spreadRadius: 1,
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ListOrderView()),
+              );
+            },
+            child: Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: const Color(0xFFEBEBEB),
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.shade400,
+                    offset: const Offset(4, 4),
+                    blurRadius: 8,
+                    spreadRadius: 1,
+                  ),
+                  const BoxShadow(
+                    color: Colors.white,
+                    offset: Offset(-4, -4),
+                    blurRadius: 8,
+                    spreadRadius: 1,
+                  ),
+                ],
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.account_circle_outlined,
+                  color: Colors.black87,
+                  size: 38,
                 ),
-                const BoxShadow(
-                  color: Colors.white,
-                  offset: Offset(-4, -4),
-                  blurRadius: 8,
-                  spreadRadius: 1,
-                ),
-              ],
-            ),
-            child: const Center(
-              child: Icon(
-                Icons.account_circle_outlined,
-                color: Colors.black87,
-                size: 38,
               ),
             ),
           ),

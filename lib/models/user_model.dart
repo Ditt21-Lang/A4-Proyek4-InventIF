@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserModel {
   final String uid;
+  final String identifier;
   final String email;
   final String? fullName;
   final String? phoneNumber;
@@ -12,6 +13,7 @@ class UserModel {
 
   UserModel({
     required this.uid,
+    required this.identifier,
     required this.email,
     this.fullName,
     this.phoneNumber,
@@ -26,6 +28,7 @@ class UserModel {
   Map<String, dynamic> toMap() {
     return {
       'uid': uid,
+      'identifier': identifier,
       'Email': email,
       'Fullname': fullName,
       'phoneNumber': phoneNumber,
@@ -41,6 +44,7 @@ class UserModel {
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
       uid: map['uid'] ?? '',
+      identifier: map['identifier'] ?? '',
       email: map['Email'] ?? map['email'] ?? '',
       fullName: map['Fullname'] ?? map['fullName'],
       phoneNumber: map['phoneNumber'],
@@ -56,6 +60,7 @@ class UserModel {
   // Copy with - untuk membuat copy dengan beberapa field yang diubah
   UserModel copyWith({
     String? uid,
+    String? identifier,
     String? email,
     String? fullName,
     String? phoneNumber,
@@ -66,6 +71,7 @@ class UserModel {
   }) {
     return UserModel(
       uid: uid ?? this.uid,
+      identifier: identifier ?? this.identifier,
       email: email ?? this.email,
       fullName: fullName ?? this.fullName,
       phoneNumber: phoneNumber ?? this.phoneNumber,
@@ -78,6 +84,6 @@ class UserModel {
 
   @override
   String toString() {
-    return 'UserModel(uid: $uid, email: $email, role: $role, isActive: $isActive)';
+    return 'UserModel(uid: $uid, identifier: $identifier, email: $email, role: $role, isActive: $isActive)';
   }
 }

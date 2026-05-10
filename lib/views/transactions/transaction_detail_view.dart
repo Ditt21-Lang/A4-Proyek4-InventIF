@@ -1,10 +1,20 @@
 import 'package:flutter/material.dart';
+import '../../controllers/transactions/transaction_detail_controller.dart';
 import '../../models/transaction_model.dart';
 
-class TransactionDetailView extends StatelessWidget {
+class TransactionDetailView extends StatefulWidget {
   final TransactionModel transaction;
 
-  const TransactionDetailView({Key? key, required this.transaction}) : super(key: key);
+  const TransactionDetailView({Key? key, required this.transaction})
+      : super(key: key);
+
+  @override
+  State<TransactionDetailView> createState() => _TransactionDetailViewState();
+}
+
+class _TransactionDetailViewState extends State<TransactionDetailView> {
+  // Panggil Controller-nya di sini
+  final TransactionDetailController _controller = TransactionDetailController();
 
   // Helper untuk memformat tanggal menjadi dd/mm/yy
   String _formatDate(DateTime date) {
@@ -27,7 +37,8 @@ class TransactionDetailView extends StatelessWidget {
           children: [
             // --- 1. HEADER & TOMBOL BACK ---
             Padding(
-              padding: const EdgeInsets.only(left: 20.0, top: 20.0, bottom: 20.0),
+              padding:
+                  const EdgeInsets.only(left: 20.0, top: 20.0, bottom: 20.0),
               child: GestureDetector(
                 onTap: () => Navigator.pop(context),
                 child: Container(
@@ -50,7 +61,7 @@ class TransactionDetailView extends StatelessWidget {
                     ],
                   ),
                   child: const Padding(
-                    padding: EdgeInsets.only(left: 6.0), // Agar icon panah terlihat ke tengah
+                    padding: EdgeInsets.only(left: 6.0),
                     child: Icon(
                       Icons.arrow_back_ios,
                       color: Color(0xFFF78233),
@@ -84,7 +95,7 @@ class TransactionDetailView extends StatelessWidget {
             ),
             const SizedBox(height: 30),
 
-            // --- 3. KONTEN UTAMA (Bisa di-scroll jika item banyak) ---
+            // --- 3. KONTEN UTAMA ---
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -101,17 +112,16 @@ class TransactionDetailView extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
 
-                    // LIST BARANG YANG DIPINJAM (Looping dinamis sesuai data)
-                    ...transaction.items.map((item) => Container(
+                    // LIST BARANG YANG DIPINJAM (Perhatikan tambahan 'widget.' sebelum transaction)
+                    ...widget.transaction.items.map((item) => Container(
                           margin: const EdgeInsets.only(bottom: 16),
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFD6D1D6), // Warna abu-abu desain
+                            color: const Color(0xFFD6D1D6),
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Row(
                             children: [
-                              // Kotak Putih (Placeholder Gambar Barang)
                               Container(
                                 width: 70,
                                 height: 70,
@@ -135,7 +145,7 @@ class TransactionDetailView extends StatelessWidget {
                                     ),
                                     const SizedBox(height: 4),
                                     const Text(
-                                      'Condition: Good', // Teks Statis sesuai desain
+                                      'Condition: Good',
                                       style: TextStyle(
                                         color: Colors.black87,
                                         fontWeight: FontWeight.w600,
@@ -166,14 +176,14 @@ class TransactionDetailView extends StatelessWidget {
                         Expanded(
                           child: _buildTimeBox(
                             icon: Icons.calendar_today_outlined,
-                            text: _formatDate(transaction.startDate),
+                            text: _formatDate(widget.transaction.startDate),
                           ),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
                           child: _buildTimeBox(
                             icon: Icons.access_time_rounded,
-                            text: _formatTime(transaction.startDate),
+                            text: _formatTime(widget.transaction.startDate),
                           ),
                         ),
                       ],
@@ -195,14 +205,14 @@ class TransactionDetailView extends StatelessWidget {
                         Expanded(
                           child: _buildTimeBox(
                             icon: Icons.calendar_today_outlined,
-                            text: _formatDate(transaction.endDate),
+                            text: _formatDate(widget.transaction.endDate),
                           ),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
                           child: _buildTimeBox(
                             icon: Icons.access_time_rounded,
-                            text: _formatTime(transaction.endDate),
+                            text: _formatTime(widget.transaction.endDate),
                           ),
                         ),
                       ],
@@ -210,50 +220,90 @@ class TransactionDetailView extends StatelessWidget {
 
                     const SizedBox(height: 40),
 
-                    // --- 6. TOMBOL RETURN ITEM ---
+                    // --- 6. TOMBOL RETURN ITEM DENGAN ANIMATED BUILDER ---
                     SizedBox(
                       width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFF78233),
-                          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          elevation: 3,
-                        ),
-                        onPressed: () {
-                          // TODO: Integrasi fungsi pengembalian (F-004)
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Request pengembalian sedang diproses...'),
-                              backgroundColor: Colors.green,
+                      child: AnimatedBuilder(
+                        animation: _controller,
+                        builder: (context, child) {
+                          return ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFF78233),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 16, horizontal: 20),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              elevation: 3,
                             ),
+                            // Matikan tombol jika sedang proses loading
+                            onPressed: _controller.isLoading
+                                ? null
+                                : () async {
+                                    // Panggil controller
+                                    bool success = await _controller.returnItem(
+                                        widget.transaction.transactionId);
+
+                                    if (success && mounted) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                              'Permintaan pengembalian dikirim ke Teknisi'),
+                                          backgroundColor: Colors.green,
+                                        ),
+                                      );
+                                      Navigator.pop(context);
+                                    } else if (!success && mounted) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content:
+                                              Text('Gagal mengirim permintaan'),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
+                                  },
+                            child: _controller.isLoading
+                                ? const SizedBox(
+                                    height: 24,
+                                    width: 24,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 3,
+                                    ),
+                                  )
+                                : Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Row(
+                                        children: const [
+                                          Icon(Icons.calendar_month_outlined,
+                                              color: Colors.white, size: 24),
+                                          SizedBox(width: 12),
+                                          Text(
+                                            'Return Item',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const Icon(
+                                          Icons.arrow_forward_ios_rounded,
+                                          color: Colors.white,
+                                          size: 20),
+                                    ],
+                                  ),
                           );
                         },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: const [
-                                Icon(Icons.calendar_month_outlined, color: Colors.white, size: 24),
-                                SizedBox(width: 12),
-                                Text(
-                                  'Return Item',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 20),
-                          ],
-                        ),
                       ),
                     ),
-                    const SizedBox(height: 30), // Jarak aman ke bawah layar
+                    const SizedBox(height: 30),
                   ],
                 ),
               ),
@@ -264,7 +314,7 @@ class TransactionDetailView extends StatelessWidget {
     );
   }
 
-  // Widget Reusable untuk Kotak Tanggal & Jam (Desain abu-abu muda)
+  // Widget Reusable untuk Kotak Tanggal & Jam
   Widget _buildTimeBox({required IconData icon, required String text}) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),

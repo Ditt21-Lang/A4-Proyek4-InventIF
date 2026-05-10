@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Wajib ditambahkan untuk mengecek siapa yang login
 import '../../models/transaction_model.dart';
 
 class ListOrderController extends ChangeNotifier {
@@ -10,34 +11,43 @@ class ListOrderController extends ChangeNotifier {
   bool get isLoading => _isLoading;
 
   ListOrderController() {
-    // Sebagai permulaan, kita panggil data dengan dummy userId.
-    // Nanti ganti dengan ID user yang sedang login.
-    fetchUserOrders('NIM-DUMMY-123'); 
+    // Ubah dari fetch satu kali menjadi mendengarkan data (listen)
+    listenToUserOrders();
   }
 
-  Future<void> fetchUserOrders(String userId) async {
+  void listenToUserOrders() {
     _isLoading = true;
     notifyListeners();
 
-    try {
-      // Mengambil data dari koleksi transactions, di mana borrowerId cocok
-      QuerySnapshot snapshot = await FirebaseFirestore.instance
-          .collection('transactions')
-          .where('borrowerId', isEqualTo: userId)
-          // Opsional: Urutkan dari yang terbaru (membutuhkan index di Firebase)
-          // .orderBy('createdAt', descending: true) 
-          .get();
+    // 1. Ambil UID dari user yang sedang login di Firebase Auth saat ini
+    User? currentUser = FirebaseAuth.instance.currentUser;
 
+    if (currentUser == null) {
+      debugPrint("Gagal memuat list: User belum login");
+      _isLoading = false;
+      notifyListeners();
+      return;
+    }
+
+    // 2. Gunakan .snapshots().listen() agar layar pengguna otomatis ter-update
+    //    setiap kali Teknisi mengubah status di Firestore
+    FirebaseFirestore.instance
+        .collection('transactions')
+        .where('borrowerId', isEqualTo: currentUser.uid)
+        // Opsional: .orderBy('createdAt', descending: true)
+        .snapshots()
+        .listen((snapshot) {
       _orders = snapshot.docs.map((doc) {
         return TransactionModel.fromFirestore(doc);
       }).toList();
-      
-    } catch (e) {
-      debugPrint("Gagal mengambil data riwayat: $e");
-      _orders = [];
-    }
 
-    _isLoading = false;
-    notifyListeners();
+      _isLoading = false;
+      notifyListeners(); // Beritahu UI untuk render ulang dengan warna baru
+    }, onError: (error) {
+      debugPrint("Gagal mengambil data riwayat: $error");
+      _orders = [];
+      _isLoading = false;
+      notifyListeners();
+    });
   }
 }

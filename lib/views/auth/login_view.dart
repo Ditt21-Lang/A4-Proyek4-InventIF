@@ -60,10 +60,21 @@ class _LoginViewState extends State<LoginView> {
 
     if (mounted) {
       if (result['success']) {
-        // Login berhasil
-        _showSuccessDialog(result['message']);
-        // TODO: Navigate ke halaman home
-        // Navigator.of(context).pushReplacementNamed('/home');
+        var userData = result['userData'];
+
+        if (userData != null) {
+          String role = userData.role.toLowerCase();
+
+          if (role == 'user') {
+            Navigator.pushReplacementNamed(context, '/katalog-alat');
+          } else if (role == 'teknisi') {
+            Navigator.pushReplacementNamed(context, '/dashboard-teknisi');
+          } else {
+            Navigator.pushReplacementNamed(context, '/katalog-alat');
+          }
+        } else {
+          _showErrorDialog("Data user tidak ditemukan di database.");
+        }
       } else {
         // Login gagal
         _showErrorDialog(result['message']);
