@@ -233,11 +233,20 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
                 );
               }),
             )
-          else if (_selectedStatus == 'Approved')
+          else if (_selectedStatus == 'In Use')
             const Align(
               alignment: Alignment.center,
-              child: Text('Masuk History (Approved)',
+              child: Text('Sedang dipakai mahasiswa',
                   style: TextStyle(
+                      color: Colors.blue,
+                      fontWeight: FontWeight.bold,
+                      fontStyle: FontStyle.italic)),
+            )
+          else if (_selectedStatus == 'History')
+            Align(
+              alignment: Alignment.center,
+              child: Text('Selesai (${item.status})',
+                  style: const TextStyle(
                       color: Colors.green,
                       fontWeight: FontWeight.bold,
                       fontStyle: FontStyle.italic)),

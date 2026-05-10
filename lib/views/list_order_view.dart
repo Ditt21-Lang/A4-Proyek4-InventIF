@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import '../controllers/list_order_controller.dart';
 import '../models/transaction_model.dart';
 import 'transactions/transaction_detail_view.dart';
+import '../widgets/custom_bottom_nav.dart'; // Import navigasi universal
 
 class ListOrderView extends StatefulWidget {
-  const ListOrderView({Key? key}) : super(key: key);
+  final VoidCallback onBack;
+  const ListOrderView({Key? key, required this.onBack}) : super(key: key);
 
   @override
   State<ListOrderView> createState() => _ListOrderViewState();
@@ -48,7 +50,7 @@ class _ListOrderViewState extends State<ListOrderView> {
                 children: [
                   // Tombol Back
                   GestureDetector(
-                    onTap: () => Navigator.pop(context),
+                    onTap: widget.onBack,
                     child: Container(
                       width: 50,
                       height: 50,
@@ -155,10 +157,6 @@ class _ListOrderViewState extends State<ListOrderView> {
           ),
         ],
       ),
-      // --- BOTTOM NAVIGATION BAR ---
-      // Anda bisa memisahkan BottomNavigationBar ini menjadi widget tersendiri
-      // agar mudah dipakai di banyak halaman.
-      bottomNavigationBar: _buildBottomNavigationBar(context),
     );
   }
 
@@ -178,6 +176,7 @@ class _ListOrderViewState extends State<ListOrderView> {
         break;
       case 'completed':
       case 'dikembalikan':
+      case 'returned':
         statusColor = Colors.blue;
         break;
       default:
@@ -265,125 +264,6 @@ class _ListOrderViewState extends State<ListOrderView> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  // Bottom Navigation Bar - Disalin dari KatalogAlatView agar konsisten
-  Widget _buildBottomNavigationBar(BuildContext context) {
-    return Container(
-      height: 90,
-      padding: const EdgeInsets.only(bottom: 10),
-      decoration: const BoxDecoration(
-        color: Color(0xFFEBEBEB),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // 1. Icon Home (Inactive)
-          GestureDetector(
-            onTap: () {
-              // Kembali ke halaman utama (Katalog)
-              Navigator.popUntil(context, ModalRoute.withName('/katalog-alat'));
-            },
-            child: Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: const Color(0xFFEBEBEB),
-                borderRadius: BorderRadius.circular(18),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.shade400,
-                    offset: const Offset(4, 4),
-                    blurRadius: 8,
-                    spreadRadius: 1,
-                  ),
-                  const BoxShadow(
-                    color: Colors.white,
-                    offset: Offset(-4, -4),
-                    blurRadius: 8,
-                    spreadRadius: 1,
-                  ),
-                ],
-              ),
-              child: const Center(
-                child:
-                    Icon(Icons.home_rounded, color: Colors.black87, size: 34),
-              ),
-            ),
-          ),
-
-          // 2. Icon Scanner (Inactive)
-          GestureDetector(
-            onTap: () {
-              // Navigasi ke Scanner. Gunakan pushReplacement agar tumpukan navigasi tidak terlalu dalam
-              Navigator.pushReplacementNamed(context, '/qr-scanner');
-            },
-            child: Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: const Color(0xFFEBEBEB),
-                borderRadius: BorderRadius.circular(18),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.shade400,
-                    offset: const Offset(4, 4),
-                    blurRadius: 8,
-                    spreadRadius: 1,
-                  ),
-                  const BoxShadow(
-                    color: Colors.white,
-                    offset: Offset(-4, -4),
-                    blurRadius: 8,
-                    spreadRadius: 1,
-                  ),
-                ],
-              ),
-              child: const Center(
-                child: Icon(
-                  Icons.crop_free_rounded,
-                  color: Colors.black87,
-                  size: 32,
-                ),
-              ),
-            ),
-          ),
-
-          // 3. Icon Profile (Active) - Berwarna Oranye
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF78233), // Warna Active
-              borderRadius: BorderRadius.circular(18),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.shade400,
-                  offset: const Offset(4, 4),
-                  blurRadius: 8,
-                  spreadRadius: 1,
-                ),
-                const BoxShadow(
-                  color: Colors.white,
-                  offset: Offset(-4, -4),
-                  blurRadius: 8,
-                  spreadRadius: 1,
-                ),
-              ],
-            ),
-            child: const Center(
-              child: Icon(
-                Icons.account_circle_outlined,
-                color: Colors.black87,
-                size: 38,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

@@ -10,6 +10,7 @@ import 'views/Teknisi/dashboard_teknisi_view.dart';
 import 'views/Teknisi/list_pengajuan_view.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'services/network_service.dart';
+import 'views/main_dashboard.dart';
 
 final GlobalKey<ScaffoldMessengerState> globalMessengerKey =
     GlobalKey<ScaffoldMessengerState>();
@@ -58,10 +59,7 @@ class _MyAppState extends State<MyApp> {
       initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginView(),
-        '/katalog-alat': (context) =>
-            KatalogAlatView(controller: KatalogAlatController()),
-        '/katalog-ruangan': (context) =>
-            KatalogRuanganScreen(controller: KatalogRuanganController()),
+        '/dashboard': (context) => const MainDashboard(),
         '/dashboard-teknisi': (context) => const DashboardTeknisiScreen(),
         '/list-pengajuan': (context) => const ListPengajuanScreen(),
       },

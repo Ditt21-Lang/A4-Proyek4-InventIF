@@ -221,88 +221,90 @@ class _TransactionDetailViewState extends State<TransactionDetailView> {
                     const SizedBox(height: 40),
 
                     // --- 6. TOMBOL RETURN ITEM DENGAN ANIMATED BUILDER ---
-                    SizedBox(
-                      width: double.infinity,
-                      child: AnimatedBuilder(
-                        animation: _controller,
-                        builder: (context, child) {
-                          return ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFF78233),
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 16, horizontal: 20),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
+                    if (widget.transaction.status.toLowerCase() == 'in use')
+                      SizedBox(
+                        width: double.infinity,
+                        child: AnimatedBuilder(
+                          animation: _controller,
+                          builder: (context, child) {
+                            return ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFF78233),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 16, horizontal: 20),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                elevation: 3,
                               ),
-                              elevation: 3,
-                            ),
-                            // Matikan tombol jika sedang proses loading
-                            onPressed: _controller.isLoading
-                                ? null
-                                : () async {
-                                    // Panggil controller
-                                    bool success = await _controller.returnItem(
-                                        widget.transaction.transactionId);
+                              // Matikan tombol jika sedang proses loading
+                              onPressed: _controller.isLoading
+                                  ? null
+                                  : () async {
+                                      // Panggil controller
+                                      bool success =
+                                          await _controller.returnItem(
+                                              widget.transaction.transactionId);
 
-                                    if (success && mounted) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                              'Permintaan pengembalian dikirim ke Teknisi'),
-                                          backgroundColor: Colors.green,
-                                        ),
-                                      );
-                                      Navigator.pop(context);
-                                    } else if (!success && mounted) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        const SnackBar(
-                                          content:
-                                              Text('Gagal mengirim permintaan'),
-                                          backgroundColor: Colors.red,
-                                        ),
-                                      );
-                                    }
-                                  },
-                            child: _controller.isLoading
-                                ? const SizedBox(
-                                    height: 24,
-                                    width: 24,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 3,
-                                    ),
-                                  )
-                                : Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Row(
-                                        children: const [
-                                          Icon(Icons.calendar_month_outlined,
-                                              color: Colors.white, size: 24),
-                                          SizedBox(width: 12),
-                                          Text(
-                                            'Return Item',
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                                      if (success && mounted) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                                'Permintaan pengembalian dikirim ke Teknisi'),
+                                            backgroundColor: Colors.green,
                                           ),
-                                        ],
+                                        );
+                                        Navigator.pop(context);
+                                      } else if (!success && mounted) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                                'Gagal mengirim permintaan'),
+                                            backgroundColor: Colors.red,
+                                          ),
+                                        );
+                                      }
+                                    },
+                              child: _controller.isLoading
+                                  ? const SizedBox(
+                                      height: 24,
+                                      width: 24,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 3,
                                       ),
-                                      const Icon(
-                                          Icons.arrow_forward_ios_rounded,
-                                          color: Colors.white,
-                                          size: 20),
-                                    ],
-                                  ),
-                          );
-                        },
+                                    )
+                                  : Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Row(
+                                          children: const [
+                                            Icon(Icons.calendar_month_outlined,
+                                                color: Colors.white, size: 24),
+                                            SizedBox(width: 12),
+                                            Text(
+                                              'Return Item',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const Icon(
+                                            Icons.arrow_forward_ios_rounded,
+                                            color: Colors.white,
+                                            size: 20),
+                                      ],
+                                    ),
+                            );
+                          },
+                        ),
                       ),
-                    ),
                     const SizedBox(height: 30),
                   ],
                 ),

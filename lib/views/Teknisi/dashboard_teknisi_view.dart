@@ -72,21 +72,36 @@ class _DashboardTeknisiScreenState extends State<DashboardTeknisiScreen> {
                 const SizedBox(height: 30),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 20, horizontal: 25),
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16)),
-                    child: const Column(
-                      children: [
-                        Icon(Icons.access_time,
-                            color: Color(0xFFF48A42), size: 36),
-                        SizedBox(height: 8),
-                        Text('Need Approve',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 14)),
-                      ],
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pushReplacementNamed(
+                          context, '/list-pengajuan');
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 20, horizontal: 25),
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, 5),
+                            )
+                          ]),
+                      child: const Column(
+                        children: [
+                          Icon(Icons.access_time,
+                              color: Color(0xFFF48A42), size: 36),
+                          SizedBox(height: 8),
+                          Text('Need Approve',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  color: Colors.black87)),
+                        ],
+                      ),
                     ),
                   ),
                 ),

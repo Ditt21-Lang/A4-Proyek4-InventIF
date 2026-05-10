@@ -66,11 +66,11 @@ class _LoginViewState extends State<LoginView> {
           String role = userData.role.toLowerCase();
 
           if (role == 'user') {
-            Navigator.pushReplacementNamed(context, '/katalog-alat');
+            Navigator.pushReplacementNamed(context, '/dashboard');
           } else if (role == 'teknisi') {
             Navigator.pushReplacementNamed(context, '/dashboard-teknisi');
           } else {
-            Navigator.pushReplacementNamed(context, '/katalog-alat');
+            Navigator.pushReplacementNamed(context, '/dashboard');
           }
         } else {
           _showErrorDialog("Data user tidak ditemukan di database.");

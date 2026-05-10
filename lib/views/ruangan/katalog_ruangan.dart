@@ -1,174 +1,144 @@
 import 'package:flutter/material.dart';
-import 'package:inventif/views/alat/qr_scanner_view.dart';
-
 import '../../controllers/ruangan/detail_ruangan_controller.dart';
 import '../../controllers/ruangan/katalog_ruangan_controller.dart';
 import '../../models/room_model.dart';
 import 'detail_ruangan.dart';
+import '../../widgets/base_catalog_layout.dart'; // Import layout universal
 
 class KatalogRuanganScreen extends StatelessWidget {
   final KatalogRuanganController controller;
+  final Function(int) onTabChanged;
 
-  const KatalogRuanganScreen({super.key, required this.controller});
+  const KatalogRuanganScreen(
+      {super.key, required this.controller, required this.onTabChanged});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/bg_gedung.png'),
-            fit: BoxFit.cover,
-            alignment: Alignment.topCenter,
+    // 1. Bungkus dengan BaseCatalogLayout, set currentIndex ke 0
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 24), // Jarak dari ujung lengkungan ke teks judul
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          child: Text(
+            'Available Facilities',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
-        child: Column(
-          children: [
-            SizedBox(height: MediaQuery.of(context).size.height * 0.15),
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF3B3B98),
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
+
+        // CHIPS (Tab Room Aktif)
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            children: [
+              _buildChip('All', false),
+              _buildChip('Room', true),
+              _buildChip('Equipment', false, onTap: () => onTabChanged(0)),
+              _buildChip('Available', false),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // SEARCH BAR
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFE6E2E6),
+              borderRadius: BorderRadius.circular(25),
+            ),
+            child: TextField(
+              onChanged: controller.searchRooms,
+              decoration: const InputDecoration(
+                hintText: 'Search Facilities',
+                hintStyle: TextStyle(color: Colors.grey),
+                suffixIcon: Icon(
+                  Icons.search,
+                  color: Colors.black87,
                 ),
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(40),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 15,
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+
+        // LISTVIEW (Data vs Skeleton Loading)
+        Expanded(
+          child: AnimatedBuilder(
+            animation: controller,
+            builder: (context, child) {
+              // 1. Tampilkan Skeleton Loading saat sedang proses ambil data
+              if (controller.isLoading) {
+                return _buildSkeletonLoading();
+              }
+
+              // 2. Tampilan saat data kosong (tetap bisa di-refresh)
+              if (controller.displayedRooms.isEmpty) {
+                return RefreshIndicator(
+                  onRefresh: controller.fetchRoomData,
+                  color: const Color(0xFFF78233),
+                  child: ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
                     children: [
-                      const SizedBox(height: 24),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 10,
-                        ),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.2,
+                      ),
+                      const Center(
                         child: Text(
-                          'Available Facilities',
+                          'Ruangan tidak ditemukan',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
                           ),
-                        ),
-                      ),
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Row(
-                          children: [
-                            _buildChip('All', false),
-                            _buildChip('Room', true),
-                            _buildChip(
-                              'Equipment',
-                              false,
-                              onTap: () => Navigator.pushReplacementNamed(
-                                context,
-                                '/katalog-alat',
-                              ),
-                            ),
-                            _buildChip('Available', false),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFE6E2E6),
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                          child: TextField(
-                            onChanged: controller.searchRooms,
-                            decoration: const InputDecoration(
-                              hintText: 'Search Facilities',
-                              hintStyle: TextStyle(color: Colors.grey),
-                              suffixIcon: Icon(
-                                Icons.search,
-                                color: Colors.black87,
-                              ),
-                              border: InputBorder.none,
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 15,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Expanded(
-                        child: AnimatedBuilder(
-                          animation: controller,
-                          builder: (context, child) {
-                            if (controller.isLoading) {
-                              return _buildSkeletonLoading();
-                            }
-
-                            if (controller.displayedRooms.isEmpty) {
-                              return RefreshIndicator(
-                                onRefresh: controller.fetchRoomData,
-                                color: const Color(0xFFF78233),
-                                child: ListView(
-                                  physics:
-                                      const AlwaysScrollableScrollPhysics(),
-                                  children: [
-                                    SizedBox(
-                                      height:
-                                          MediaQuery.of(context).size.height *
-                                              0.2,
-                                    ),
-                                    const Center(
-                                      child: Text(
-                                        'Ruangan tidak ditemukan',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }
-
-                            return RefreshIndicator(
-                              onRefresh: controller.fetchRoomData,
-                              color: const Color(0xFFF78233),
-                              backgroundColor: Colors.white,
-                              child: ListView.builder(
-                                physics: const AlwaysScrollableScrollPhysics(),
-                                padding: const EdgeInsets.only(
-                                  left: 20,
-                                  right: 20,
-                                  bottom: 100,
-                                ),
-                                itemCount: controller.displayedRooms.length,
-                                itemBuilder: (context, index) {
-                                  return _buildRoomCard(
-                                    context,
-                                    controller.displayedRooms[index],
-                                  );
-                                },
-                              ),
-                            );
-                          },
                         ),
                       ),
                     ],
                   ),
+                );
+              }
+
+              // 3. TAMPILAN LIST DATA + FITUR PULL TO REFRESH
+              return RefreshIndicator(
+                onRefresh: controller.fetchRoomData,
+                color: const Color(0xFFF78233),
+                backgroundColor: Colors.white,
+                child: ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.only(
+                    left: 20,
+                    right: 20,
+                    bottom:
+                        100, // Jarak aman agar item terbawah tidak tertutup Navbar
+                  ),
+                  itemCount: controller.displayedRooms.length,
+                  itemBuilder: (context, index) {
+                    return _buildRoomCard(
+                      context,
+                      controller.displayedRooms[index],
+                    );
+                  },
                 ),
-              ),
-            ),
-          ],
+              );
+            },
+          ),
         ),
-      ),
-      bottomNavigationBar: _buildBottomNavigationBar(context),
+      ],
     );
   }
+
+  // --- WIDGET KOMPONEN ---
 
   Widget _buildChip(String label, bool isActive, {VoidCallback? onTap}) {
     return GestureDetector(
@@ -266,6 +236,7 @@ class KatalogRuanganScreen extends StatelessWidget {
     );
   }
 
+  // Widget khusus untuk membuat efek Skeleton Loading
   Widget _buildSkeletonLoading() {
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -275,7 +246,7 @@ class KatalogRuanganScreen extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: 16),
           height: 104,
           decoration: BoxDecoration(
-            color: const Color(0xFFE6E2E6).withValues(alpha: 0.8),
+            color: const Color(0xFFE6E2E6).withOpacity(0.8),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Row(
@@ -295,114 +266,6 @@ class KatalogRuanganScreen extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildBottomNavigationBar(BuildContext context) {
-    return Container(
-      height: 90,
-      padding: const EdgeInsets.only(bottom: 10),
-      decoration: const BoxDecoration(
-        color: Color(0xFFEBEBEB),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF78233),
-              borderRadius: BorderRadius.circular(18),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.shade400,
-                  offset: const Offset(4, 4),
-                  blurRadius: 8,
-                  spreadRadius: 1,
-                ),
-                const BoxShadow(
-                  color: Colors.white,
-                  offset: Offset(-4, -4),
-                  blurRadius: 8,
-                  spreadRadius: 1,
-                ),
-              ],
-            ),
-            child: const Center(
-              child: Icon(Icons.home_rounded, color: Colors.black87, size: 34),
-            ),
-          ),
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const QrScannerView()),
-              );
-            },
-            child: Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: const Color(0xFFEBEBEB),
-                borderRadius: BorderRadius.circular(18),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.shade400,
-                    offset: const Offset(4, 4),
-                    blurRadius: 8,
-                    spreadRadius: 1,
-                  ),
-                  const BoxShadow(
-                    color: Colors.white,
-                    offset: Offset(-4, -4),
-                    blurRadius: 8,
-                    spreadRadius: 1,
-                  ),
-                ],
-              ),
-              child: const Center(
-                child: Icon(
-                  Icons.crop_free_rounded,
-                  color: Colors.black87,
-                  size: 32,
-                ),
-              ),
-            ),
-          ),
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: const Color(0xFFEBEBEB),
-              borderRadius: BorderRadius.circular(18),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.shade400,
-                  offset: const Offset(4, 4),
-                  blurRadius: 8,
-                  spreadRadius: 1,
-                ),
-                const BoxShadow(
-                  color: Colors.white,
-                  offset: Offset(-4, -4),
-                  blurRadius: 8,
-                  spreadRadius: 1,
-                ),
-              ],
-            ),
-            child: const Center(
-              child: Icon(
-                Icons.account_circle_outlined,
-                color: Colors.black87,
-                size: 38,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

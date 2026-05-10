@@ -515,7 +515,7 @@ class _SelfCheckoutViewState extends State<SelfCheckoutView> {
                               // 3. Kembali ke halaman Katalog (Anti Layar Hitam)
                               Navigator.pushNamedAndRemoveUntil(
                                   context,
-                                  '/katalog-alat',
+                                  '/dashboard',
                                   (route) =>
                                       false // Buang semua riwayat halaman sebelumnya agar memori HP lega
                                   );
