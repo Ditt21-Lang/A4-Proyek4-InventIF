@@ -158,17 +158,7 @@ class _RequestRuanganScreenState extends State<RequestRuanganScreen> {
                                       icon: Icons.upload_outlined,
                                       text: controller.documentLabel ??
                                           'Upload max 100mb',
-                                      onTap: () {
-                                        controller.markDocumentPlaceholder();
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          const SnackBar(
-                                            content: Text(
-                                              'Upload document belum tersedia',
-                                            ),
-                                          ),
-                                        );
-                                      },
+                                      onTap: () => controller.pickDocument(),
                                     ),
                                   ),
                                 ),

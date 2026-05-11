@@ -44,7 +44,7 @@ dependencies:
   internet_connection_checker: ^3.0.1
   cloudinary_public: ^0.23.1
   image_picker: ^1.2.2
-  file_picker: ^11.0.2
+  file_picker: ^8.0.0
 
 dev_dependencies:
   flutter_test:

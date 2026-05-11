@@ -1,10 +1,13 @@
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../models/room_model.dart';
 import '../../models/transaction_model.dart';
 import '../../models/user_model.dart';
+import '../../services/cloudinary_service.dart';
 
 class RequestRuanganController extends ChangeNotifier {
   RequestRuanganController({required this.room, DateTime? initialDate}) {
@@ -28,6 +31,7 @@ class RequestRuanganController extends ChangeNotifier {
   final RoomModel room;
   final eventNameController = TextEditingController();
   final descriptionController = TextEditingController();
+  final CloudinaryService _cloudinaryService = CloudinaryService();
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -36,17 +40,36 @@ class RequestRuanganController extends ChangeNotifier {
   late DateTime _endDateTime;
   bool _isSubmitting = false;
   String? _documentLabel;
+  File? _pickedFile;
 
   DateTime get startDateTime => _startDateTime;
   DateTime get endDateTime => _endDateTime;
   bool get isSubmitting => _isSubmitting;
   String? get documentLabel => _documentLabel;
+  File? get pickedFile => _pickedFile;
 
   @override
   void dispose() {
     eventNameController.dispose();
     descriptionController.dispose();
     super.dispose();
+  }
+
+  Future<void> pickDocument() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
+      );
+
+      if (result != null && result.files.single.path != null) {
+        _pickedFile = File(result.files.single.path!);
+        _documentLabel = result.files.single.name;
+        notifyListeners();
+      }
+    } catch (e) {
+      print('Error picking document: $e');
+    }
   }
 
   Future<void> pickStartDate(BuildContext context) async {
@@ -152,11 +175,6 @@ class RequestRuanganController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void markDocumentPlaceholder() {
-    _documentLabel = 'Document upload pending';
-    notifyListeners();
-  }
-
   Future<bool> submitRequest() async {
     final user = _auth.currentUser;
     if (user == null) {
@@ -178,6 +196,15 @@ class RequestRuanganController extends ChangeNotifier {
     notifyListeners();
 
     try {
+      String? attachmentUrl;
+      if (_pickedFile != null) {
+        attachmentUrl =
+            await _cloudinaryService.uploadFile(_pickedFile!, 'surat_peminjaman');
+        if (attachmentUrl == null) {
+          throw Exception('Gagal mengupload dokumen ke Cloudinary');
+        }
+      }
+
       final userDoc = await _firestore.collection('users').doc(user.uid).get();
       final userData = userDoc.exists
           ? UserModel.fromMap(userDoc.data() as Map<String, dynamic>)
@@ -201,7 +228,7 @@ class RequestRuanganController extends ChangeNotifier {
         actualReturnDate: null,
         details: description,
         eventName: eventName,
-        attachmentUrl: _documentLabel,
+        attachmentUrl: attachmentUrl,
         status: 'Waiting',
         createdAt: DateTime.now(),
       );
