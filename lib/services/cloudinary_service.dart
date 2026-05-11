@@ -1,0 +1,27 @@
+import 'dart:io';
+import 'package:cloudinary_public/cloudinary_public.dart';
+
+class CloudinaryService {
+  final cloudinary =
+      CloudinaryPublic('inventif_unsigned', 'ddhiy2jhq', cache: false);
+
+  /// Fungsi universal untuk mengupload gambar
+  /// [folderName] bisa diisi 'ktm' atau 'profile_pics' agar rapi di Cloudinary
+  Future<String?> uploadImage(File imageFile, String folderName) async {
+    try {
+      CloudinaryResponse response = await cloudinary.uploadFile(
+        CloudinaryFile.fromFile(
+          imageFile.path,
+          folder: folderName, // Otomatis membuat folder di Cloudinary
+          resourceType: CloudinaryResourceType.Image,
+        ),
+      );
+
+      // Mengembalikan URL publik (HTTPS) yang bisa langsung disimpan ke Firestore
+      return response.secureUrl;
+    } catch (e) {
+      print('Error upload ke Cloudinary: $e');
+      return null;
+    }
+  }
+}
