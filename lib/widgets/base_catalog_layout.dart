@@ -7,7 +7,6 @@ class BaseCatalogLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      // Ganti Scaffold jadi Container
       decoration: const BoxDecoration(
         image: DecorationImage(
           image: AssetImage('assets/images/bg_gedung.png'),

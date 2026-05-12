@@ -4,10 +4,13 @@ class UserModel {
   final String uid;
   final String identifier;
   final String email;
-  final String? fullName;
+  final String fullName;
+  final String? nickname;
+  final String? dateOfBirth;
+  final String? ktm;
   final String? phoneNumber;
-  final String role; // 'user', 'teknisi', 'TU', etc.
   final String? profileImage;
+  final String role; // 'user', 'teknisi', 'coordinator'
   final DateTime createdAt;
   final bool isActive;
 
@@ -15,10 +18,13 @@ class UserModel {
     required this.uid,
     required this.identifier,
     required this.email,
-    this.fullName,
+    required this.fullName,
+    this.nickname,
+    this.dateOfBirth,
+    required this.ktm,
     this.phoneNumber,
-    required this.role,
     this.profileImage,
+    required this.role,
     required this.createdAt,
     this.isActive = true,
   });
@@ -28,12 +34,15 @@ class UserModel {
   Map<String, dynamic> toMap() {
     return {
       'uid': uid,
-      'identifier': identifier,
-      'Email': email,
-      'Fullname': fullName,
-      'phoneNumber': phoneNumber,
-      'role': role,
+      'identifier': identifier ?? '',
+      'email': email,
+      'fullName': fullName,
+      'nickname': nickname ?? '',
+      'dateOfBirth': dateOfBirth ?? '',
+      'ktm': ktm ?? '',
+      'phoneNumber': phoneNumber ?? '',
       'profileImage': profileImage,
+      'role': role,
       'createdAt': createdAt,
       'isActive': isActive,
     };
@@ -46,10 +55,13 @@ class UserModel {
       uid: map['uid'] ?? '',
       identifier: map['identifier'] ?? '',
       email: map['Email'] ?? map['email'] ?? '',
-      fullName: map['Fullname'] ?? map['fullName'],
-      phoneNumber: map['phoneNumber'],
-      role: map['role'] ?? 'user',
+      fullName: map['Fullname'] ?? map['fullName'] ?? 'User',
+      nickname: map['nickname'] ?? '',
+      dateOfBirth: map['dateOfBirth'] ?? '',
+      ktm: map['ktm'] ?? '',
+      phoneNumber: map['phoneNumber'] ?? '',
       profileImage: map['profileImage'],
+      role: map['role'] ?? 'user',
       createdAt: map['createdAt'] != null
           ? (map['createdAt'] as Timestamp).toDate()
           : DateTime.now(),
@@ -63,9 +75,12 @@ class UserModel {
     String? identifier,
     String? email,
     String? fullName,
+    String? nickname,
+    String? dateOfBirth,
+    String? ktm,
     String? phoneNumber,
-    String? role,
     String? profileImage,
+    String? role,
     DateTime? createdAt,
     bool? isActive,
   }) {
@@ -74,9 +89,12 @@ class UserModel {
       identifier: identifier ?? this.identifier,
       email: email ?? this.email,
       fullName: fullName ?? this.fullName,
+      nickname: nickname ?? this.nickname,
+      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+      ktm: ktm ?? this.ktm,
       phoneNumber: phoneNumber ?? this.phoneNumber,
-      role: role ?? this.role,
       profileImage: profileImage ?? this.profileImage,
+      role: role ?? this.role,
       createdAt: createdAt ?? this.createdAt,
       isActive: isActive ?? this.isActive,
     );
@@ -84,6 +102,6 @@ class UserModel {
 
   @override
   String toString() {
-    return 'UserModel(uid: $uid, identifier: $identifier, email: $email, role: $role, isActive: $isActive)';
+    return 'UserModel(uid: $uid, identifier: $identifier, email: $email, fullName: $fullName, nickname: $nickname, dateOfBirth: $dateOfBirth, ktm: $ktm, phoneNumber: $phoneNumber, profileImage: $profileImage, role: $role, createdAt: $createdAt, isActive: $isActive)';
   }
 }

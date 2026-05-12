@@ -155,28 +155,6 @@ class _DashboardTeknisiScreenState extends State<DashboardTeknisiScreen> {
               ],
             ),
           ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              height: 90,
-              padding: const EdgeInsets.only(bottom: 10),
-              decoration: const BoxDecoration(
-                color: Color(0xFFEBEBEB),
-                borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Anda bisa menyesuaikan icon jika ingin persis seperti desain awal
-                  _buildNavItem(Icons.home_rounded, 0, '/dashboard-teknisi'),
-                  _buildNavItem(
-                      Icons.content_paste_rounded, 1, '/list-pengajuan'),
-                  _buildNavItem(Icons.account_circle_outlined, 2, ''),
-                ],
-              ),
-            ),
-          ),
         ],
       ),
     );
@@ -254,46 +232,6 @@ class _DashboardTeknisiScreenState extends State<DashboardTeknisiScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildNavItem(IconData icon, int index, String routeName) {
-    bool isActive = _selectedIndex == index;
-    return GestureDetector(
-      onTap: () {
-        if (!isActive && routeName.isNotEmpty) {
-          Navigator.pushReplacementNamed(context, routeName);
-        }
-      },
-      child: Container(
-        width: 60,
-        height: 60,
-        decoration: BoxDecoration(
-          color: isActive ? const Color(0xFFF78233) : const Color(0xFFEBEBEB),
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.shade400,
-              offset: const Offset(4, 4),
-              blurRadius: 8,
-              spreadRadius: 1,
-            ),
-            const BoxShadow(
-              color: Colors.white,
-              offset: Offset(-4, -4),
-              blurRadius: 8,
-              spreadRadius: 1,
-            ),
-          ],
-        ),
-        child: Center(
-          child: Icon(
-            icon,
-            color: Colors.black87, // Tetap hitam keabuan seperti di Katalog
-            size: 34,
-          ),
-        ),
       ),
     );
   }
