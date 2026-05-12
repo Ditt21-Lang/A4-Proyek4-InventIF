@@ -11,7 +11,6 @@ class DashboardTeknisiScreen extends StatefulWidget {
 
 class _DashboardTeknisiScreenState extends State<DashboardTeknisiScreen> {
   final DashboardTeknisiController _controller = DashboardTeknisiController();
-  final int _selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {

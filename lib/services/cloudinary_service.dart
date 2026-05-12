@@ -3,7 +3,7 @@ import 'package:cloudinary_public/cloudinary_public.dart';
 
 class CloudinaryService {
   final cloudinary =
-      CloudinaryPublic('inventif_unsigned', 'ddhiy2jhq', cache: false);
+      CloudinaryPublic('ddhiy2jhq','inventif_unsigned', cache: false);
 
   /// Fungsi universal untuk mengupload gambar
   /// [folderName] bisa diisi 'ktm' atau 'profile_pics' agar rapi di Cloudinary

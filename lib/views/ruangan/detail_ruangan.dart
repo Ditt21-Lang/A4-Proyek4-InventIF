@@ -346,7 +346,7 @@ class _BulletText extends StatelessWidget {
     return Text(
       '* $text',
       style: const TextStyle(
-        color: Colors.white,
+        color: Colors.black,
         fontSize: 11,
         fontWeight: FontWeight.w600,
       ),
