@@ -2,10 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserModel {
   final String uid;
+  final String identifier;
   final String email;
   final String fullName;
   final String? nickname;
-  final String? identifier; // NIM (untuk user), NIP (untuk teknisi), atau unique identifier lainnya
   final String? dateOfBirth;
   final String? ktm;
   final String? phoneNumber;
@@ -16,12 +16,12 @@ class UserModel {
 
   UserModel({
     required this.uid,
+    required this.identifier,
     required this.email,
     required this.fullName,
     this.nickname,
-    this.identifier,
     this.dateOfBirth,
-    this.ktm,
+    required this.ktm,
     this.phoneNumber,
     this.profileImage,
     required this.role,
@@ -33,10 +33,10 @@ class UserModel {
   Map<String, dynamic> toMap() {
     return {
       'uid': uid,
-      'Email': email,
-      'Fullname': fullName,
-      'nickname': nickname ?? '',
       'identifier': identifier ?? '',
+      'email': email,
+      'fullName': fullName,
+      'nickname': nickname ?? '',
       'dateOfBirth': dateOfBirth ?? '',
       'ktm': ktm ?? '',
       'phoneNumber': phoneNumber ?? '',
@@ -51,10 +51,10 @@ class UserModel {
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
       uid: map['uid'] ?? '',
+      identifier: map['identifier'] ?? '',
       email: map['Email'] ?? map['email'] ?? '',
       fullName: map['Fullname'] ?? map['fullName'] ?? 'User',
       nickname: map['nickname'] ?? '',
-      identifier: map['identifier'] ?? '',
       dateOfBirth: map['dateOfBirth'] ?? '',
       ktm: map['ktm'] ?? '',
       phoneNumber: map['phoneNumber'] ?? '',
@@ -70,10 +70,10 @@ class UserModel {
   // Copy with - untuk membuat copy dengan beberapa field yang diubah
   UserModel copyWith({
     String? uid,
+    String? identifier,
     String? email,
     String? fullName,
     String? nickname,
-    String? identifier,
     String? dateOfBirth,
     String? ktm,
     String? phoneNumber,
@@ -84,10 +84,10 @@ class UserModel {
   }) {
     return UserModel(
       uid: uid ?? this.uid,
+      identifier: identifier ?? this.identifier,
       email: email ?? this.email,
       fullName: fullName ?? this.fullName,
       nickname: nickname ?? this.nickname,
-      identifier: identifier ?? this.identifier,
       dateOfBirth: dateOfBirth ?? this.dateOfBirth,
       ktm: ktm ?? this.ktm,
       phoneNumber: phoneNumber ?? this.phoneNumber,
@@ -100,6 +100,6 @@ class UserModel {
 
   @override
   String toString() {
-    return 'UserModel(uid: $uid, email: $email, fullName: $fullName, role: $role, isActive: $isActive)';
+    return 'UserModel(uid: $uid, identifier: $identifier, email: $email, fullName: $fullName, nickname: $nickname, dateOfBirth: $dateOfBirth, ktm: $ktm, phoneNumber: $phoneNumber, profileImage: $profileImage, role: $role, createdAt: $createdAt, isActive: $isActive)';
   }
 }

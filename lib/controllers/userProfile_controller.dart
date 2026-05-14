@@ -11,10 +11,8 @@ class UserProfileController {
     try {
       final User? currentUser = _auth.currentUser;
       if (currentUser != null) {
-        final DocumentSnapshot userDoc = await _firestore
-            .collection('users')
-            .doc(currentUser.uid)
-            .get();
+        final DocumentSnapshot userDoc =
+            await _firestore.collection('users').doc(currentUser.uid).get();
 
         if (userDoc.exists) {
           final userData = userDoc.data() as Map<String, dynamic>;
@@ -22,8 +20,10 @@ class UserProfileController {
         } else {
           return UserModel(
             uid: currentUser.uid,
+            identifier: '',
             email: currentUser.email ?? '',
             fullName: currentUser.displayName ?? 'User',
+            ktm: '',
             role: 'user',
             createdAt: DateTime.now(),
           );

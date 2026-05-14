@@ -31,16 +31,16 @@ class _ManageAccountViewState extends State<ManageAccountView> {
   bool _obscureNew = true;
   bool _obscureConfirm = true;
 
+  late TextEditingController _identifierController;
+  late TextEditingController _emailController;
   late TextEditingController _fullNameController;
   late TextEditingController _nicknameController;
-  late TextEditingController _studentIDController;
-  late TextEditingController _ktmController;
   late TextEditingController _birthDateController;
+  late TextEditingController _ktmController;
+  late TextEditingController _phoneController;
   late TextEditingController _currentPasswordController;
   late TextEditingController _newPasswordController;
   late TextEditingController _confirmPasswordController;
-  late TextEditingController _emailController;
-  late TextEditingController _phoneController;
 
   String? userName;
   String? userNickname;
@@ -55,16 +55,16 @@ class _ManageAccountViewState extends State<ManageAccountView> {
   }
 
   void _initializeControllers() {
+    _identifierController = TextEditingController();
+    _emailController = TextEditingController();
     _fullNameController = TextEditingController();
     _nicknameController = TextEditingController();
-    _studentIDController = TextEditingController();
-    _ktmController = TextEditingController();
     _birthDateController = TextEditingController();
+    _ktmController = TextEditingController();
+    _phoneController = TextEditingController();
     _currentPasswordController = TextEditingController();
     _newPasswordController = TextEditingController();
     _confirmPasswordController = TextEditingController();
-    _emailController = TextEditingController();
-    _phoneController = TextEditingController();
   }
 
   Future<void> _loadUserData() async {
@@ -72,15 +72,15 @@ class _ManageAccountViewState extends State<ManageAccountView> {
       final userData = await _controller.getManageAccountData();
       if (userData != null) {
         setState(() {
+          userUID = userData.uid;
+          _identifierController.text = userData.identifier ?? '';
+          _emailController.text = userData.email;
           userName = userData.fullName;
           userNickname = userData.nickname;
-          userUID = userData.uid;
           _fullNameController.text = userData.fullName;
           _nicknameController.text = userData.nickname ?? '';
-          _studentIDController.text = userData.identifier ?? '';
           _ktmController.text = userData.ktm ?? '';
           _birthDateController.text = userData.dateOfBirth ?? '';
-          _emailController.text = userData.email;
           _phoneController.text = userData.phoneNumber ?? '';
         });
 
@@ -88,7 +88,8 @@ class _ManageAccountViewState extends State<ManageAccountView> {
         if (userData.uid.isNotEmpty) {
           try {
             final appDocDir = await getApplicationDocumentsDirectory();
-            final userFolder = Directory('${appDocDir.path}/ktm_files/${userData.uid}');
+            final userFolder =
+                Directory('${appDocDir.path}/ktm_files/${userData.uid}');
             if (userFolder.existsSync()) {
               try {
                 final files = userFolder.listSync();
@@ -144,8 +145,9 @@ class _ManageAccountViewState extends State<ManageAccountView> {
       if (image != null) {
         // Validate file format - only allow jpg, jpeg, png, pdf
         final validExtensions = ['jpg', 'jpeg', 'png', 'pdf'];
-        final fileExtension = image.path.substring(image.path.lastIndexOf('.') + 1).toLowerCase();
-        
+        final fileExtension =
+            image.path.substring(image.path.lastIndexOf('.') + 1).toLowerCase();
+
         if (!validExtensions.contains(fileExtension)) {
           _showErrorSnackBar('Unsupported file format. Use: JPG, PNG, or PDF');
           return;
@@ -153,7 +155,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
 
         final file = File(image.path);
         final fileName = 'KTM.$fileExtension';
-        
+
         // Create folder path in app's document directory (writable location)
         final appDocDir = await getApplicationDocumentsDirectory();
         final userFolder = Directory('${appDocDir.path}/ktm_files/$userUID');
@@ -169,7 +171,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
         final success = await _controller.updatePersonalInfo(
           fullName: _fullNameController.text,
           nickname: _nicknameController.text,
-          studentID: _studentIDController.text,
+          identifier: _identifierController.text,
           ktm: newFilePath, // Save file path
           birthDate: _birthDateController.text,
         );
@@ -215,7 +217,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
     final success = await _controller.updatePersonalInfo(
       fullName: _fullNameController.text,
       nickname: _nicknameController.text,
-      studentID: _studentIDController.text,
+      identifier: _identifierController.text,
       ktm: _ktmController.text,
       birthDate: _birthDateController.text,
     );
@@ -250,7 +252,8 @@ class _ManageAccountViewState extends State<ManageAccountView> {
       _confirmPasswordController.clear();
       setState(() => _isChangePasswordExpanded = false);
     } else {
-      _showErrorSnackBar('Failed to change password. Check your current password');
+      _showErrorSnackBar(
+          'Failed to change password. Check your current password');
     }
   }
 
@@ -289,7 +292,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
   void dispose() {
     _fullNameController.dispose();
     _nicknameController.dispose();
-    _studentIDController.dispose();
+    _identifierController.dispose();
     _ktmController.dispose();
     _birthDateController.dispose();
     _currentPasswordController.dispose();
@@ -306,7 +309,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
       backgroundColor: primaryBlue,
       body: Column(
         children: [
-          // Header (cream background) 
+          // Header (cream background)
           Container(
             color: creamColor,
             padding: EdgeInsets.only(
@@ -373,7 +376,8 @@ class _ManageAccountViewState extends State<ManageAccountView> {
                   height: 54,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: const Color(0xFFE0E0E0), width: 2),
+                    border:
+                        Border.all(color: const Color(0xFFE0E0E0), width: 2),
                   ),
                   child: ClipOval(
                     child: Image.asset(
@@ -396,8 +400,8 @@ class _ManageAccountViewState extends State<ManageAccountView> {
                     title: 'Personal Info',
                     icon: Icons.person_outline,
                     isExpanded: _isPersonalInfoExpanded,
-                    onToggle: () => setState(
-                        () => _isPersonalInfoExpanded = !_isPersonalInfoExpanded),
+                    onToggle: () => setState(() =>
+                        _isPersonalInfoExpanded = !_isPersonalInfoExpanded),
                     children: [
                       _buildNavyField(
                         label: 'Fullname',
@@ -411,7 +415,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
                       ),
                       _buildNavyField(
                         label: 'NIM',
-                        controller: _studentIDController,
+                        controller: _identifierController,
                         suffixIcon: Icons.edit,
                       ),
                       _buildKtmField(),
@@ -443,7 +447,8 @@ class _ManageAccountViewState extends State<ManageAccountView> {
                       const SizedBox(height: 10),
                       _buildPasswordField(
                         label: 'New Password',
-                        hint: '*password must be at least 8 character\nand include number and letter',
+                        hint:
+                            '*password must be at least 8 character\nand include number and letter',
                         controller: _newPasswordController,
                         obscure: _obscureNew,
                         onToggle: () =>
@@ -452,7 +457,8 @@ class _ManageAccountViewState extends State<ManageAccountView> {
                       const SizedBox(height: 10),
                       _buildPasswordField(
                         label: 'Confirm New Password',
-                        hint: '*password must be at least 8 character\nand include number and letter',
+                        hint:
+                            '*password must be at least 8 character\nand include number and letter',
                         controller: _confirmPasswordController,
                         obscure: _obscureConfirm,
                         onToggle: () =>
@@ -495,9 +501,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
               ),
             ),
           ),
-
-          // Bottom Navigation Bar
-          _buildBottomNavigationBar(context),
         ],
       ),
     );
@@ -643,7 +646,8 @@ class _ManageAccountViewState extends State<ManageAccountView> {
                 child: GestureDetector(
                   onTap: _uploadKTMFile,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 10, horizontal: 12),
                     decoration: BoxDecoration(
                       color: primaryOrange,
                       borderRadius: BorderRadius.circular(8),
@@ -651,7 +655,8 @@ class _ManageAccountViewState extends State<ManageAccountView> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: const [
-                        Icon(Icons.upload_outlined, color: Colors.white, size: 16),
+                        Icon(Icons.upload_outlined,
+                            color: Colors.white, size: 16),
                         SizedBox(width: 6),
                         Text(
                           'Upload',
@@ -673,7 +678,8 @@ class _ManageAccountViewState extends State<ManageAccountView> {
                 child: GestureDetector(
                   onTap: _openKTMFile,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 10, horizontal: 12),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.1),
                       border: Border.all(color: primaryOrange, width: 1),
@@ -682,7 +688,8 @@ class _ManageAccountViewState extends State<ManageAccountView> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: const [
-                        Icon(Icons.folder_open_outlined, color: Colors.white70, size: 16),
+                        Icon(Icons.folder_open_outlined,
+                            color: Colors.white70, size: 16),
                         SizedBox(width: 6),
                         Text(
                           'Open File',
@@ -768,7 +775,9 @@ class _ManageAccountViewState extends State<ManageAccountView> {
           GestureDetector(
             onTap: onToggle,
             child: Icon(
-              obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+              obscure
+                  ? Icons.visibility_off_outlined
+                  : Icons.visibility_outlined,
               color: Colors.white54,
               size: 20,
             ),
@@ -784,9 +793,8 @@ class _ManageAccountViewState extends State<ManageAccountView> {
     required TextEditingController controller,
   }) {
     // Create masked representation of current password
-    String maskedPassword = controller.text.isNotEmpty
-        ? '*' * controller.text.length
-        : '';
+    String maskedPassword =
+        controller.text.isNotEmpty ? '*' * controller.text.length : '';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -922,6 +930,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
       ),
     );
   }
+<<<<<<< HEAD
 
   // Bottom Navigation Bar
   Widget _buildBottomNavigationBar(BuildContext context) {
@@ -1030,3 +1039,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
     );
   }
 }
+=======
+}
+>>>>>>> bedfd162debc39bb720ff550ed85dd692b5e0345

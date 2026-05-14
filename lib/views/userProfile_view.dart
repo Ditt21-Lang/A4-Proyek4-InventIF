@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'manageAccount_view.dart';
-import 'listOrder_view.dart';
+import 'list_order_view.dart';
 import '../controllers/userProfile_controller.dart';
-// import 'qrScanner_view.dart';
 
 class UserProfileView extends StatefulWidget {
   const UserProfileView({super.key});
@@ -22,9 +21,7 @@ class _UserProfileViewState extends State<UserProfileView> {
   String? userNickname;
   String? userID;
   String? userDate;
-
-  static const double cardHeight = 102.0;
-  static const double overlapAmount = cardHeight / 2;
+  String? userRole;
 
   @override
   void initState() {
@@ -41,6 +38,7 @@ class _UserProfileViewState extends State<UserProfileView> {
           userNickname = userProfile.nickname;
           userID = userProfile.identifier ?? userProfile.uid;
           userDate = userProfile.dateOfBirth ?? '16/08/06';
+          userRole = userProfile.role;
         });
       }
     } catch (e) {
@@ -51,7 +49,6 @@ class _UserProfileViewState extends State<UserProfileView> {
   Future<void> _signOut() async {
     final success = await _controller.signOut();
     if (success && mounted) {
-      // Navigate to login page
       Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -62,64 +59,77 @@ class _UserProfileViewState extends State<UserProfileView> {
 
   @override
   Widget build(BuildContext context) {
+    // Mengambil tinggi status bar HP (poni HP)
+    final double topPadding = MediaQuery.of(context).padding.top;
+
+    // Menentukan tinggi area krem di atas dan tinggi kartu
+    final double headerCreamHeight = topPadding + 140.0;
+    const double cardHeight = 130.0;
+
     return Scaffold(
       backgroundColor: primaryBlue,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // transisi cream biru dengan card overlap (profile info)
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Column(
-                  children: [
-                    Container(
-                      color: creamColor,
-                      height: overlapAmount,
-                      width: double.infinity,
+      // KITA HAPUS SAFE AREA AGAR WARNA KREM TEMBUS KE UJUNG ATAS LAYAR
+      body: Column(
+        children: [
+          // --- 1. HEADER KREM & KARTU PROFIL ---
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              // Latar Belakang (Krem di atas, Biru di bawah)
+              Column(
+                children: [
+                  Container(
+                    height: headerCreamHeight,
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('assets/images/bg_gedung.png'),
+                        fit: BoxFit.cover,
+                        alignment: Alignment.topCenter,
+                      ),
                     ),
-                    Container(
-                      color: primaryBlue,
-                      height: overlapAmount,
-                      width: double.infinity,
-                    ),
-                  ],
-                ),
-                Positioned(
-                  top: 0,
-                  left: 16,
-                  right: 16,
-                  child: _buildProfileCard(),
-                ),
-              ],
-            ),
+                  ),
+                  Container(
+                    color: primaryBlue,
+                    height: cardHeight / 2, // Bantalan bawah untuk kartu
+                    width: double.infinity,
+                  ),
+                ],
+              ),
+              // Kartu Profil (Tepat di tengah perbatasan warna)
+              Positioned(
+                top: headerCreamHeight - (cardHeight / 2),
+                left: 24,
+                right: 24,
+                child: _buildProfileCard(cardHeight),
+              ),
+            ],
+          ),
 
-            // Blue area dengan menu buttons
-            Expanded(
-              child: Container(
-                color: primaryBlue,
-                width: double.infinity,
-                padding: const EdgeInsets.only(
-                  left: 16,
-                  right: 16,
-                  top: 80,
-                  bottom: 16,
-                ),
-                child: Column(
-                  children: [
-                    _buildMenuButton(
-                      icon: Icons.account_circle_outlined, 
-                      label: 'Manage Account',
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ManageAccountView(),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 14),
+          // Memberi jarak ruang di bawah kartu yang melayang
+          const SizedBox(height: (cardHeight / 2) + 10),
+
+          // --- 2. MENU BUTTONS ---
+          Expanded(
+            child: SingleChildScrollView(
+              padding:
+                  const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 100.0),
+              child: Column(
+                children: [
+                  _buildMenuButton(
+                    icon: Icons.account_circle_outlined,
+                    label: 'Manage Account',
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ManageAccountView(),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 24),
+                  if (userRole != 'teknisi') ...[
                     _buildMenuButton(
                       icon: Icons.shopping_bag_outlined,
                       label: 'List Order',
@@ -127,109 +137,106 @@ class _UserProfileViewState extends State<UserProfileView> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const ListOrderView(),
+                            builder: (context) => ListOrderView(
+                              onBack: () => Navigator.pop(context),
+                            ),
                           ),
                         );
                       },
                     ),
-                    const SizedBox(height: 14),
-                    _buildMenuButton(
-                      icon: Icons.logout_outlined,
-                      label: 'Log Out',
-                      onPressed: () {
-                        _signOut();
-                      },
-                    ),
+                    const SizedBox(height: 24),
                   ],
-                ),
+                  _buildMenuButton(
+                    icon: Icons.logout_rounded, // Berubah menyesuaikan Figma
+                    label: 'Sign Out', // Mengikuti teks Figma "Sign Out"
+                    onPressed: _signOut,
+                  ),
+                ],
               ),
             ),
-
-            // Bottom Navigation Bar
-            _buildBottomNavigationBar(context),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildProfileCard() {
+  // Komponen Kartu Profil
+  Widget _buildProfileCard(double height) {
     return Container(
+      height: height,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(30), // Lebih melengkung
         color: creamColor,
         boxShadow: [
-          // Shadow lapis pertama - shadow besar
           BoxShadow(
-            color: Colors.black.withOpacity(0.25),
-            blurRadius: 30,
-            offset: const Offset(0, 15),
-            spreadRadius: 6,
-          ),
-          // Shadow lapis kedua - shadow medium
-          BoxShadow(
-            color: Colors.black.withOpacity(0.15),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-            spreadRadius: 2,
-          ),
-          // Shadow lapis ketiga - highlight inner
-          BoxShadow(
-            color: Colors.white.withOpacity(0.3),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-            spreadRadius: 1,
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center, // Teks sejajar vertikal
         children: [
+          // Foto Profil
           Container(
-            width: 70,
-            height: 70,
+            width: 85,
+            height: 85,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: const Color(0xFFE8E8E8),
-                width: 2,
+                color: Colors.white,
+                width: 3,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                )
+              ],
             ),
             child: ClipOval(
               child: Image.asset(
-                'assets/images/profile_01.png',
+                'assets/images/profile_01.png', // Pastikan asset ini ada
                 fit: BoxFit.cover,
               ),
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 20),
+          // Data Teks
           Expanded(
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   userFullName ?? 'Loading...',
                   style: const TextStyle(
-                    fontSize: 15,
+                    fontSize: 18, // Lebih besar agar mudah dibaca
                     fontWeight: FontWeight.bold,
                     color: Colors.black87,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(
                   userID ?? 'ID Loading...',
                   style: const TextStyle(
-                    fontSize: 13,
+                    fontSize: 14,
                     color: Color(0xFF6B7280),
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   userDate ?? '16/08/06',
                   style: const TextStyle(
-                    fontSize: 13,
+                    fontSize: 14,
                     color: Color(0xFF6B7280),
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
@@ -240,6 +247,7 @@ class _UserProfileViewState extends State<UserProfileView> {
     );
   }
 
+  // Komponen Tombol Menu
   Widget _buildMenuButton({
     required IconData icon,
     required String label,
@@ -250,141 +258,34 @@ class _UserProfileViewState extends State<UserProfileView> {
       child: Container(
         decoration: BoxDecoration(
           color: creamColor,
-          borderRadius: BorderRadius.circular(14),
+          // Bentuk PILL (sangat melengkung) seperti Figma
+          borderRadius: BorderRadius.circular(50),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.12),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
         child: Row(
           children: [
-            Icon(icon, color: primaryOrange, size: 24),
+            Icon(icon, color: primaryOrange, size: 28),
             const SizedBox(width: 16),
             Text(
               label,
               style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
+                fontSize: 18, // Font dibesarkan & ditebalkan
+                fontWeight: FontWeight.bold,
                 color: primaryOrange,
               ),
             ),
             const Spacer(),
-            Icon(Icons.arrow_forward_ios, color: primaryOrange, size: 16),
+            Icon(Icons.arrow_forward_ios_rounded,
+                color: primaryOrange, size: 20),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildBottomNavigationBar(BuildContext context) {
-    return Container(
-      height: 90,
-      padding: const EdgeInsets.only(bottom: 10),
-      decoration: const BoxDecoration(
-        color: Color(0xFFEBEBEB),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Home (inactive)
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: const Color(0xFFEBEBEB),
-                borderRadius: BorderRadius.circular(18),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.shade400,
-                    offset: const Offset(4, 4),
-                    blurRadius: 8,
-                    spreadRadius: 1,
-                  ),
-                  const BoxShadow(
-                    color: Colors.white,
-                    offset: Offset(-4, -4),
-                    blurRadius: 8,
-                    spreadRadius: 1,
-                  ),
-                ],
-              ),
-              child: const Center(
-                child: Icon(Icons.home_rounded, color: Colors.black87, size: 34),
-              ),
-            ),
-          ),
-
-          // Scanner (inactive)
-          GestureDetector(
-            onTap: () {
-              // Navigator.push(context, MaterialPageRoute(builder: (context) => const QrScannerView()));
-            },
-            child: Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: const Color(0xFFEBEBEB),
-                borderRadius: BorderRadius.circular(18),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.shade400,
-                    offset: const Offset(4, 4),
-                    blurRadius: 8,
-                    spreadRadius: 1,
-                  ),
-                  const BoxShadow(
-                    color: Colors.white,
-                    offset: Offset(-4, -4),
-                    blurRadius: 8,
-                    spreadRadius: 1,
-                  ),
-                ],
-              ),
-              child: const Center(
-                child: Icon(Icons.crop_free_rounded, color: Colors.black87, size: 32),
-              ),
-            ),
-          ),
-
-          // Profile (ACTIVE – oranye)
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF78233),
-              borderRadius: BorderRadius.circular(18),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.shade400,
-                  offset: const Offset(4, 4),
-                  blurRadius: 8,
-                  spreadRadius: 1,
-                ),
-                const BoxShadow(
-                  color: Colors.white,
-                  offset: Offset(-4, -4),
-                  blurRadius: 8,
-                  spreadRadius: 1,
-                ),
-              ],
-            ),
-            child: const Center(
-              child: Icon(
-                Icons.account_circle_outlined,
-                color: Colors.black87,
-                size: 38,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

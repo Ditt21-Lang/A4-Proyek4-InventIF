@@ -12,10 +12,8 @@ class ManageAccountController {
     try {
       final User? currentUser = _auth.currentUser;
       if (currentUser != null) {
-        final DocumentSnapshot userDoc = await _firestore
-            .collection('users')
-            .doc(currentUser.uid)
-            .get();
+        final DocumentSnapshot userDoc =
+            await _firestore.collection('users').doc(currentUser.uid).get();
 
         if (userDoc.exists) {
           final userData = userDoc.data() as Map<String, dynamic>;
@@ -33,14 +31,14 @@ class ManageAccountController {
   Future<bool> updatePersonalInfo({
     required String fullName,
     required String nickname,
-    required String studentID,
+    required String identifier,
     required String ktm,
     required String birthDate,
   }) async {
     return await UserService.updatePersonalInfo(
       fullName: fullName,
       nickname: nickname,
-      studentID: studentID,
+      identifier: identifier,
       ktm: ktm,
       birthDate: birthDate,
     );

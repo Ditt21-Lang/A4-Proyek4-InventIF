@@ -10,10 +10,8 @@ class UserService {
     try {
       final User? currentUser = _auth.currentUser;
       if (currentUser != null) {
-        final DocumentSnapshot userDoc = await _firestore
-            .collection('users')
-            .doc(currentUser.uid)
-            .get();
+        final DocumentSnapshot userDoc =
+            await _firestore.collection('users').doc(currentUser.uid).get();
         return userDoc.data() as Map<String, dynamic>?;
       }
       return null;
@@ -27,7 +25,7 @@ class UserService {
   static Future<bool> updatePersonalInfo({
     required String fullName,
     required String nickname,
-    required String studentID,
+    required String identifier,
     required String ktm,
     required String birthDate,
   }) async {
@@ -37,14 +35,14 @@ class UserService {
         await _firestore.collection('users').doc(currentUser.uid).update({
           'fullName': fullName,
           'nickname': nickname,
-          'studentID': studentID,
+          'identifier': identifier,
           'ktm': ktm,
           'dateOfBirth': birthDate,
         });
-        
+
         // Update display name di Firebase Auth
         await currentUser.updateDisplayName(fullName);
-        
+
         return true;
       }
       return false;
@@ -68,12 +66,12 @@ class UserService {
         email: currentUser.email!,
         password: currentPassword,
       );
-      
+
       await currentUser.reauthenticateWithCredential(credential);
-      
+
       // Update password
       await currentUser.updatePassword(newPassword);
-      
+
       return true;
     } catch (e) {
       print('Error changing password: $e');
@@ -93,12 +91,12 @@ class UserService {
           'email': email,
           'phoneNumber': phoneNumber,
         });
-        
+
         // Update email di Firebase Auth jika berbeda
         if (email != currentUser.email) {
           await currentUser.verifyBeforeUpdateEmail(email);
         }
-        
+
         return true;
       }
       return false;
