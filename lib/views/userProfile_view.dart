@@ -39,7 +39,7 @@ class _UserProfileViewState extends State<UserProfileView> {
         setState(() {
           userFullName = userProfile.fullName;
           userNickname = userProfile.nickname;
-          userID = userProfile.identifier ?? userProfile.studentID ?? userProfile.uid;
+          userID = userProfile.identifier ?? userProfile.uid;
           userDate = userProfile.dateOfBirth ?? '16/08/06';
         });
       }

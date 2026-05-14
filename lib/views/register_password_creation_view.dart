@@ -75,12 +75,13 @@ class _RegisterPasswordCreationViewState
       _isLoading = true;
     });
 
-    // Create account dengan email dan password
+    // Create account dengan email/phone dan password
     Map<String, dynamic> result =
         await widget.registerController.createAccountAfterOTPVerification(
-      email: widget.identity,
+      identity: widget.identity,
       password: _passwordController.text,
       fullName: _fullNameController.text,
+      isPhone: widget.isPhone,
     );
 
     setState(() {

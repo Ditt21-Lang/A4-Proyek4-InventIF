@@ -77,7 +77,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
           userUID = userData.uid;
           _fullNameController.text = userData.fullName;
           _nicknameController.text = userData.nickname ?? '';
-          _studentIDController.text = userData.identifier ?? userData.studentID ?? '';
+          _studentIDController.text = userData.identifier ?? '';
           _ktmController.text = userData.ktm ?? '';
           _birthDateController.text = userData.dateOfBirth ?? '';
           _emailController.text = userData.email;

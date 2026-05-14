@@ -5,8 +5,7 @@ class UserModel {
   final String email;
   final String fullName;
   final String? nickname;
-  final String? studentID;
-  final String? identifier; // NIM atau unique identifier
+  final String? identifier; // NIM (untuk user), NIP (untuk teknisi), atau unique identifier lainnya
   final String? dateOfBirth;
   final String? ktm;
   final String? phoneNumber;
@@ -20,7 +19,6 @@ class UserModel {
     required this.email,
     required this.fullName,
     this.nickname,
-    this.studentID,
     this.identifier,
     this.dateOfBirth,
     this.ktm,
@@ -32,14 +30,12 @@ class UserModel {
   });
 
   // Convert UserModel to JSON (untuk menyimpan ke Firestore)
-  // Map field names sesuai Firestore structure
   Map<String, dynamic> toMap() {
     return {
       'uid': uid,
       'Email': email,
       'Fullname': fullName,
       'nickname': nickname ?? '',
-      'studentID': studentID ?? '',
       'identifier': identifier ?? '',
       'dateOfBirth': dateOfBirth ?? '',
       'ktm': ktm ?? '',
@@ -52,14 +48,12 @@ class UserModel {
   }
 
   // Convert JSON dari Firestore ke UserModel
-  // Read field names sesuai Firestore structure
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
       uid: map['uid'] ?? '',
       email: map['Email'] ?? map['email'] ?? '',
       fullName: map['Fullname'] ?? map['fullName'] ?? 'User',
       nickname: map['nickname'] ?? '',
-      studentID: map['studentID'] ?? '',
       identifier: map['identifier'] ?? '',
       dateOfBirth: map['dateOfBirth'] ?? '',
       ktm: map['ktm'] ?? '',
@@ -79,7 +73,6 @@ class UserModel {
     String? email,
     String? fullName,
     String? nickname,
-    String? studentID,
     String? identifier,
     String? dateOfBirth,
     String? ktm,
@@ -94,7 +87,6 @@ class UserModel {
       email: email ?? this.email,
       fullName: fullName ?? this.fullName,
       nickname: nickname ?? this.nickname,
-      studentID: studentID ?? this.studentID,
       identifier: identifier ?? this.identifier,
       dateOfBirth: dateOfBirth ?? this.dateOfBirth,
       ktm: ktm ?? this.ktm,

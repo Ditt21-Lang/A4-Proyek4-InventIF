@@ -1,25 +1,23 @@
+import 'dart:async';
+import 'dart:math';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import '../models/user_model.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class RegisterController {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-  // SendGrid Configuration
-  // ⚠️ IMPORTANT: Ganti dengan API key Anda sendiri dari SendGrid
-  static const String SENDGRID_API_KEY = 'SG.YOUR_SENDGRID_API_KEY_HERE'; // <-- GANTI DI SINI
-  static const String SENDGRID_FROM_EMAIL = 'noreply@inventif.app'; // <-- Update dengan sender email Anda
-
   // Variable untuk store verification data sementara
   String? _verificationId;
   String? _tempPhoneNumber;
   String? _tempEmail;
   int? _resendToken;
+  String? _verifiedSmsCode; // Simpan smsCode setelah verifikasi
 
   // === OTP VERIFICATION FLOW ===
 
@@ -27,206 +25,176 @@ class RegisterController {
   Future<Map<String, dynamic>> sendPhoneOTP(String phoneNumber) async {
     try {
       _tempPhoneNumber = phoneNumber;
+      
+      // Ensure +62 format
+      if (phoneNumber.startsWith('08')) {
+        phoneNumber = '+62${phoneNumber.substring(1)}';
+        _tempPhoneNumber = phoneNumber;
+      }
+
+      // Use Completer to await callback
+      final completer = Completer<Map<String, dynamic>>();
 
       await _firebaseAuth.verifyPhoneNumber(
         phoneNumber: phoneNumber,
+        timeout: const Duration(seconds: 60),
         verificationCompleted: (PhoneAuthCredential credential) {
-          // Auto-retrieve SMS (untuk Android)
+          // Auto-verified (Android only)
           print('Phone auto-verified');
         },
         verificationFailed: (FirebaseAuthException e) {
-          print('Phone verification failed: ${e.message}');
+          // Called if there is an error (e.g., invalid number)
+          print('ERROR CODE: ${e.code}');
+          print('ERROR MESSAGE: ${e.message}');
+          if (!completer.isCompleted) {
+            completer.complete({
+              'success': false,
+              'message': _getPhoneSendErrorMessage(e.code),
+            });
+          }
         },
         codeSent: (String verificationId, int? resendToken) {
+          // OTP successfully sent - save verificationId
           _verificationId = verificationId;
           _resendToken = resendToken;
-          print('OTP sent to $phoneNumber');
+          if (!completer.isCompleted) {
+            completer.complete({
+              'success': true,
+              'message': 'OTP successfully sent to $phoneNumber',
+            });
+          }
         },
         codeAutoRetrievalTimeout: (String verificationId) {
           _verificationId = verificationId;
         },
+        forceResendingToken: _resendToken,
       );
 
-      return {
-        'success': true,
-        'message': 'OTP berhasil dikirim ke $phoneNumber',
-      };
+      return await completer.future;
     } catch (e) {
       return {
         'success': false,
-        'message': 'Gagal mengirim OTP: ${e.toString()}',
+        'message': 'Failed to send OTP: ${e.toString()}',
       };
     }
   }
 
-  // Fungsi untuk kirim OTP ke email menggunakan SendGrid
+  String _getPhoneSendErrorMessage(String code) {
+    switch (code) {
+      case 'invalid-phone-number':
+        return 'Invalid phone number format. Use format +62-xxx-xxxx-xxxx';
+      case 'too-many-requests':
+        return 'Too many attempts. Wait a few minutes.';
+      case 'quota-exceeded':
+        return 'SMS quota exceeded. Try again tomorrow or contact admin.';
+      case 'app-not-authorized':
+        return 'App not authorized. Check SHA-1 in Firebase Console.';
+      case 'missing-client-identifier':
+        return 'SafetyNet/Play Integrity not configured.';
+      default:
+        return 'Failed to send OTP: $code';
+    }
+  }
+
+  // Function to send OTP to email using EmailJS
   Future<Map<String, dynamic>> sendEmailOTP(String email) async {
     try {
       _tempEmail = email;
-      
-      // Generate random OTP code (6 digits)
-      String otpCode = (100000 + DateTime.now().microsecond % 900000).toString();
-      
-      // Simpan OTP temporary ke Firestore dengan expiry
+
+      // Generate OTP
+      final random = Random.secure();
+      String otpCode = List.generate(6, (_) => random.nextInt(10)).join();
+
+      // Save to Firestore first (for verification later)
       await _firestore.collection('otp_temp').doc(email).set({
         'code': otpCode,
         'email': email,
-        'createdAt': DateTime.now(),
-        'expiresAt': DateTime.now().add(const Duration(minutes: 10)),
+        'createdAt': FieldValue.serverTimestamp(),
+        'expiresAt': Timestamp.fromDate(
+          DateTime.now().add(const Duration(minutes: 10)),
+        ),
         'attempts': 0,
       });
 
-      // Kirim email via SendGrid API
-      bool emailSent = await _sendEmailViaSendGrid(
-        recipientEmail: email,
-        otpCode: otpCode,
-      );
+      print('=== DEBUG EMAILJS START ===');
+      print('Sending email to: $email');
+      print('OTP Code: $otpCode');
 
-      if (!emailSent) {
-        // Jika gagal kirim email, hapus OTP dari Firestore
-        await _firestore.collection('otp_temp').doc(email).delete();
-        return {
-          'success': false,
-          'message': 'Gagal mengirim OTP ke email. Pastikan SendGrid API key sudah dikonfigurasi.',
-        };
-      }
-
-      return {
-        'success': true,
-        'message': 'OTP berhasil dikirim ke $email',
-      };
-    } catch (e) {
-      return {
-        'success': false,
-        'message': 'Gagal mengirim OTP: ${e.toString()}',
-      };
-    }
-  }
-
-  // Helper method untuk kirim email via SendGrid API
-  Future<bool> _sendEmailViaSendGrid({
-    required String recipientEmail,
-    required String otpCode,
-  }) async {
-    try {
-      // Cek apakah API key sudah dikonfigurasi
-      if (SENDGRID_API_KEY == 'SG.YOUR_SENDGRID_API_KEY_HERE') {
-        print('⚠️ SendGrid API key belum dikonfigurasi. Silahkan update di RegisterController.');
-        print('📧 OTP Code untuk testing: $otpCode');
-        // Untuk development, tetap return true agar flow lanjut
-        return true;
-      }
-
-      const String sendgridUrl = 'https://api.sendgrid.com/v3/mail/send';
-
+      // Send email via EmailJS
       final response = await http.post(
-        Uri.parse(sendgridUrl),
+        Uri.parse('https://api.emailjs.com/api/v1.0/email/send'),
         headers: {
-          'Authorization': 'Bearer $SENDGRID_API_KEY',
           'Content-Type': 'application/json',
+          'origin': 'http://localhost',
         },
         body: jsonEncode({
-          'personalizations': [
-            {
-              'to': [
-                {
-                  'email': recipientEmail,
-                }
-              ],
-              'subject': 'InventIF - OTP Verification Code',
-            }
-          ],
-          'from': {
-            'email': SENDGRID_FROM_EMAIL,
-            'name': 'InventIF App',
+          'service_id': 'service_6m7dkml',   
+          'template_id': 'template_o8ktbyy', 
+          'user_id': 'C8NOE45fXb296PWuF',
+          'template_params': {
+            'to_email': email,
+            'otp_code': otpCode,
           },
-          'content': [
-            {
-              'type': 'text/html',
-              'value': _generateEmailHTML(otpCode),
-            }
-          ],
         }),
       );
 
-      if (response.statusCode == 202) {
-        print('✅ Email sent successfully to $recipientEmail');
-        return true;
+      print('STATUS CODE: ${response.statusCode}');
+      print('RESPONSE BODY: ${response.body}');
+      print('=== DEBUG EMAILJS END ===');
+
+      if (response.statusCode == 200) {
+        print('Email sent successfully!');
+        return {
+          'success': true,
+          'message': 'OTP successfully sent to $email. Check your inbox!',
+        };
       } else {
-        print('❌ SendGrid Error: ${response.statusCode} - ${response.body}');
-        return false;
+        // If EmailJS fails, delete OTP from Firestore
+        await _firestore.collection('otp_temp').doc(email).delete();
+        print('EmailJS Error: ${response.body}');
+        return {
+          'success': false,
+          'message': 'Failed to send email. Try again. (${response.body})',
+        };
       }
     } catch (e) {
-      print('❌ Error sending email: ${e.toString()}');
-      return false;
+      return {
+        'success': false,
+        'message': 'Error: ${e.toString()}',
+      };
     }
   }
 
-  // Generate HTML email template
-  String _generateEmailHTML(String otpCode) {
-    return '''
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <style>
-            body { font-family: Arial, sans-serif; background-color: #f4f4f4; }
-            .container { max-width: 600px; margin: 0 auto; background-color: white; padding: 20px; border-radius: 8px; }
-            .header { background-color: #2A2C8F; color: white; padding: 20px; text-align: center; border-radius: 8px; }
-            .content { padding: 20px; }
-            .otp-box { background-color: #f0f0f0; padding: 15px; text-align: center; border-radius: 8px; margin: 20px 0; }
-            .otp-code { font-size: 32px; font-weight: bold; color: #2A2C8F; letter-spacing: 5px; }
-            .footer { text-align: center; color: #888; font-size: 12px; margin-top: 20px; }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="header">
-                <h1>InventIF</h1>
-                <p>Email Verification</p>
-            </div>
-            <div class="content">
-                <h2>Verify Your Email</h2>
-                <p>Your verification code is:</p>
-                <div class="otp-box">
-                    <div class="otp-code">$otpCode</div>
-                </div>
-                <p>This code will expire in 10 minutes.</p>
-                <p>If you didn't request this code, please ignore this email.</p>
-            </div>
-            <div class="footer">
-                <p>&copy; 2026 InventIF. All rights reserved.</p>
-            </div>
-        </div>
-    </body>
-    </html>
-    ''';
-  }
-
-  // Fungsi untuk verify OTP dari nomor HP
+  // Function to verify OTP from phone number
   Future<Map<String, dynamic>> verifyPhoneOTP(String otpCode) async {
     try {
       if (_verificationId == null) {
         return {
           'success': false,
-          'message': 'Verification ID not found. Please try again.',
+          'message': 'Session expired. Please resend OTP.',
         };
       }
 
+      // Create credential to verify OTP validity
       PhoneAuthCredential credential = PhoneAuthProvider.credential(
         verificationId: _verificationId!,
         smsCode: otpCode,
       );
 
-      // Test credential dengan sign in temporary (untuk memverifikasi OTP valid)
+      // Sign in temporarily only for OTP validation
       await _firebaseAuth.signInWithCredential(credential);
-      
-      // Logout dulu, baru buat user dengan email/password nanti
+
+      // Save smsCode before signOut
+      // Will be used again in createAccountAfterOTPVerification
+      _verifiedSmsCode = otpCode;
+
+      // Sign out after saving smsCode
       await _firebaseAuth.signOut();
 
       return {
         'success': true,
         'phoneNumber': _tempPhoneNumber,
-        'message': 'Phone verified successfully!',
+        'message': 'Phone number verified successfully!',
       };
     } on FirebaseAuthException catch (e) {
       return {
@@ -241,7 +209,7 @@ class RegisterController {
     }
   }
 
-  // Fungsi untuk verify OTP dari email
+  // Function to verify OTP from email
   Future<Map<String, dynamic>> verifyEmailOTP(String otpCode) async {
     try {
       if (_tempEmail == null) {
@@ -251,14 +219,14 @@ class RegisterController {
         };
       }
 
-      // Ambil OTP dari Firestore
+      // Get OTP from Firestore
       DocumentSnapshot docSnapshot =
           await _firestore.collection('otp_temp').doc(_tempEmail).get();
 
       if (!docSnapshot.exists) {
         return {
           'success': false,
-          'message': 'OTP tidak ditemukan. Silahkan minta ulang.',
+          'message': 'OTP not found. Please request again.',
         };
       }
 
@@ -270,7 +238,7 @@ class RegisterController {
         await _firestore.collection('otp_temp').doc(_tempEmail).delete();
         return {
           'success': false,
-          'message': 'OTP sudah kadaluarsa. Silahkan minta ulang.',
+          'message': 'OTP expired. Please request again.',
         };
       }
 
@@ -282,7 +250,7 @@ class RegisterController {
           await _firestore.collection('otp_temp').doc(_tempEmail).delete();
           return {
             'success': false,
-            'message': 'Terlalu banyak percobaan. Silahkan minta ulang OTP.',
+            'message': 'Too many attempts. Please request a new OTP.',
           };
         }
         await _firestore.collection('otp_temp').doc(_tempEmail).update({
@@ -290,11 +258,11 @@ class RegisterController {
         });
         return {
           'success': false,
-          'message': 'OTP salah. Silahkan coba lagi. (Percobaan: $attempts/5)',
+          'message': 'Incorrect OTP. Please try again. (Attempt: $attempts/5)',
         };
       }
 
-      // OTP valid - hapus dari Firestore
+      // OTP valid - delete from Firestore
       await _firestore.collection('otp_temp').doc(_tempEmail).delete();
 
       return {
@@ -310,35 +278,60 @@ class RegisterController {
     }
   }
 
-  // Fungsi untuk create account setelah OTP verified
+  // Function to create account after OTP verified
   Future<Map<String, dynamic>> createAccountAfterOTPVerification({
-    required String email,
+    required String identity,   // email or phone number
     required String password,
     required String fullName,
+    required bool isPhone,
   }) async {
     try {
-      // Create user di Firebase Auth
-      UserCredential userCredential =
-          await _firebaseAuth.createUserWithEmailAndPassword(
-        email: email.trim(),
-        password: password,
-      );
+      UserCredential userCredential;
 
-      // Buat UserModel baru
+      if (isPhone) {
+        // Phone path: use PhoneAuthCredential, no need for email/password
+        if (_verificationId == null || _verifiedSmsCode == null) {
+          return {
+            'success': false,
+            'user': null,
+            'userData': null,
+            'message': 'Session expired. Please try registering again.',
+          };
+        }
+
+        PhoneAuthCredential phoneCredential = PhoneAuthProvider.credential(
+          verificationId: _verificationId!,
+          smsCode: _verifiedSmsCode!,
+        );
+
+        userCredential =
+            await _firebaseAuth.signInWithCredential(phoneCredential);
+
+      } else {
+        // Email path: use email + password as usual
+        userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
+          email: identity.trim(),
+          password: password,
+        );
+      }
+
       UserModel newUser = UserModel(
         uid: userCredential.user!.uid,
-        email: email.trim(),
+        email: isPhone ? '' : identity.trim(),
         fullName: fullName.trim(),
+        phoneNumber: isPhone ? _tempPhoneNumber : null,
         role: 'user',
         createdAt: DateTime.now(),
         isActive: true,
       );
 
-      // Simpan ke Firestore
       await _firestore
           .collection('users')
           .doc(userCredential.user!.uid)
           .set(newUser.toMap());
+
+      // Reset all temp data after success
+      resetTempData();
 
       return {
         'success': true,
@@ -347,24 +340,23 @@ class RegisterController {
         'message': 'Account created successfully!',
       };
     } on FirebaseAuthException catch (e) {
-      String message = _getErrorMessage(e.code);
       return {
         'success': false,
         'user': null,
         'userData': null,
-        'message': message,
+        'message': _getErrorMessage(e.code),
       };
     } catch (e) {
       return {
         'success': false,
         'user': null,
         'userData': null,
-        'message': 'Terjadi kesalahan: ${e.toString()}',
+        'message': 'An error occurred: ${e.toString()}',
       };
     }
   }
 
-  // Getter untuk verificationId
+  // Getter for verificationId
   String? getVerificationId() => _verificationId;
 
   // Reset temp data
@@ -373,120 +365,46 @@ class RegisterController {
     _tempPhoneNumber = null;
     _tempEmail = null;
     _resendToken = null;
+    _verifiedSmsCode = null;
   }
 
-  // Fungsi untuk register dengan Email dan Password (tidak dipakai lagi, diganti dengan OTP flow)
-  Future<Map<String, dynamic>> register({
-    required String email,
-    required String password,
-    required String confirmPassword,
-    required String fullName,
-  }) async {
-    try {
-      // Validasi password match
-      if (password != confirmPassword) {
-        return {
-          'success': false,
-          'user': null,
-          'userData': null,
-          'message': 'Password tidak cocok!',
-        };
-      }
-
-      // Validasi password strength
-      if (password.length < 6) {
-        return {
-          'success': false,
-          'user': null,
-          'userData': null,
-          'message': 'Password minimal 6 karakter!',
-        };
-      }
-
-      // Buat user baru di Firebase Auth
-      UserCredential userCredential =
-          await _firebaseAuth.createUserWithEmailAndPassword(
-        email: email.trim(),
-        password: password,
-      );
-
-      // Buat user model baru
-      UserModel newUser = UserModel(
-        uid: userCredential.user!.uid,
-        email: email.trim(),
-        fullName: fullName.trim(),
-        role: 'user', // Default role adalah 'user'
-        createdAt: DateTime.now(),
-        isActive: true,
-      );
-
-      // Simpan user data ke Firestore
-      await _firestore
-          .collection('users')
-          .doc(userCredential.user!.uid)
-          .set(newUser.toMap());
-
-      return {
-        'success': true,
-        'user': userCredential.user,
-        'userData': newUser,
-        'message': 'Register berhasil! Sekarang kamu bisa login.',
-      };
-    } on FirebaseAuthException catch (e) {
-      String message = _getErrorMessage(e.code);
-      return {
-        'success': false,
-        'user': null,
-        'userData': null,
-        'message': message,
-      };
-    } catch (e) {
-      return {
-        'success': false,
-        'user': null,
-        'userData': null,
-        'message': 'Terjadi kesalahan: ${e.toString()}',
-      };
-    }
-  }
-
-  // Fungsi untuk mapping error messages Firebase OTP
+  // Function to map Firebase OTP error messages
   String _getOTPErrorMessage(String errorCode) {
     switch (errorCode) {
       case 'invalid-verification-code':
-        return 'Kode OTP tidak valid!';
+        return 'Invalid OTP code!';
       case 'session-expired':
-        return 'Sesi verification sudah expired. Silahkan minta ulang OTP.';
+        return 'Verification session expired. Please request a new OTP.';
       case 'missing-verification-code':
-        return 'Silahkan masukkan kode OTP!';
+        return 'Please enter OTP code!';
       case 'invalid-phone-number':
-        return 'Format nomor telepon tidak valid!';
+        return 'Invalid phone number format!';
       case 'too-many-requests':
-        return 'Terlalu banyak percobaan. Coba lagi nanti!';
+        return 'Too many attempts. Try again later!';
       default:
-        return 'Terjadi kesalahan: $errorCode';
+        return 'An error occurred: $errorCode';
     }
   }
 
-  // Fungsi untuk mapping error messages Firebase
+  // Function to map Firebase error messages
   String _getErrorMessage(String errorCode) {
     switch (errorCode) {
       case 'weak-password':
-        return 'Password terlalu lemah!';
+        return 'Password is too weak!';
       case 'email-already-in-use':
-        return 'Email ini sudah digunakan!';
+        return 'This email is already in use!';
       case 'invalid-email':
-        return 'Format email tidak valid!';
+        return 'Invalid email format!';
       case 'operation-not-allowed':
-        return 'Email/Password login tidak diaktifkan!';
+        return 'Email/Password login is not enabled!';
       case 'too-many-requests':
-        return 'Terlalu banyak percobaan. Coba lagi nanti!';
+        return 'Too many attempts. Try again later!';
       default:
-        return 'Terjadi kesalahan: $errorCode';
+        return 'An error occurred: $errorCode';
     }
   }
 
-  // Cek apakah email sudah terdaftar
+  // Check if email already exists
   Future<bool> isEmailExists(String email) async {
     try {
       List<String> signInMethods =
@@ -498,10 +416,10 @@ class RegisterController {
     }
   }
 
-  // Fungsi untuk Google Sign In / Register
+  // Function for Google Sign In / Register
   Future<Map<String, dynamic>> signUpWithGoogle() async {
     try {
-      // Logout dulu dari Google untuk force pilih akun
+      // Logout from Google first to force account selection
       await _googleSignIn.signOut();
 
       // Trigger Google Sign In
@@ -512,30 +430,30 @@ class RegisterController {
           'success': false,
           'user': null,
           'userData': null,
-          'message': 'Google Sign In dibatalkan',
+          'message': 'Google Sign In cancelled',
         };
       }
 
-      // Get authentication details dari Google
+      // Get authentication details from Google
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
 
-      // Buat credential untuk Firebase
+      // Create credential for Firebase
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      // Sign in ke Firebase dengan Google credential
+      // Sign in to Firebase with Google credential
       UserCredential userCredential =
           await _firebaseAuth.signInWithCredential(credential);
 
-      // Cek apakah ini user baru atau lama
+      // Check if this is a new user or existing
       bool isNewUser =
           userCredential.additionalUserInfo?.isNewUser ?? false;
 
       if (isNewUser) {
-        // Buat user model baru
+        // Create new user model
         UserModel newUser = UserModel(
           uid: userCredential.user!.uid,
           email: userCredential.user!.email ?? googleUser.email,
@@ -546,7 +464,7 @@ class RegisterController {
           isActive: true,
         );
 
-        // Simpan ke Firestore
+        // Save to Firestore
         await _firestore
             .collection('users')
             .doc(userCredential.user!.uid)
@@ -557,10 +475,10 @@ class RegisterController {
           'user': userCredential.user,
           'userData': newUser,
           'isNewUser': true,
-          'message': 'Google Sign Up berhasil! Silahkan lengkapi profil kamu.',
+          'message': 'Google Sign Up successful! Please complete your profile.',
         };
       } else {
-        // User sudah ada, ambil datanya dari Firestore
+        // User already exists, get data from Firestore
         UserModel? userData =
             await getUserDataFromFirestore(userCredential.user!.uid);
 
@@ -569,7 +487,7 @@ class RegisterController {
           'user': userCredential.user,
           'userData': userData,
           'isNewUser': false,
-          'message': 'Google Login berhasil!',
+          'message': 'Google Login successful!',
         };
       }
     } on FirebaseAuthException catch (e) {
@@ -587,12 +505,12 @@ class RegisterController {
         'user': null,
         'userData': null,
         'isNewUser': false,
-        'message': 'Terjadi kesalahan: ${e.toString()}',
+        'message': 'An error occurred: ${e.toString()}',
       };
     }
   }
 
-  // Ambil user data dari Firestore berdasarkan UID
+  // Get user data from Firestore by UID
   Future<UserModel?> getUserDataFromFirestore(String uid) async {
     try {
       DocumentSnapshot doc =
@@ -609,7 +527,7 @@ class RegisterController {
     }
   }
 
-  // Fungsi untuk update profile user setelah complete
+  // Function to update user profile after completion
   Future<Map<String, dynamic>> updateUserProfile({
     required String uid,
     String? nickname,
@@ -635,7 +553,7 @@ class RegisterController {
 
       return {
         'success': true,
-        'message': 'Profil berhasil diupdate!',
+        'message': 'Profile updated successfully!',
       };
     } catch (e) {
       return {

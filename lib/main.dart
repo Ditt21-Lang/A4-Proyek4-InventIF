@@ -3,6 +3,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'views/userProfile_view.dart';
 import 'views/login_view.dart';
+import 'views/register_view.dart';
+import 'views/register_identity_input_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,9 +29,11 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2A2C8F)),
         useMaterial3: true,
       ),
-      home: const UserProfileView(),
+      home: const LoginView(),
       routes: {
         '/login': (context) => const LoginView(),
+        '/register': (context) => const RegisterView(),
+        '/register-identity': (context) => const RegisterIdentityInputView(),
         '/profile': (context) => const UserProfileView(),
       },
     );
