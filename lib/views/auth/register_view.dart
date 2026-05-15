@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../controllers/register_controller.dart';
-import '../views/profile_completion_view.dart';
-import '../views/register_otp_verification_view.dart';
+import '../../controllers/auth/register_controller.dart';
+import 'profile_completion_view.dart';
+import 'register_otp_verification_view.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -32,27 +32,27 @@ class _RegisterViewState extends State<RegisterView> {
     super.dispose();
   }
 
-  // Handle send OTP
+  // Send OTP
   Future<void> _handleSendOTP() async {
     String identity = _identityController.text.trim();
 
-    // Validasi input
+    // Validate if input is empty
     if (identity.isEmpty) {
       _showErrorDialog(
-          'Please enter your ${_isPhoneSelected ? 'phone number' : 'email'}');
+          'Enter your ${_isPhoneSelected ? 'phone number' : 'email'}');
       return;
     }
 
-    // Validasi format
+    // Validate format
     if (_isPhoneSelected) {
-      // Validasi nomor HP (minimal 10 digit)
+      // Validate phone number (minimum 10 digits)
       if (!RegExp(r'^[+]?[0-9]{10,}$').hasMatch(identity)) {
         _showErrorDialog(
-            'Invalid phone number format. Use format like +62812345678 or 081234567890');
+            'Invalid phone number format. Use format +62812345678 or 081234567890');
         return;
       }
     } else {
-      // Validasi email
+      // Validate email
       if (!RegExp(r'^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$')
           .hasMatch(identity)) {
         _showErrorDialog('Invalid email format');
@@ -77,7 +77,7 @@ class _RegisterViewState extends State<RegisterView> {
 
     if (mounted) {
       if (result['success']) {
-        // Navigate ke OTP verification screen
+        // Navigasi ke halaman verifikasi OTP
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -94,7 +94,7 @@ class _RegisterViewState extends State<RegisterView> {
     }
   }
 
-  // Handle Google Sign In
+  // Mendaftar dengan Google
   Future<void> _handleGoogleSignUp() async {
     setState(() {
       _isLoading = true;
@@ -131,36 +131,218 @@ class _RegisterViewState extends State<RegisterView> {
     }
   }
 
-  // Show error dialog
+  // Tampilkan dialog error dengan design yang menarik
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Error'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+      builder: (context) => Center(
+        child: SingleChildScrollView(
+          child: AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            backgroundColor: Colors.white,
+            insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+            contentPadding: const EdgeInsets.all(0),
+            content: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Header dengan background merah
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFF6B6B),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(16),
+                        topRight: Radius.circular(16),
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.error_outline,
+                            color: Colors.white,
+                            size: 32,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Oops!',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Message
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Text(
+                      message,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF333333),
+                        height: 1.5,
+                      ),
+                    ),
+                  ),
+                  // Button
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFFF6B6B),
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text(
+                          'OK',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ],
+        ),
       ),
     );
   }
 
-  // Show success dialog
+  // Tampilkan dialog success dengan design yang menarik
   void _showSuccessDialog(String message) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Berhasil'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+      builder: (context) => Center(
+        child: SingleChildScrollView(
+          child: AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            backgroundColor: Colors.white,
+            insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+            contentPadding: const EdgeInsets.all(0),
+            content: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Header dengan background hijau
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF51CF66),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(16),
+                        topRight: Radius.circular(16),
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.check_circle_outline,
+                            color: Colors.white,
+                            size: 32,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Success!',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Message
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Text(
+                      message,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF333333),
+                        height: 1.5,
+                      ),
+                    ),
+                  ),
+                  // Button
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF51CF66),
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text(
+                          'Close',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -196,7 +378,7 @@ class _RegisterViewState extends State<RegisterView> {
               const Text(
                 'Verify Your Identity',
                 style: TextStyle(
-                  fontSize: 22,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF2A2C8F),
                 ),
@@ -206,7 +388,7 @@ class _RegisterViewState extends State<RegisterView> {
               Text(
                 'Choose your preferred method to receive verification code',
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: 10,
                   color: Colors.grey.shade600,
                   height: 1.5,
                 ),
@@ -232,7 +414,7 @@ class _RegisterViewState extends State<RegisterView> {
                         ),
                         decoration: BoxDecoration(
                           color: _isPhoneSelected
-                              ? Colors.white
+                              ? Color(0xFFF88031)
                               : Colors.grey.shade100,
                           border: Border.all(
                             color: _isPhoneSelected
@@ -255,7 +437,7 @@ class _RegisterViewState extends State<RegisterView> {
                             Text(
                               'Phone',
                               style: TextStyle(
-                                fontSize: 13,
+                                fontSize: 14,
                                 fontWeight: FontWeight.w600,
                                 color: _isPhoneSelected
                                     ? primaryBlue
@@ -285,7 +467,7 @@ class _RegisterViewState extends State<RegisterView> {
                         ),
                         decoration: BoxDecoration(
                           color: !_isPhoneSelected
-                              ? Colors.white
+                              ? Color(0xFFF88031)
                               : Colors.grey.shade100,
                           border: Border.all(
                             color: !_isPhoneSelected
@@ -308,7 +490,7 @@ class _RegisterViewState extends State<RegisterView> {
                             Text(
                               'Email',
                               style: TextStyle(
-                                fontSize: 13,
+                                fontSize: 14,
                                 fontWeight: FontWeight.w600,
                                 color: !_isPhoneSelected
                                     ? primaryBlue
@@ -327,7 +509,7 @@ class _RegisterViewState extends State<RegisterView> {
               Text(
                 _isPhoneSelected ? 'Phone Number' : 'Email Address',
                 style: const TextStyle(
-                  fontSize: 13,
+                  fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: Color(0xFF2A2C8F),
                 ),
@@ -344,9 +526,9 @@ class _RegisterViewState extends State<RegisterView> {
                 decoration: InputDecoration(
                   hintText: _isPhoneSelected
                       ? 'e.g., +62812345678'
-                      : 'e.g., your@email.com',
+                      : 'e.g., your@gmail.com',
                   hintStyle: TextStyle(
-                    fontSize: 13,
+                    fontSize: 12,
                     color: Colors.grey.shade400,
                   ),
                   prefixIcon: Icon(
@@ -389,10 +571,10 @@ class _RegisterViewState extends State<RegisterView> {
                   vertical: 10,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
+                  color:  Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: Colors.blue.shade100,
+                    color: Colors.grey.shade200,
                   ),
                 ),
                 child: Row(
@@ -400,7 +582,7 @@ class _RegisterViewState extends State<RegisterView> {
                   children: [
                     Icon(
                       Icons.info_outline,
-                      color: Colors.blue.shade600,
+                      color: Colors.grey.shade700,
                       size: 18,
                     ),
                     const SizedBox(width: 10),
@@ -408,8 +590,8 @@ class _RegisterViewState extends State<RegisterView> {
                       child: Text(
                         'We\'ll send a verification code to verify your ${_isPhoneSelected ? 'phone number' : 'email address'}.',
                         style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.blue.shade700,
+                          fontSize: 10,
+                          color: Colors.grey.shade700,
                           height: 1.4,
                         ),
                       ),
@@ -447,7 +629,7 @@ class _RegisterViewState extends State<RegisterView> {
                       : const Text(
                           'Send Verification Code',
                           style: TextStyle(
-                            fontSize: 15,
+                            fontSize: 14,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
@@ -504,7 +686,7 @@ class _RegisterViewState extends State<RegisterView> {
                                 errorBuilder: (context, error, stackTrace) {
                                   return const Icon(
                                     Icons.g_mobiledata,
-                                    size: 20,
+                                    size: 26,
                                   );
                                 },
                               ),
@@ -515,7 +697,7 @@ class _RegisterViewState extends State<RegisterView> {
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
-                                color: Color(0xFF2A2C8F),
+                                color: Color(0xFFF88031),
                               ),
                             ),
                           ],
@@ -532,7 +714,7 @@ class _RegisterViewState extends State<RegisterView> {
                       'Already have an account? ',
                       style: TextStyle(
                         color: Colors.grey.shade700,
-                        fontSize: 13,
+                        fontSize: 12,
                       ),
                     ),
                     GestureDetector(

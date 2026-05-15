@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
-import '../controllers/manageAccount_controller.dart';
+import '../../controllers/profile/manageAccount_controller.dart';
 
 class ManageAccountView extends StatefulWidget {
   const ManageAccountView({super.key});
@@ -27,7 +27,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
   bool _isLoadingPassword = false;
   bool _isLoadingContact = false;
 
-  bool _obscureCurrent = true;
   bool _obscureNew = true;
   bool _obscureConfirm = true;
 
@@ -73,7 +72,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
       if (userData != null) {
         setState(() {
           userUID = userData.uid;
-          _identifierController.text = userData.identifier ?? '';
           _emailController.text = userData.email;
           userName = userData.fullName;
           userNickname = userData.nickname;
@@ -930,115 +928,4 @@ class _ManageAccountViewState extends State<ManageAccountView> {
       ),
     );
   }
-<<<<<<< HEAD
-
-  // Bottom Navigation Bar
-  Widget _buildBottomNavigationBar(BuildContext context) {
-    return Container(
-      height: 90,
-      padding: const EdgeInsets.only(bottom: 10),
-      decoration: const BoxDecoration(
-        color: Color(0xFFEBEBEB),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Home (inactive)
-          GestureDetector(
-            onTap: () => Navigator.popUntil(context, (r) => r.isFirst),
-            child: Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: const Color(0xFFEBEBEB),
-                borderRadius: BorderRadius.circular(18),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.shade400,
-                    offset: const Offset(4, 4),
-                    blurRadius: 8,
-                    spreadRadius: 1,
-                  ),
-                  const BoxShadow(
-                    color: Colors.white,
-                    offset: Offset(-4, -4),
-                    blurRadius: 8,
-                    spreadRadius: 1,
-                  ),
-                ],
-              ),
-              child: const Center(
-                child: Icon(Icons.home_rounded, color: Colors.black87, size: 34),
-              ),
-            ),
-          ),
-          // Scanner (inactive)
-          GestureDetector(
-            onTap: () {
-              // TODO: navigate to QR scanner
-            },
-            child: Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: const Color(0xFFEBEBEB),
-                borderRadius: BorderRadius.circular(18),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.shade400,
-                    offset: const Offset(4, 4),
-                    blurRadius: 8,
-                    spreadRadius: 1,
-                  ),
-                  const BoxShadow(
-                    color: Colors.white,
-                    offset: Offset(-4, -4),
-                    blurRadius: 8,
-                    spreadRadius: 1,
-                  ),
-                ],
-              ),
-              child: const Center(
-                child: Icon(Icons.crop_free_rounded, color: Colors.black87, size: 32),
-              ),
-            ),
-          ),
-          // Profile (ACTIVE – oranye karena masih dalam alur Profile)
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF78233),
-                borderRadius: BorderRadius.circular(18),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.shade400,
-                    offset: const Offset(4, 4),
-                    blurRadius: 8,
-                    spreadRadius: 1,
-                  ),
-                  const BoxShadow(
-                    color: Colors.white,
-                    offset: Offset(-4, -4),
-                    blurRadius: 8,
-                    spreadRadius: 1,
-                  ),
-                ],
-              ),
-              child: const Center(
-                child: Icon(Icons.account_circle_outlined, color: Colors.black87, size: 38),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
-=======
-}
->>>>>>> bedfd162debc39bb720ff550ed85dd692b5e0345

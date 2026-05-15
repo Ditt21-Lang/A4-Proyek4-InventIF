@@ -214,7 +214,7 @@ class RequestRuanganController extends ChangeNotifier {
       final transaction = TransactionModel(
         transactionId: transactionRef.id,
         borrowerId: user.uid,
-        borrowerName: userData?.fullName?.trim().isNotEmpty == true
+        borrowerName: (userData?.fullName?.trim().isNotEmpty ?? false)
             ? userData!.fullName!
             : (user.displayName?.trim().isNotEmpty == true
                 ? user.displayName!

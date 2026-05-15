@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import '../models/user_model.dart';
+import '../../models/user_model.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -26,24 +26,24 @@ class RegisterController {
     try {
       _tempPhoneNumber = phoneNumber;
       
-      // Ensure +62 format
+      // Pastikan format +62
       if (phoneNumber.startsWith('08')) {
         phoneNumber = '+62${phoneNumber.substring(1)}';
         _tempPhoneNumber = phoneNumber;
       }
 
-      // Use Completer to await callback
+      // Gunakan Completer untuk menunggu callback
       final completer = Completer<Map<String, dynamic>>();
 
       await _firebaseAuth.verifyPhoneNumber(
         phoneNumber: phoneNumber,
         timeout: const Duration(seconds: 60),
         verificationCompleted: (PhoneAuthCredential credential) {
-          // Auto-verified (Android only)
-          print('Phone auto-verified');
+          // Verifikasi otomatis (hanya Android)
+          print('Nomor telepon terverifikasi secara otomatis');
         },
         verificationFailed: (FirebaseAuthException e) {
-          // Called if there is an error (e.g., invalid number)
+          // Dipanggil jika ada error (contoh: nomor tidak valid)
           print('ERROR CODE: ${e.code}');
           print('ERROR MESSAGE: ${e.message}');
           if (!completer.isCompleted) {
@@ -54,7 +54,7 @@ class RegisterController {
           }
         },
         codeSent: (String verificationId, int? resendToken) {
-          // OTP successfully sent - save verificationId
+          // OTP berhasil dikirim - simpan verificationId
           _verificationId = verificationId;
           _resendToken = resendToken;
           if (!completer.isCompleted) {
@@ -96,7 +96,7 @@ class RegisterController {
     }
   }
 
-  // Function to send OTP to email using EmailJS
+  // Fungsi untuk mengirim OTP ke email menggunakan EmailJS
   Future<Map<String, dynamic>> sendEmailOTP(String email) async {
     try {
       _tempEmail = email;
@@ -105,7 +105,7 @@ class RegisterController {
       final random = Random.secure();
       String otpCode = List.generate(6, (_) => random.nextInt(10)).join();
 
-      // Save to Firestore first (for verification later)
+      // Simpan ke Firestore dulu (untuk verifikasi nanti)
       await _firestore.collection('otp_temp').doc(email).set({
         'code': otpCode,
         'email': email,
@@ -117,10 +117,10 @@ class RegisterController {
       });
 
       print('=== DEBUG EMAILJS START ===');
-      print('Sending email to: $email');
-      print('OTP Code: $otpCode');
+      print('Kirim email ke: $email');
+      print('Kode OTP: $otpCode');
 
-      // Send email via EmailJS
+      // Kirim email via EmailJS
       final response = await http.post(
         Uri.parse('https://api.emailjs.com/api/v1.0/email/send'),
         headers: {
@@ -143,13 +143,13 @@ class RegisterController {
       print('=== DEBUG EMAILJS END ===');
 
       if (response.statusCode == 200) {
-        print('Email sent successfully!');
+        print('Email berhasil dikirim!');
         return {
           'success': true,
           'message': 'OTP successfully sent to $email. Check your inbox!',
         };
       } else {
-        // If EmailJS fails, delete OTP from Firestore
+        // Jika EmailJS gagal, hapus OTP dari Firestore
         await _firestore.collection('otp_temp').doc(email).delete();
         print('EmailJS Error: ${response.body}');
         return {
@@ -165,7 +165,7 @@ class RegisterController {
     }
   }
 
-  // Function to verify OTP from phone number
+  // Fungsi untuk verifikasi OTP dari nomor telepon
   Future<Map<String, dynamic>> verifyPhoneOTP(String otpCode) async {
     try {
       if (_verificationId == null) {
@@ -175,26 +175,26 @@ class RegisterController {
         };
       }
 
-      // Create credential to verify OTP validity
+      // Buat credential untuk verifikasi kevaliditasan OTP
       PhoneAuthCredential credential = PhoneAuthProvider.credential(
         verificationId: _verificationId!,
         smsCode: otpCode,
       );
 
-      // Sign in temporarily only for OTP validation
+      // Masuk sementara hanya untuk validasi OTP
       await _firebaseAuth.signInWithCredential(credential);
 
-      // Save smsCode before signOut
-      // Will be used again in createAccountAfterOTPVerification
+      // Simpan smsCode sebelum sign out
+      // Akan digunakan lagi di createAccountAfterOTPVerification
       _verifiedSmsCode = otpCode;
 
-      // Sign out after saving smsCode
+      // Keluar setelah menyimpan smsCode
       await _firebaseAuth.signOut();
 
       return {
         'success': true,
         'phoneNumber': _tempPhoneNumber,
-        'message': 'Phone number verified successfully!',
+        'message': 'Phone number successfully verified!',
       };
     } on FirebaseAuthException catch (e) {
       return {
@@ -209,7 +209,7 @@ class RegisterController {
     }
   }
 
-  // Function to verify OTP from email
+  // Fungsi untuk verifikasi OTP dari email
   Future<Map<String, dynamic>> verifyEmailOTP(String otpCode) async {
     try {
       if (_tempEmail == null) {
@@ -219,7 +219,7 @@ class RegisterController {
         };
       }
 
-      // Get OTP from Firestore
+      // Ambil OTP dari Firestore
       DocumentSnapshot docSnapshot =
           await _firestore.collection('otp_temp').doc(_tempEmail).get();
 
@@ -232,19 +232,19 @@ class RegisterController {
 
       Map<String, dynamic> data = docSnapshot.data() as Map<String, dynamic>;
 
-      // Check expiry
+      // Cek kadaluarsa
       DateTime expiresAt = (data['expiresAt'] as Timestamp).toDate();
       if (DateTime.now().isAfter(expiresAt)) {
         await _firestore.collection('otp_temp').doc(_tempEmail).delete();
         return {
           'success': false,
-          'message': 'OTP expired. Please request again.',
+          'message': 'OTP has expired. Please request a new one.',
         };
       }
 
-      // Check OTP code
+      // Cek kode OTP
       if (data['code'] != otpCode) {
-        // Increment attempts
+        // Tambah percobaan
         int attempts = data['attempts'] + 1;
         if (attempts >= 5) {
           await _firestore.collection('otp_temp').doc(_tempEmail).delete();
@@ -258,17 +258,17 @@ class RegisterController {
         });
         return {
           'success': false,
-          'message': 'Incorrect OTP. Please try again. (Attempt: $attempts/5)',
+          'message': 'Incorrect OTP. Please try again. (Attempts: $attempts/5)',
         };
       }
 
-      // OTP valid - delete from Firestore
+      // OTP valid - hapus dari Firestore
       await _firestore.collection('otp_temp').doc(_tempEmail).delete();
 
       return {
         'success': true,
         'email': _tempEmail,
-        'message': 'Email verified successfully!',
+        'message': 'Email successfully verified!',
       };
     } catch (e) {
       return {
@@ -278,9 +278,9 @@ class RegisterController {
     }
   }
 
-  // Function to create account after OTP verified
+  // Fungsi untuk membuat akun setelah OTP diverifikasi
   Future<Map<String, dynamic>> createAccountAfterOTPVerification({
-    required String identity,   // email or phone number
+    required String identity,   // email atau nomor telepon
     required String password,
     required String fullName,
     required bool isPhone,
@@ -289,13 +289,13 @@ class RegisterController {
       UserCredential userCredential;
 
       if (isPhone) {
-        // Phone path: use PhoneAuthCredential, no need for email/password
+        // Jalur telepon: gunakan PhoneAuthCredential, tidak perlu email/password
         if (_verificationId == null || _verifiedSmsCode == null) {
           return {
             'success': false,
             'user': null,
             'userData': null,
-            'message': 'Session expired. Please try registering again.',
+            'message': 'Sesi berakhir. Silakan coba daftar lagi.',
           };
         }
 
@@ -308,7 +308,7 @@ class RegisterController {
             await _firebaseAuth.signInWithCredential(phoneCredential);
 
       } else {
-        // Email path: use email + password as usual
+        // Jalur email: gunakan email + password seperti biasanya
         userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
           email: identity.trim(),
           password: password,
@@ -317,8 +317,10 @@ class RegisterController {
 
       UserModel newUser = UserModel(
         uid: userCredential.user!.uid,
+        identifier: '', // NIM/Identifier akan diisi saat profile completion
         email: isPhone ? '' : identity.trim(),
         fullName: fullName.trim(),
+        ktm: '', // KTM akan diupload saat profile completion
         phoneNumber: isPhone ? _tempPhoneNumber : null,
         role: 'user',
         createdAt: DateTime.now(),
@@ -356,10 +358,10 @@ class RegisterController {
     }
   }
 
-  // Getter for verificationId
+  // Getter untuk verificationId
   String? getVerificationId() => _verificationId;
 
-  // Reset temp data
+  // Reset data sementara
   void resetTempData() {
     _verificationId = null;
     _tempPhoneNumber = null;
@@ -405,11 +407,16 @@ class RegisterController {
   }
 
   // Check if email already exists
+  // Function to check if email already exists
   Future<bool> isEmailExists(String email) async {
     try {
-      List<String> signInMethods =
-          await _firebaseAuth.fetchSignInMethodsForEmail(email.trim());
-      return signInMethods.isNotEmpty;
+      // Check in Firestore users collection
+      final QuerySnapshot result = await _firestore
+          .collection('users')
+          .where('email', isEqualTo: email.trim())
+          .limit(1)
+          .get();
+      return result.docs.isNotEmpty;
     } catch (e) {
       print('Error checking email: $e');
       return false;
@@ -456,8 +463,10 @@ class RegisterController {
         // Create new user model
         UserModel newUser = UserModel(
           uid: userCredential.user!.uid,
+          identifier: '',
           email: userCredential.user!.email ?? googleUser.email,
           fullName: userCredential.user!.displayName ?? googleUser.displayName ?? 'User',
+          ktm: null,
           profileImage: userCredential.user!.photoURL,
           role: 'user',
           createdAt: DateTime.now(),
@@ -491,21 +500,39 @@ class RegisterController {
         };
       }
     } on FirebaseAuthException catch (e) {
+      // TAMBAH INI — print error spesifik
+      print('GOOGLE ERROR CODE: ${e.code}');
+      print('GOOGLE ERROR MESSAGE: ${e.message}');
       String message = _getErrorMessage(e.code);
       return {
         'success': false,
         'user': null,
         'userData': null,
         'isNewUser': false,
-        'message': message,
+        'message': 'Error: ${e.code} - ${e.message}',
       };
     } catch (e) {
+      // Catch ALL errors termasuk PlatformException
+      print('GOOGLE CATCH ERROR: ${e.toString()}');
+      
+      // Handle Android error code 10 (DEVELOPER_ERROR)
+      String errorMsg = e.toString();
+      if (errorMsg.contains('error code: 10') || errorMsg.contains('ApiException: 10')) {
+        return {
+          'success': false,
+          'user': null,
+          'userData': null,
+          'isNewUser': false,
+          'message': 'Developer Error (Code 10): SHA-1 fingerprint mismatch. Check Firebase Console.',
+        };
+      }
+      
       return {
         'success': false,
         'user': null,
         'userData': null,
         'isNewUser': false,
-        'message': 'An error occurred: ${e.toString()}',
+        'message': e.toString(),
       };
     }
   }

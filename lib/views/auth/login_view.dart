@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../controllers/login_controller.dart';
+import '../../controllers/auth/login_controller.dart';
+import 'register_view.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -38,9 +39,9 @@ class _LoginViewState extends State<LoginView> {
 
   // Handle login
   Future<void> _handleLogin() async {
-    // Validasi input
+    // Validasi apakah email dan password kosong
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      _showErrorDialog('Email and password are required!');
+      _showErrorDialog('Email and password must be filled!');
       return;
     }
 
@@ -60,75 +61,239 @@ class _LoginViewState extends State<LoginView> {
 
     if (mounted) {
       if (result['success']) {
-        var userData = result['userData'];
-
-        if (userData != null) {
-          String role = userData.role.toLowerCase();
-
-          if (role == 'user') {
-            Navigator.pushReplacementNamed(context, '/dashboard');
-          } else if (role == 'teknisi') {
-            Navigator.pushReplacementNamed(context, '/dashboard-teknisi');
-          } else {
-            Navigator.pushReplacementNamed(context, '/dashboard');
+        // Login successful
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Login successful!'),
+            backgroundColor: const Color(0xFF2A2C8F),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+        // Navigasi ke dashboard
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (mounted) {
+            Navigator.of(context).pushReplacementNamed('/dashboard');
           }
-        } else {
-          _showErrorDialog("Data user tidak ditemukan di database.");
-        }
+        });
       } else {
-        // Login gagal
+        // Login failed
         _showErrorDialog(result['message']);
       }
     }
   }
 
-  // Show error dialog
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Error'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Show success dialog
+  // Tampilkan dialog success dengan design yang menarik
   void _showSuccessDialog(String message) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Success'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+      builder: (context) => Center(
+        child: SingleChildScrollView(
+          child: AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            backgroundColor: Colors.white,
+            insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+            contentPadding: const EdgeInsets.all(0),
+            content: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Header dengan background hijau
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF51CF66),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(16),
+                        topRight: Radius.circular(16),
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.check_circle_outline,
+                            color: Colors.white,
+                            size: 32,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Berhasil!',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Message
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Text(
+                      message,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF333333),
+                        height: 1.5,
+                      ),
+                    ),
+                  ),
+                  // Button
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF51CF66),
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text(
+                          'Tutup',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ],
+        ),
       ),
     );
   }
 
-  // Show info dialog
-  void _showInfoDialog(String message) {
+  // Tampilkan dialog error dengan design yang menarik
+  void _showErrorDialog(String message) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Information'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+      builder: (context) => Center(
+        child: SingleChildScrollView(
+          child: AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            backgroundColor: Colors.white,
+            insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+            contentPadding: const EdgeInsets.all(0),
+            content: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Header dengan background merah
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFF6B6B),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(16),
+                        topRight: Radius.circular(16),
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.error_outline,
+                            color: Colors.white,
+                            size: 32,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Oops!',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Message
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Text(
+                      message,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF333333),
+                        height: 1.5,
+                      ),
+                    ),
+                  ),
+                  // Button
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFFF6B6B),
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text(
+                          'Mengerti',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -145,7 +310,7 @@ class _LoginViewState extends State<LoginView> {
             height: double.infinity,
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/images/bg_gedung.png'),
+                image: AssetImage('assets/images/bg_gedung.jpg'),
                 fit: BoxFit.cover,
               ),
             ),
@@ -389,15 +554,12 @@ class _LoginViewState extends State<LoginView> {
                             onTap: _isLoading
                                 ? null
                                 : () {
-                                    // TODO: Navigate ke halaman register
-                                    // Navigator.of(context).push(
-                                    //   MaterialPageRoute(
-                                    //     builder: (context) =>
-                                    //         const RegisterView(),
-                                    //   ),
-                                    // );
-                                    _showInfoDialog(
-                                        'Register feature will be available soon');
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const RegisterView(),
+                                      ),
+                                    );
                                   },
                             child: Text(
                               "Sign Up",

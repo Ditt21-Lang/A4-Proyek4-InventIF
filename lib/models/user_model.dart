@@ -33,7 +33,7 @@ class UserModel {
   Map<String, dynamic> toMap() {
     return {
       'uid': uid,
-      'identifier': identifier ?? '',
+      'identifier': identifier,
       'email': email,
       'fullName': fullName,
       'nickname': nickname ?? '',

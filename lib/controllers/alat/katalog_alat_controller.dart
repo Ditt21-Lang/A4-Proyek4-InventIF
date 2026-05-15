@@ -5,9 +5,10 @@ import '../../models/equipment_model.dart';
 class KatalogAlatController extends ChangeNotifier {
   List<EquipmentModel> _allEquipment = [];
   List<EquipmentModel> _displayedEquipment = [];
+  String _searchQuery = '';
 
   bool _isLoading = true;
-  String _searchQuery = '';
+
 
   List<EquipmentModel> get displayedEquipment => _displayedEquipment;
   bool get isLoading => _isLoading;

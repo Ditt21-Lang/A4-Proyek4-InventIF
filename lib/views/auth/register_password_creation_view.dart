@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../controllers/register_controller.dart';
-import '../views/profile_completion_view.dart';
+import '../../controllers/auth/register_controller.dart';
+import 'profile_completion_view.dart';
 
 class RegisterPasswordCreationView extends StatefulWidget {
   final String identity;
@@ -48,16 +48,16 @@ class _RegisterPasswordCreationViewState
     super.dispose();
   }
 
-  // Handle create account
+  // Membuat akun
   Future<void> _handleCreateAccount() async {
-    // Validasi input
+    // Create account
     if (_fullNameController.text.isEmpty) {
-      _showErrorDialog('Please enter your full name');
+      _showErrorDialog('Enter your full name');
       return;
     }
 
     if (_passwordController.text.isEmpty) {
-      _showErrorDialog('Please enter a password');
+      _showErrorDialog('Enter password');
       return;
     }
 
@@ -75,7 +75,7 @@ class _RegisterPasswordCreationViewState
       _isLoading = true;
     });
 
-    // Create account dengan email/phone dan password
+    // Buat akun dengan email/phone dan password
     Map<String, dynamic> result =
         await widget.registerController.createAccountAfterOTPVerification(
       identity: widget.identity,
@@ -90,7 +90,7 @@ class _RegisterPasswordCreationViewState
 
     if (mounted) {
       if (result['success']) {
-        // Account created - navigate ke profile completion
+        // Akun berhasil dibuat - navigasi ke halaman profile completion
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -105,18 +105,110 @@ class _RegisterPasswordCreationViewState
     }
   }
 
+  // Tampilkan dialog error dengan design yang menarik
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Error'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+      builder: (context) => Center(
+        child: SingleChildScrollView(
+          child: AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            backgroundColor: Colors.white,
+            insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+            contentPadding: const EdgeInsets.all(0),
+            content: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Header dengan background merah
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFF6B6B),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(16),
+                        topRight: Radius.circular(16),
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.error_outline,
+                            color: Colors.white,
+                            size: 32,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Oops!',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Message
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Text(
+                      message,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF333333),
+                        height: 1.5,
+                      ),
+                    ),
+                  ),
+                  // Button
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFFF6B6B),
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text(
+                          'OK',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -211,7 +303,7 @@ class _RegisterPasswordCreationViewState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '📝 Password Requirements:',
+                      'Password Requirements:',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -283,7 +375,7 @@ class _RegisterPasswordCreationViewState
                     onTap: _isLoading
                         ? null
                         : () {
-                            // Navigate back to login (pop all registration screens)
+                            // Kembali ke login (pop semua layar registrasi)
                             Navigator.pop(context);
                             Navigator.pop(context);
                             Navigator.pop(context);

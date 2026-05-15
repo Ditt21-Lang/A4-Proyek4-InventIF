@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Wajib ditambahkan untuk mengecek siapa yang login
-import '../../models/transaction_model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../../models/transaction_model.dart';
 
 class ListOrderController extends ChangeNotifier {
   List<TransactionModel> _orders = [];
@@ -11,7 +11,7 @@ class ListOrderController extends ChangeNotifier {
   bool get isLoading => _isLoading;
 
   ListOrderController() {
-    // Ubah dari fetch satu kali menjadi mendengarkan data (listen)
+    // Ubah dari fetch satu kali menjadi mendengarkan data
     listenToUserOrders();
   }
 
@@ -19,7 +19,7 @@ class ListOrderController extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    // 1. Ambil UID dari user yang sedang login di Firebase Auth saat ini
+    // Ambil UID dari user yang sedang login di Firebase Auth saat ini
     User? currentUser = FirebaseAuth.instance.currentUser;
 
     if (currentUser == null) {
@@ -29,8 +29,8 @@ class ListOrderController extends ChangeNotifier {
       return;
     }
 
-    // 2. Gunakan .snapshots().listen() agar layar pengguna otomatis ter-update
-    //    setiap kali Teknisi mengubah status di Firestore
+    // Gunakan .snapshots().listen() agar layar pengguna otomatis ter-update
+    // setiap kali teknisi mengubah status di Firestore
     FirebaseFirestore.instance
         .collection('transactions')
         .where('borrowerId', isEqualTo: currentUser.uid)

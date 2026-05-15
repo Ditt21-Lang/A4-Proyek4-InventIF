@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import '../controllers/auth/register_controller.dart';
+import '../../controllers/auth/register_controller.dart';
 import '../../models/user_model.dart';
-import 'userProfile_view.dart';
-
+import '../profile/userProfile_view.dart';
 
 class ProfileCompletionView extends StatefulWidget {
   final UserModel userData;
@@ -48,7 +47,7 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
     super.dispose();
   }
 
-  // Handle update profile
+  // Update profil
   Future<void> _handleUpdateProfile() async {
     setState(() {
       _isLoading = true;
@@ -83,7 +82,7 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
     }
   }
 
-  // Skip update profile
+  // Lewati update profil
   void _handleSkip() {
     Navigator.pushReplacement(
       context,
@@ -91,34 +90,218 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
     );
   }
 
+  // Tampilkan dialog error dengan design yang menarik
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Error'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+      builder: (context) => Center(
+        child: SingleChildScrollView(
+          child: AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            backgroundColor: Colors.white,
+            insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+            contentPadding: const EdgeInsets.all(0),
+            content: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Header dengan background merah
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFF6B6B),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(16),
+                        topRight: Radius.circular(16),
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.error_outline,
+                            color: Colors.white,
+                            size: 32,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Oops!',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Message
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Text(
+                      message,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF333333),
+                        height: 1.5,
+                      ),
+                    ),
+                  ),
+                  // Button
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFFF6B6B),
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text(
+                          'OK',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ],
+        ),
       ),
     );
   }
 
+  // Tampilkan dialog success dengan design yang menarik
   void _showSuccessDialog(String message) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Success'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+      builder: (context) => Center(
+        child: SingleChildScrollView(
+          child: AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            backgroundColor: Colors.white,
+            insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+            contentPadding: const EdgeInsets.all(0),
+            content: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Header dengan background hijau
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF51CF66),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(16),
+                        topRight: Radius.circular(16),
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.check_circle_outline,
+                            color: Colors.white,
+                            size: 32,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Success!',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Message
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Text(
+                      message,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF333333),
+                        height: 1.5,
+                      ),
+                    ),
+                  ),
+                  // Button
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF51CF66),
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text(
+                          'Close',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -161,7 +344,7 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
                           Icon(
                             Icons.info_outline,
                             color: Colors.blue.shade700,
-                            size: 20,
+                            size: 16,
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -169,7 +352,7 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
                               'Complete your profile to unlock all features. You can skip this for now.',
                               style: TextStyle(
                                 color: Colors.blue.shade700,
-                                fontSize: 12,
+                                fontSize: 10,
                               ),
                             ),
                           ),
@@ -193,7 +376,7 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
                   Text(
                     'Hello, ${widget.userData.fullName}!',
                     style: const TextStyle(
-                      fontSize: 20,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF2A2C8F),
                     ),
@@ -202,7 +385,7 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
                   Text(
                     'Let\'s complete your profile information',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 12,
                       color: Colors.grey.shade600,
                     ),
                   ),
@@ -210,27 +393,27 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
 
                   // Nickname Field
                   _buildTextFieldWithLabel(
-                    label: 'Nickname (optional)',
+                    label: 'Nickname',
                     controller: _nicknameController,
-                    hintText: 'e.g., Budi, Ahmad',
+                    hintText: 'nickname',
                     enabled: !_isLoading,
                   ),
                   const SizedBox(height: 16),
 
                   // Identifier (NIM/Employee ID) Field
                   _buildTextFieldWithLabel(
-                    label: 'Identifier (NIM for Students / NIP for Employees)',
+                    label: 'Identifier',
                     controller: _identifierController,
-                    hintText: 'e.g., 2023001234 for NIM or NIP format',
+                    hintText: 'NIM/NIP',
                     enabled: !_isLoading,
                   ),
                   const SizedBox(height: 16),
 
                   // Date of Birth Field
                   _buildTextFieldWithLabel(
-                    label: 'Date of Birth (optional)',
+                    label: 'Date of Birth',
                     controller: _dateOfBirthController,
-                    hintText: 'e.g., 01/05/2000',
+                    hintText: '01/05/2000',
                     enabled: !_isLoading,
                     onTap: () async {
                       DateTime? pickedDate = await showDatePicker(
@@ -249,9 +432,9 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
 
                   // Phone Number Field
                   _buildTextFieldWithLabel(
-                    label: 'Phone Number (optional)',
+                    label: 'Phone Number',
                     controller: _phoneNumberController,
-                    hintText: 'e.g., +62812345678',
+                    hintText: '+62812345678',
                     enabled: !_isLoading,
                     keyboardType: TextInputType.phone,
                   ),
@@ -261,14 +444,14 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.amber.withOpacity(0.1),
+                      color: Colors.blue.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      '💡 Tip: Complete your profile now to avoid seeing the notification later.',
+                      'Complete your profile now to avoid seeing the notification later.',
                       style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.amber.shade800,
+                        fontSize: 10,
+                        color:Colors.blue.shade700,
                       ),
                     ),
                   ),
