@@ -9,6 +9,8 @@ import 'services/network_service.dart';
 import 'services/notification_service.dart';
 import 'views/main_dashboard.dart';
 import 'views/profile/userProfile_view.dart';
+import 'views/auth/register_view.dart';
+import 'views/auth/register_identity_input_view.dart';
 import 'views/Teknisi/main_dashboard_teknisi.dart';
 
 const String pendingSyncNotificationTask = 'pendingSyncNotificationTask';
@@ -73,6 +75,8 @@ class _MyAppState extends State<MyApp> {
       initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginView(),
+        '/register': (context) => const RegisterView(),
+        '/register-identity': (context) => const RegisterIdentityInputView(),
         '/dashboard': (context) => const MainDashboard(),
         '/profile': (context) => const UserProfileView(),
         '/dashboard-teknisi': (context) => const MainDashboardTeknisi(),

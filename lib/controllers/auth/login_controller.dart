@@ -23,7 +23,7 @@ class LoginController {
         'success': true,
         'user': userCredential.user,
         'userData': userData,
-        'message': 'Login successful!',
+        'message': 'Login berhasil!',
       };
     } on FirebaseAuthException catch (e) {
       String message = _getErrorMessage(e.code);
@@ -43,15 +43,15 @@ class LoginController {
     }
   }
 
-  // Fungsi untuk Forgot Password - mengirim reset email
-  // ONPROGRESS
+  // Fungsi untuk Lupa Password - mengirim email reset
+  // SEDANG DIKERJAKAN
   Future<Map<String, dynamic>> sendPasswordResetEmail(String email) async {
     try {
       await _firebaseAuth.sendPasswordResetEmail(email: email.trim());
       return {
         'success': true,
         'message':
-            'Password reset email has been sent. Check your inbox or spam folder.',
+            'Email reset password telah dikirim. Periksa inbox atau folder spam Anda.',
       };
     } on FirebaseAuthException catch (e) {
       String message = _getErrorMessage(e.code);

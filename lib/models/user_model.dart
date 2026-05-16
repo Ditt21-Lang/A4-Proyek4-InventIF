@@ -30,11 +30,10 @@ class UserModel {
   });
 
   // Convert UserModel to JSON (untuk menyimpan ke Firestore)
-  // Map field names sesuai Firestore structure
   Map<String, dynamic> toMap() {
     return {
       'uid': uid,
-      'identifier': identifier ?? '',
+      'identifier': identifier,
       'email': email,
       'fullName': fullName,
       'nickname': nickname ?? '',
@@ -49,7 +48,6 @@ class UserModel {
   }
 
   // Convert JSON dari Firestore ke UserModel
-  // Read field names sesuai Firestore structure
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
       uid: map['uid'] ?? '',

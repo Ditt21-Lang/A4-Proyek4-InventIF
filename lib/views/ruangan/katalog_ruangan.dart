@@ -3,7 +3,6 @@ import '../../controllers/ruangan/detail_ruangan_controller.dart';
 import '../../controllers/ruangan/katalog_ruangan_controller.dart';
 import '../../models/room_model.dart';
 import 'detail_ruangan.dart';
-import '../../widgets/base_catalog_layout.dart'; // Import layout universal
 
 class KatalogRuanganScreen extends StatelessWidget {
   final KatalogRuanganController controller;

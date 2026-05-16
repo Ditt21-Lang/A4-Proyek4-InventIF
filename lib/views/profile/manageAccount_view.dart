@@ -27,7 +27,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
   bool _isLoadingPassword = false;
   bool _isLoadingContact = false;
 
-  bool _obscureCurrent = true;
   bool _obscureNew = true;
   bool _obscureConfirm = true;
 
@@ -73,7 +72,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
       if (userData != null) {
         setState(() {
           userUID = userData.uid;
-          _identifierController.text = userData.identifier ?? '';
           _emailController.text = userData.email;
           userName = userData.fullName;
           userNickname = userData.nickname;
