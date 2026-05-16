@@ -4,6 +4,8 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'offline_service.dart';
+import '../controllers/notifications_controller.dart';
+import '../models/notification_model.dart';
 import '../main.dart';
 
 class NetworkService {
@@ -90,6 +92,18 @@ class NetworkService {
 
       // Bersihkan Hive setelah semua berhasil terkirim
       await _offlineService.clearAllRequests();
+
+      // Stop pending sync reminders once offline data has been synchronized
+      final notifCtrl = NotificationsController.instance;
+      await notifCtrl.stopRepeating();
+      final successNote = NotificationModel(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        title: 'Sinkronisasi Tuntas',
+        body: 'Semua permintaan checkout offline telah berhasil disinkronkan.',
+        timestamp: DateTime.now(),
+      );
+      await notifCtrl.addNotification(successNote, showSystem: true);
+
       print("SINKRONISASI SUKSES!");
     } catch (e) {
       print("GAGAL sinkronisasi data: $e");
