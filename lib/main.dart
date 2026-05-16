@@ -6,7 +6,7 @@ import 'views/Teknisi/list_pengajuan_view.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'services/network_service.dart';
 import 'views/main_dashboard.dart';
-import 'views/userProfile_view.dart';
+import 'views/profile/userProfile_view.dart';
 import 'views/Teknisi/main_dashboard_teknisi.dart';
 
 final GlobalKey<ScaffoldMessengerState> globalMessengerKey =

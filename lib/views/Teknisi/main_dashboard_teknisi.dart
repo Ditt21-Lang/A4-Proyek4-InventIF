@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dashboard_teknisi_view.dart';
 import 'list_pengajuan_view.dart';
-import '../userProfile_view.dart';
+import '../profile/userProfile_view.dart';
 
 class MainDashboardTeknisi extends StatefulWidget {
   const MainDashboardTeknisi({super.key});

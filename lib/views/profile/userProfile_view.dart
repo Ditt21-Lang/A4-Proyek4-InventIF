@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'manageAccount_view.dart';
-import 'list_order_view.dart';
-import '../controllers/userProfile_controller.dart';
+import '../transactions/list_order_view.dart';
+import '../../controllers/profile/userProfile_controller.dart';
 
 class UserProfileView extends StatefulWidget {
   const UserProfileView({super.key});
