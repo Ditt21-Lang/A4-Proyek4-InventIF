@@ -70,11 +70,21 @@ class _LoginViewState extends State<LoginView> {
           ),
         );
         // Navigasi ke dashboard
-        Future.delayed(const Duration(milliseconds: 500), () {
-          if (mounted) {
-            Navigator.of(context).pushReplacementNamed('/dashboard');
+        var userData = result['userData'];
+
+        if (userData != null) {
+          String role = userData.role.toLowerCase();
+
+          if (role == 'user') {
+            Navigator.pushReplacementNamed(context, '/dashboard');
+          } else if (role == 'teknisi') {
+            Navigator.pushReplacementNamed(context, '/dashboard-teknisi');
+          } else {
+            Navigator.pushReplacementNamed(context, '/dashboard');
           }
-        });
+        } else {
+          Navigator.pushReplacementNamed(context, '/dashboard');
+        }
       } else {
         // Login failed
         _showErrorDialog(result['message']);
