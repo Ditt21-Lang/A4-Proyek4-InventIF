@@ -13,7 +13,13 @@ class CustomBottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 90,
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: EdgeInsets.only(
+        top: 12,
+        left: 20,
+        right: 20,
+        // Ini kunci agar bottom nav Anda aman di semua jenis HP
+        bottom: 12 + MediaQuery.of(context).padding.bottom, 
+      ),
       decoration: const BoxDecoration(
         color: Color(0xFFEBEBEB),
         borderRadius: BorderRadius.vertical(top: Radius.circular(30)),

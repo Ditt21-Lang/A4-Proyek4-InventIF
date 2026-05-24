@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../controllers/auth/register_controller.dart';
 import '../../models/user_model.dart';
 import '../profile/userProfile_view.dart';
+import '../main_dashboard.dart';
 
 class ProfileCompletionView extends StatefulWidget {
   final UserModel userData;
@@ -32,10 +33,14 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
   void initState() {
     super.initState();
     _registerController = RegisterController();
-    _nicknameController = TextEditingController(text: widget.userData.nickname ?? '');
-    _identifierController = TextEditingController(text: widget.userData.identifier);
-    _dateOfBirthController = TextEditingController(text: widget.userData.dateOfBirth ?? '');
-    _phoneNumberController = TextEditingController(text: widget.userData.phoneNumber ?? '');
+    _nicknameController =
+        TextEditingController(text: widget.userData.nickname ?? '');
+    _identifierController =
+        TextEditingController(text: widget.userData.identifier);
+    _dateOfBirthController =
+        TextEditingController(text: widget.userData.dateOfBirth ?? '');
+    _phoneNumberController =
+        TextEditingController(text: widget.userData.phoneNumber ?? '');
   }
 
   @override
@@ -72,7 +77,7 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
           if (mounted) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const UserProfileView()),
+              MaterialPageRoute(builder: (context) => const MainDashboard()),
             );
           }
         });
@@ -86,7 +91,7 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
   void _handleSkip() {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const UserProfileView()),
+      MaterialPageRoute(builder: (context) => const MainDashboard()),
     );
   }
 
@@ -165,7 +170,8 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
                   ),
                   // Button
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+                    padding:
+                        const EdgeInsets.only(bottom: 16, left: 16, right: 16),
                     child: SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -273,7 +279,8 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
                   ),
                   // Button
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+                    padding:
+                        const EdgeInsets.only(bottom: 16, left: 16, right: 16),
                     child: SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -319,11 +326,11 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
         children: [
           SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.only(
+              padding: EdgeInsets.only(
                 left: 20.0,
                 right: 20.0,
                 top: 20.0,
-                bottom: 100.0,
+                bottom: 100.0 + MediaQuery.of(context).padding.bottom,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -451,7 +458,7 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
                       'Complete your profile now to avoid seeing the notification later.',
                       style: TextStyle(
                         fontSize: 10,
-                        color:Colors.blue.shade700,
+                        color: Colors.blue.shade700,
                       ),
                     ),
                   ),
@@ -467,7 +474,12 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
             right: 0,
             child: Container(
               color: Colors.white,
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.only(
+                left: 16.0,
+                right: 16.0,
+                top: 16.0,
+                bottom: 16.0 + MediaQuery.of(context).padding.bottom, 
+              ),
               child: Row(
                 children: [
                   // Skip Button

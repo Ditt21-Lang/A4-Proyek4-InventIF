@@ -38,7 +38,7 @@ class KatalogAlatView extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: [
-              _buildChip('All', false),
+              _buildChip('All', false, onTap: () => onTabChanged(2)),
               _buildChip('Room', false, onTap: () => onTabChanged(1)),
               _buildChip('Equipment', true),
               _buildChip('Available', false),

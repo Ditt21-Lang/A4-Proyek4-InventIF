@@ -552,7 +552,7 @@ class _SelfCheckoutViewState extends State<SelfCheckoutView> {
                 },
               ),
             ),
-            const SizedBox(height: 30),
+            SizedBox(height: 30 + MediaQuery.of(context).padding.bottom),
           ],
         ),
       ),

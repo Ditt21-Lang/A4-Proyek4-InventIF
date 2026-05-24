@@ -369,7 +369,13 @@ class _RegisterViewState extends State<RegisterView> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.only(
+            left: 20.0,
+            right: 20.0,
+            top: 20.0,
+            // Dorong konten ke atas setinggi tombol navigasi HP
+            bottom: 20.0 + MediaQuery.of(context).padding.bottom, 
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

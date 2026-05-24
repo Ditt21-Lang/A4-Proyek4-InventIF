@@ -36,7 +36,7 @@ class KatalogRuanganScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: [
-              _buildChip('All', false),
+              _buildChip('All', false, onTap: () => onTabChanged(2)),
               _buildChip('Room', true),
               _buildChip('Equipment', false, onTap: () => onTabChanged(0)),
               _buildChip('Available', false),

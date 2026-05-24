@@ -5,6 +5,8 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 import '../../models/equipment_model.dart';
 import '../../models/user_model.dart';
 import '../../services/offline_service.dart';
+import '../../controllers/notifications_controller.dart';
+import '../../models/notification_model.dart';
 
 class CheckoutController extends ChangeNotifier {
   bool isCheckingOut = false;
@@ -53,7 +55,7 @@ class CheckoutController extends ChangeNotifier {
         batch.set(transactionRef, {
           'borrowerId': currentUser.uid,
           'borrowerIdentifier': userData.identifier,
-          'borrowerName': userData.fullName ?? 'Unknown',
+          'borrowerName': userData.fullName,
           'items': itemsData,
           'category': 'equipment',
           'startDate': startDate,
@@ -76,10 +78,9 @@ class CheckoutController extends ChangeNotifier {
         Map<String, dynamic> offlineData = {
           'borrowerId': currentUser.uid,
           'borrowerIdentifier': userData.identifier,
-          'borrowerName': userData.fullName ?? 'Unknown',
+          'borrowerName': userData.fullName,
           'items': itemsData,
           'category': 'equipment',
-          // Ubah ke ISO 8601 String karena Hive lebih ramah dengan String untuk DateTime
           'startDate': startDate.toIso8601String(),
           'endDate': endDate.toIso8601String(),
           'details': 'Peminjaman mandiri aplikasi InventIF',
@@ -89,6 +90,22 @@ class CheckoutController extends ChangeNotifier {
         await _offlineService.savePendingRequest(offlineData);
         debugPrint("Checkout Disimpan Offline");
         // Note: Status barang di layar tidak langsung berubah sampai HP dapat sinyal
+        final notificationsController = NotificationsController.instance;
+        final pendingNotification = NotificationModel(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          title: 'Pending Sync',
+          body:
+              'Anda memiliki peminjaman yang tersimpan offline. Mohon online-kan untuk sinkronisasi.',
+          timestamp: DateTime.now(),
+        );
+        await notificationsController.addNotification(pendingNotification,
+            showSystem: true);
+        await notificationsController.startRepeatingPendingReminder(
+          minutes: 5,
+          title: 'Pending Sync Reminder',
+          body:
+              'Segera online-kan aplikasi untuk menyinkronkan pinjaman offline.',
+        );
       }
 
       isCheckingOut = false;

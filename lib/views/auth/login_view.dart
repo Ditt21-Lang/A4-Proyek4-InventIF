@@ -65,33 +65,26 @@ class _LoginViewState extends State<LoginView> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Login successful!'),
-            backgroundColor: const Color(0xFF2A2C8F),
+            backgroundColor: Colors.green,
             duration: const Duration(seconds: 2),
           ),
         );
-
-        // Get user role dan redirect sesuai role
-        final userData = result['userData'];
-        String targetRoute = '/dashboard'; // Default route
+        // Navigasi ke dashboard sesuai role
+        var userData = result['userData'];
 
         if (userData != null) {
-          final role = userData.role;
-          
-          if (role == 'coordinator') {
-            targetRoute = '/dashboard-coordinator';
-          } else if (role == 'teknisi') {
-            targetRoute = '/dashboard-teknisi';
-          } else if (role == 'user') {
-            targetRoute = '/dashboard';
-          }
-        }
+          String role = userData.role.toLowerCase();
 
-        // Navigasi ke dashboard sesuai role
-        Future.delayed(const Duration(milliseconds: 500), () {
-          if (mounted) {
-            Navigator.of(context).pushReplacementNamed(targetRoute);
+          if (role == 'coordinator') {
+            Navigator.pushReplacementNamed(context, '/dashboard-coordinator');
+          } else if (role == 'teknisi') {
+            Navigator.pushReplacementNamed(context, '/dashboard-teknisi');
+          } else {
+            Navigator.pushReplacementNamed(context, '/dashboard');
           }
-        });
+        } else {
+          Navigator.pushReplacementNamed(context, '/dashboard');
+        }
       } else {
         // Login failed
         _showErrorDialog(result['message']);
@@ -174,7 +167,8 @@ class _LoginViewState extends State<LoginView> {
                   ),
                   // Button
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+                    padding:
+                        const EdgeInsets.only(bottom: 16, left: 16, right: 16),
                     child: SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -282,7 +276,8 @@ class _LoginViewState extends State<LoginView> {
                   ),
                   // Button
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+                    padding:
+                        const EdgeInsets.only(bottom: 16, left: 16, right: 16),
                     child: SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -346,11 +341,11 @@ class _LoginViewState extends State<LoginView> {
               ),
               child: SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.only(
+                  padding: EdgeInsets.only(
                     left: 30.0,
                     right: 30.0,
-                    top: 15.0, // Dikurangi dari 25.0
-                    bottom: 25.0, // Dikurangi dari 40.0
+                    top: 15.0, 
+                    bottom: 25.0 + MediaQuery.of(context).padding.bottom, 
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import '../controllers/auth/register_controller.dart';
 import '../../models/user_model.dart';
-import 'userProfile_view.dart';
-
+import 'profile/userProfile_view.dart';
 
 class ProfileCompletionView extends StatefulWidget {
   final UserModel userData;
@@ -33,10 +32,14 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
   void initState() {
     super.initState();
     _registerController = RegisterController();
-    _nicknameController = TextEditingController(text: widget.userData.nickname ?? '');
-    _identifierController = TextEditingController(text: widget.userData.identifier);
-    _dateOfBirthController = TextEditingController(text: widget.userData.dateOfBirth ?? '');
-    _phoneNumberController = TextEditingController(text: widget.userData.phoneNumber ?? '');
+    _nicknameController =
+        TextEditingController(text: widget.userData.nickname ?? '');
+    _identifierController =
+        TextEditingController(text: widget.userData.identifier);
+    _dateOfBirthController =
+        TextEditingController(text: widget.userData.dateOfBirth ?? '');
+    _phoneNumberController =
+        TextEditingController(text: widget.userData.phoneNumber ?? '');
   }
 
   @override

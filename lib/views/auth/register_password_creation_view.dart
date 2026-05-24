@@ -326,7 +326,7 @@ class _RegisterPasswordCreationViewState
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      '• Minimum 8 characters\n• Use uppercase (A-Z) and lowercase (a-z)\n• Include at least one number (0-9)'
+                      '• Minimum 8 characters\n• Use uppercase (A-Z) and lowercase (a-z)\n• Include at least one number (0-9)',
                       style: TextStyle(
                         fontSize: 11,
                         color: Colors.amber.shade800,
