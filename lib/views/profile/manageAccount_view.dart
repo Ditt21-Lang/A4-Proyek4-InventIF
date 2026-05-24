@@ -391,7 +391,12 @@ class _ManageAccountViewState extends State<ManageAccountView> {
           // Scrollable content (blue background)
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+              padding: EdgeInsets.only(
+                left: 16,
+                right: 16,
+                top: 20,
+                bottom: 20 + MediaQuery.of(context).padding.bottom, 
+              ),
               child: Column(
                 children: [
                   _buildSection(

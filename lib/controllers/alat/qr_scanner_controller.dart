@@ -6,10 +6,9 @@ class QrScannerController extends ChangeNotifier {
   List<EquipmentModel> scannedEquipments = [];
   bool isProcessing = false;
 
-  // Ubah kembaliannya menjadi String (pesan status)
   Future<String> processScannedCode(String scannedId) async {
     if (isProcessing) return 'PROCESSING';
-    
+
     // Cek apakah sudah ada di keranjang
     if (scannedEquipments.any((eq) => eq.id == scannedId)) {
       return 'ALREADY_IN_CART';
@@ -26,13 +25,13 @@ class QrScannerController extends ChangeNotifier {
 
       if (doc.exists) {
         EquipmentModel equipment = EquipmentModel.fromFirestore(doc);
-        
-        // --- GERBANG VALIDASI UTAMA ---
+
+        // --- VALIDASI UTAMA ---
         // Jika status BUKAN 'Available', tolak dan beritahu alasannya
         if (equipment.status != 'Available') {
           isProcessing = false;
           notifyListeners();
-          return 'NOT_AVAILABLE'; 
+          return 'NOT_AVAILABLE';
         }
 
         // Jika Available, masukkan ke keranjang
@@ -40,7 +39,6 @@ class QrScannerController extends ChangeNotifier {
         isProcessing = false;
         notifyListeners();
         return 'SUCCESS';
-
       } else {
         isProcessing = false;
         notifyListeners();

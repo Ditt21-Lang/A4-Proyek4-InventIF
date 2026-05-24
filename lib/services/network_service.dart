@@ -12,31 +12,55 @@ class NetworkService {
   final OfflineService _offlineService = OfflineService();
   late StreamSubscription<List<ConnectivityResult>> _subscription;
 
+  // Flag ingatan untuk mencegah spam SnackBar setiap kali aplikasi dimuat
+  bool _wasOffline = false;
+
   void startMonitoring() {
     _subscription = Connectivity()
         .onConnectivityChanged
         .listen((List<ConnectivityResult> results) async {
+          
+      // Cek apakah tidak mode pesawat dan terhubung ke suatu jaringan (Wifi/Seluler)
       if (!results.contains(ConnectivityResult.none)) {
+        // Validasi ping nyata ke internet
         bool hasInternet =
             await InternetConnectionChecker.createInstance().hasConnection;
 
         if (hasInternet) {
-          // --- KONEKSI KEMBALI ---
-          globalMessengerKey.currentState?.showSnackBar(
-            const SnackBar(
-              content: Text('Kembali Online! Menyinkronkan data...'),
-              backgroundColor: Colors.green,
-              duration: Duration(seconds: 2),
-            ),
-          );
+          // --- KONEKSI KEMBALI / ONLINE ---
+          // HANYA munculkan SnackBar JIKA sebelumnya benar-benar terdeteksi offline
+          if (_wasOffline) {
+            globalMessengerKey.currentState?.showSnackBar(
+              const SnackBar(
+                content: Text('Kembali Online! Menyinkronkan data...'),
+                backgroundColor: Colors.green,
+                duration: Duration(seconds: 2),
+              ),
+            );
 
-          print("Sinkronisasi");
-          await _syncDataToServer();
+            print("Sinkronisasi karena sinyal kembali");
+            await _syncDataToServer();
+
+            // Reset ingatan karena sekarang HP sudah dipastikan online
+            _wasOffline = false;
+          } else {
+            // Jika aplikasi baru dibuka dan sudah online dari awal, 
+            // lakukan sinkronisasi secara diam-diam (Gaib) tanpa SnackBar berisik.
+            await _syncDataToServer();
+          }
         } else {
-          _showOfflineWarning();
+          // --- TERHUBUNG JARINGAN TAPI TIDAK ADA INTERNET (Misal Wi-Fi belum login) ---
+          if (!_wasOffline) {
+            _showOfflineWarning();
+            _wasOffline = true;
+          }
         }
       } else {
-        _showOfflineWarning();
+        // --- TERPUTUS TOTAL (Mode Pesawat / Tidak ada Wi-Fi & Seluler) ---
+        if (!_wasOffline) {
+          _showOfflineWarning();
+          _wasOffline = true;
+        }
       }
     });
   }
@@ -93,9 +117,10 @@ class NetworkService {
       // Bersihkan Hive setelah semua berhasil terkirim
       await _offlineService.clearAllRequests();
 
-      // Stop pending sync reminders once offline data has been synchronized
+      // Hentikan notifikasi pengingat berulang karena data offline sudah disinkronkan
       final notifCtrl = NotificationsController.instance;
       await notifCtrl.stopRepeating();
+      
       final successNote = NotificationModel(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         title: 'Sinkronisasi Tuntas',

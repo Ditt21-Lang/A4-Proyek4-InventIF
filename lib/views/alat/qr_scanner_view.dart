@@ -120,7 +120,7 @@ class _QrScannerViewState extends State<QrScannerView> {
           // 5. Tombol Checkout
           if (_controller.scannedEquipments.isNotEmpty)
             Positioned(
-              bottom: 40,
+              bottom: 40 + MediaQuery.of(context).padding.bottom,
               left: 24,
               right: 24,
               child: ElevatedButton(

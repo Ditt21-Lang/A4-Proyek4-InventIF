@@ -60,9 +60,12 @@ class _RequestRuanganScreenState extends State<RequestRuanganScreen> {
                       style: TextStyle(color: Color(0xFFBDBDE0), fontSize: 16),
                     ),
                     const SizedBox(height: 10),
+                    // KEMBALIKAN DUA BARIS INI:
                     Expanded(
                       child: SingleChildScrollView(
-                        padding: const EdgeInsets.fromLTRB(0, 4, 0, 24),
+                        padding: EdgeInsets.fromLTRB(
+                          0, 4, 0, 24 + MediaQuery.of(context).padding.bottom
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [

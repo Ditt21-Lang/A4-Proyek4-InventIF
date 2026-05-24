@@ -81,7 +81,6 @@ class CheckoutController extends ChangeNotifier {
           'borrowerName': userData.fullName,
           'items': itemsData,
           'category': 'equipment',
-          // Ubah ke ISO 8601 String karena Hive lebih ramah dengan String untuk DateTime
           'startDate': startDate.toIso8601String(),
           'endDate': endDate.toIso8601String(),
           'details': 'Peminjaman mandiri aplikasi InventIF',

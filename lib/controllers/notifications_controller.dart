@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/notification_model.dart';
 import '../services/notification_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class NotificationsController extends ChangeNotifier {
   static NotificationsController? _instance;
@@ -24,7 +25,7 @@ class NotificationsController extends ChangeNotifier {
 
   Future<void> _loadFromStorage() async {
     final sp = await SharedPreferences.getInstance();
-    final raw = sp.getString('local_notifications') ?? '[]';
+    final raw = sp.getString(_storageKey) ?? '[]';
     final list = jsonDecode(raw) as List<dynamic>;
     _items.clear();
     _items.addAll(list
@@ -35,7 +36,7 @@ class NotificationsController extends ChangeNotifier {
   Future<void> saveToStorage() async {
     final sp = await SharedPreferences.getInstance();
     final raw = jsonEncode(_items.map((e) => e.toMap()).toList());
-    await sp.setString('local_notifications', raw);
+    await sp.setString(_storageKey, raw);
   }
 
   Future<void> addNotification(NotificationModel n,
@@ -93,5 +94,17 @@ class NotificationsController extends ChangeNotifier {
     _repeatTimer?.cancel();
     _repeatTimer = null;
     await NotificationService().cancelBackgroundReminder();
+  }
+
+  String get _storageKey {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      return 'local_notifications_${user.uid}'; // Contoh hasil: local_notifications_abc123
+    }
+    return 'local_notifications_guest'; // Jika belum login
+  }
+
+  Future<void> reloadForUser() async {
+    await _loadFromStorage();
   }
 }

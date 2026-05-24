@@ -65,7 +65,7 @@ class _LoginViewState extends State<LoginView> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Login successful!'),
-            backgroundColor: const Color(0xFF2A2C8F),
+            backgroundColor: Colors.green,
             duration: const Duration(seconds: 2),
           ),
         );
@@ -341,11 +341,11 @@ class _LoginViewState extends State<LoginView> {
               ),
               child: SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.only(
+                  padding: EdgeInsets.only(
                     left: 30.0,
                     right: 30.0,
-                    top: 15.0, // Dikurangi dari 25.0
-                    bottom: 25.0, // Dikurangi dari 40.0
+                    top: 15.0, 
+                    bottom: 25.0 + MediaQuery.of(context).padding.bottom, 
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,

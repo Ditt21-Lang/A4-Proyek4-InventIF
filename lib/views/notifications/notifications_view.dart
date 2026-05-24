@@ -41,7 +41,13 @@ class _NotificationsViewState extends State<NotificationsView> {
                     style: TextStyle(color: Colors.white)));
           }
           return ListView.separated(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.only(
+              left: 12,
+              right: 12,
+              top: 12,
+              // Area aman untuk notifikasi terbawah
+              bottom: 12 + MediaQuery.of(context).padding.bottom,
+            ),
             itemBuilder: (c, i) {
               final n = items[i];
               return ListTile(

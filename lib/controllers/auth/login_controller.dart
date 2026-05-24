@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../models/user_model.dart';
+import '../notifications_controller.dart';
 
 class LoginController {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
@@ -18,6 +19,9 @@ class LoginController {
       // Ambil user data dari Firestore
       UserModel? userData =
           await getUserDataFromFirestore(userCredential.user!.uid);
+
+      // Muat notifikasi untuk user yang sedang login
+      await NotificationsController.instance.reloadForUser();
 
       return {
         'success': true,

@@ -305,7 +305,7 @@ class _TransactionDetailViewState extends State<TransactionDetailView> {
                           },
                         ),
                       ),
-                    const SizedBox(height: 30),
+                    SizedBox(height: 30 + MediaQuery.of(context).padding.bottom),
                   ],
                 ),
               ),

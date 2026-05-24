@@ -36,8 +36,10 @@ class _MainDashboardTeknisiState extends State<MainDashboardTeknisi> {
 
   Widget _buildBottomNav() {
     return Container(
-      height: 90,
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: EdgeInsets.only(
+        top: 15,
+        bottom: 10 + MediaQuery.of(context).padding.bottom, // Anti tertutup navigasi HP
+      ),
       decoration: const BoxDecoration(
         color: Color(0xFFEBEBEB),
         borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
