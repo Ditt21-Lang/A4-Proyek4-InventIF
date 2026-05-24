@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
@@ -85,7 +86,8 @@ class _ManageAccountViewState extends State<ManageAccountView> {
         });
 
         // Check for existing KTM file in document directory (writable location)
-        if (userData.uid.isNotEmpty) {
+        // Only on mobile/desktop, not on web
+        if (!kIsWeb && userData.uid.isNotEmpty) {
           try {
             final appDocDir = await getApplicationDocumentsDirectory();
             final userFolder =
@@ -157,15 +159,17 @@ class _ManageAccountViewState extends State<ManageAccountView> {
         final fileName = 'KTM.$fileExtension';
 
         // Create folder path in app's document directory (writable location)
-        final appDocDir = await getApplicationDocumentsDirectory();
-        final userFolder = Directory('${appDocDir.path}/ktm_files/$userUID');
-        if (!userFolder.existsSync()) {
-          userFolder.createSync(recursive: true);
-        }
+        // Only on mobile/desktop, not on web
+        if (!kIsWeb) {
+          final appDocDir = await getApplicationDocumentsDirectory();
+          final userFolder = Directory('${appDocDir.path}/ktm_files/$userUID');
+          if (!userFolder.existsSync()) {
+            userFolder.createSync(recursive: true);
+          }
 
-        // Copy file to document directory
-        final newFilePath = '${userFolder.path}/$fileName';
-        final newFile = await file.copy(newFilePath);
+          // Copy file to document directory
+          final newFilePath = '${userFolder.path}/$fileName';
+          final newFile = await file.copy(newFilePath);
 
         // Save path to database
         final success = await _controller.updatePersonalInfo(

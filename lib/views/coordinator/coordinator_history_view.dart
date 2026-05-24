@@ -38,7 +38,7 @@ class _CoordinatorHistoryViewState extends State<CoordinatorHistoryView> {
           decoration: const BoxDecoration(
             image: DecorationImage(
               image: NetworkImage(
-                'https://drive.google.com/file/d/14huLMCPbDYsCMkOrzIo3hezQVcpN6dHN/view?usp=sharing',
+                'https://drive.google.com/uc?id=14huLMCPbDYsCMkOrzIo3hezQVcpN6dHN&export=download',
               ),
               fit: BoxFit.cover,
             ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:workmanager/workmanager.dart';
 import 'firebase_options.dart';
@@ -33,7 +34,12 @@ final GlobalKey<ScaffoldMessengerState> globalMessengerKey =
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Workmanager().initialize(callbackDispatcher, isInDebugMode: false);
+  
+  // Initialize workmanager only on mobile platforms (not on web)
+  if (!kIsWeb) {
+    await Workmanager().initialize(callbackDispatcher, isInDebugMode: false);
+  }
+  
   await Hive.initFlutter();
   await Hive.openBox('pending_requests');
 
