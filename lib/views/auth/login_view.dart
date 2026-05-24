@@ -69,10 +69,27 @@ class _LoginViewState extends State<LoginView> {
             duration: const Duration(seconds: 2),
           ),
         );
-        // Navigasi ke dashboard
+
+        // Get user role dan redirect sesuai role
+        final userData = result['userData'];
+        String targetRoute = '/dashboard'; // Default route
+
+        if (userData != null) {
+          final role = userData.role;
+          
+          if (role == 'coordinator') {
+            targetRoute = '/dashboard-coordinator';
+          } else if (role == 'teknisi') {
+            targetRoute = '/dashboard-teknisi';
+          } else if (role == 'user') {
+            targetRoute = '/dashboard';
+          }
+        }
+
+        // Navigasi ke dashboard sesuai role
         Future.delayed(const Duration(milliseconds: 500), () {
           if (mounted) {
-            Navigator.of(context).pushReplacementNamed('/dashboard');
+            Navigator.of(context).pushReplacementNamed(targetRoute);
           }
         });
       } else {

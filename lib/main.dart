@@ -10,6 +10,7 @@ import 'views/profile/userProfile_view.dart';
 import 'views/auth/register_view.dart';
 import 'views/auth/register_identity_input_view.dart';
 import 'views/Teknisi/main_dashboard_teknisi.dart';
+import 'views/coordinator/coordinator_dashboard_view.dart';
 
 final GlobalKey<ScaffoldMessengerState> globalMessengerKey =
     GlobalKey<ScaffoldMessengerState>();
@@ -23,6 +24,7 @@ void main() async {
   runApp(const MyApp());
 }
 
+// OLD MyApp CLASS
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
@@ -64,9 +66,29 @@ class _MyAppState extends State<MyApp> {
         '/profile': (context) => const UserProfileView(),
         '/dashboard-teknisi': (context) => const MainDashboardTeknisi(),
         '/list-pengajuan': (context) => const ListPengajuanScreen(),
+        '/dashboard-coordinator': (context) => const CoordinatorDashboardView(),
       },
       // home: const MyHomePage(title: 'Flutter Demo Home Page'),
       // home: KatalogAlatView(controller: KatalogAlatController()),
     );
   }
 }
+
+// TEMPORARY MyAppCoordinator - COMMENTED OUT
+// class MyAppCoordinator extends StatelessWidget {
+//   const MyAppCoordinator({super.key});
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       scaffoldMessengerKey: globalMessengerKey,
+//       title: 'InventIF - Coordinator',
+//       debugShowCheckedModeBanner: false,
+//       theme: ThemeData(
+//         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2A2C8F)),
+//         useMaterial3: true,
+//       ),
+//       home: const CoordinatorDashboardView(),
+//     );
+//   }
+// }

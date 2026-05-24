@@ -75,7 +75,8 @@ class LoginController {
           await _firestore.collection('users').doc(uid).get();
 
       if (doc.exists) {
-        return UserModel.fromMap(doc.data() as Map<String, dynamic>);
+        final data = doc.data() as Map<String, dynamic>;
+        return UserModel.fromMap(data);
       } else {
         return null;
       }
