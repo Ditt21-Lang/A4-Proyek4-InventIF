@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 class CustomBottomNav extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap; // Tambahkan ini agar dinamis
+  final IconData middleIcon; // Icon untuk tab tengah (history/crop_free)
 
   const CustomBottomNav(
-      {Key? key, required this.currentIndex, required this.onTap})
+      {Key? key, required this.currentIndex, required this.onTap, this.middleIcon = Icons.crop_free_rounded})
       : super(key: key);
 
   @override
@@ -22,7 +23,7 @@ class CustomBottomNav extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           _buildNavItem(icon: Icons.home_rounded, index: 0, iconSize: 34),
-          _buildNavItem(icon: Icons.crop_free_rounded, index: 1, iconSize: 32),
+          _buildNavItem(icon: middleIcon, index: 1, iconSize: 32),
           _buildNavItem(
               icon: Icons.account_circle_outlined, index: 2, iconSize: 38),
         ],

@@ -7,6 +7,7 @@ import '../../models/user_model.dart';
 import 'coordinator_history_view.dart';
 import '../profile/userProfile_view.dart';
 import '../auth/login_view.dart';
+import '../../widgets/custom_bottom_nav.dart';
 
 class CoordinatorDashboardView extends StatefulWidget {
   const CoordinatorDashboardView({super.key});
@@ -243,9 +244,7 @@ class _CoordinatorDashboardViewState extends State<CoordinatorDashboardView> {
                     CircleAvatar(
                       radius: 32,
                       backgroundColor: Colors.grey[300],
-                      backgroundImage: const NetworkImage(
-                        'https://via.placeholder.com/64',
-                      ),
+                      child: const Icon(Icons.person, color: Colors.grey, size: 36),
                     ),
                   ],
                 ),
@@ -322,168 +321,232 @@ class _CoordinatorDashboardViewState extends State<CoordinatorDashboardView> {
 
   Widget _buildSubmissionCard(
       TransactionModel submission, BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.95),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Name + Avatar
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 24,
-                backgroundColor: Colors.grey[300],
-                backgroundImage: const NetworkImage(
-                  'https://via.placeholder.com/48',
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Name: ${submission.borrowerName}',
-                      style: const TextStyle(
-                        color: Color(0xFF283593),
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      submission.itemNames,
-                      style: const TextStyle(
-                        color: Colors.grey,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          // Room info
-          RichText(
-            text: TextSpan(
+    return GestureDetector(
+      onTap: () => _showTransactionDetail(submission),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.95),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Name + Avatar
+            Row(
               children: [
-                const TextSpan(
-                  text: 'Room: ',
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 12,
-                  ),
+                CircleAvatar(
+                  radius: 24,
+                  backgroundColor: Colors.grey[300],
+                  child: const Icon(Icons.person, color: Colors.grey, size: 28),
                 ),
-                TextSpan(
-                  text: submission.itemNames,
-                  style: const TextStyle(
-                    color: Color(0xFF283593),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 8),
-          // Items info
-          RichText(
-            text: TextSpan(
-              children: [
-                const TextSpan(
-                  text: 'Items: ',
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 12,
-                  ),
-                ),
-                TextSpan(
-                  text: submission.itemNames.isNotEmpty
-                      ? submission.itemNames
-                      : 'No items',
-                  style: const TextStyle(
-                    color: Color(0xFF283593),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          // Confirm Button
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () async {
-                // Show confirmation dialog
-                final confirmed = await showDialog<bool>(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text('Confirm Submission'),
-                    content: Text(
-                      'Confirm room submission from ${submission.borrowerName}?',
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context, false),
-                        child: const Text('Cancel'),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Name: ${submission.borrowerName}',
+                        style: const TextStyle(
+                          color: Color(0xFF283593),
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                      TextButton(
-                        onPressed: () => Navigator.pop(context, true),
-                        child: const Text(
-                          'Confirm',
-                          style: TextStyle(color: Colors.blue),
+                      const SizedBox(height: 4),
+                      Text(
+                        submission.itemNames,
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 12,
                         ),
                       ),
                     ],
                   ),
-                );
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Room info
+            RichText(
+              text: TextSpan(
+                children: [
+                  const TextSpan(
+                    text: 'Room: ',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 12,
+                    ),
+                  ),
+                  TextSpan(
+                    text: submission.itemNames,
+                    style: const TextStyle(
+                      color: Color(0xFF283593),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            // Items info
+            RichText(
+              text: TextSpan(
+                children: [
+                  const TextSpan(
+                    text: 'Items: ',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 12,
+                    ),
+                  ),
+                  TextSpan(
+                    text: submission.itemNames.isNotEmpty
+                        ? submission.itemNames
+                        : 'No items',
+                    style: const TextStyle(
+                      color: Color(0xFF283593),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            // Confirm Button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () async {
+                  // Show confirmation dialog
+                  final confirmed = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Confirm Submission'),
+                      content: Text(
+                        'Confirm room submission from ${submission.borrowerName}?',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: const Text(
+                            'Confirm',
+                            style: TextStyle(color: Colors.blue),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
 
-                if (confirmed == true) {
-                  try {
-                    await _controller.confirmSubmission(submission);
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Submission confirmed'),
-                          backgroundColor: Colors.green,
-                        ),
-                      );
-                    }
-                  } catch (e) {
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Error: $e'),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
+                  if (confirmed == true) {
+                    try {
+                      await _controller.confirmSubmission(submission);
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Submission confirmed'),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Error: $e'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
                     }
                   }
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF9500),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF9500),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-              ),
-              child: const Text(
-                'Confirm submission',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
+                child: const Text(
+                  'Confirm submission',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
                 ),
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showTransactionDetail(TransactionModel transaction) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Transaction Detail'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _detailRow('Borrower', transaction.borrowerName),
+              _detailRow('Room', transaction.itemNames),
+              _detailRow('Status', transaction.status),
+              _detailRow('Event', transaction.eventName ?? '-'),
+              _detailRow('Details', transaction.details),
+              _detailRow(
+                'Start Date',
+                '${transaction.startDate.day}/${transaction.startDate.month}/${transaction.startDate.year} ${transaction.startDate.hour}:${transaction.startDate.minute.toString().padLeft(2, '0')}',
+              ),
+              _detailRow(
+                'End Date',
+                '${transaction.endDate.day}/${transaction.endDate.month}/${transaction.endDate.year} ${transaction.endDate.hour}:${transaction.endDate.minute.toString().padLeft(2, '0')}',
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _detailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.grey,
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: const TextStyle(
+              fontWeight: FontWeight.w500,
+              fontSize: 14,
             ),
           ),
         ],
@@ -492,48 +555,10 @@ class _CoordinatorDashboardViewState extends State<CoordinatorDashboardView> {
   }
 
   Widget _buildBottomNav() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: BottomNavigationBar(
-        currentIndex: _bottomNavIndex,
-        onTap: _onBottomNavTapped,
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        selectedItemColor: const Color(0xFFFF9500),
-        unselectedItemColor: Colors.grey,
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.home,
-              size: _bottomNavIndex == 0 ? 28 : 24,
-            ),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.history,
-              size: _bottomNavIndex == 1 ? 28 : 24,
-            ),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.person,
-              size: _bottomNavIndex == 2 ? 28 : 24,
-            ),
-            label: '',
-          ),
-        ],
-      ),
+    return CustomBottomNav(
+      currentIndex: _bottomNavIndex,
+      onTap: _onBottomNavTapped,
+      middleIcon: Icons.assignment,
     );
   }
 }

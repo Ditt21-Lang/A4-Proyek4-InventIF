@@ -47,7 +47,7 @@ class _MainDashboardTeknisiState extends State<MainDashboardTeknisi> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           _buildNavItem(Icons.home_rounded, 0, 34),
-          _buildNavItem(Icons.content_paste_rounded, 1, 32),
+          _buildNavItem(Icons.assignment, 1, 32),
           _buildNavItem(Icons.account_circle_outlined, 2, 38),
         ],
       ),

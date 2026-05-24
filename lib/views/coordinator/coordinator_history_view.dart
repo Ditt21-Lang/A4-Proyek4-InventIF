@@ -13,6 +13,7 @@ class _CoordinatorHistoryViewState extends State<CoordinatorHistoryView> {
   final CoordinatorDashboardController _controller =
       CoordinatorDashboardController();
   final TextEditingController _searchController = TextEditingController();
+  String? _selectedStatus;
 
   @override
   void dispose() {
@@ -99,13 +100,33 @@ class _CoordinatorHistoryViewState extends State<CoordinatorHistoryView> {
                 ),
               ),
               const SizedBox(height: 20),
+              // Status Filter
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _buildStatusFilterChip('All', null),
+                      const SizedBox(width: 8),
+                      _buildStatusFilterChip('Waiting', 'Waiting'),
+                      const SizedBox(width: 8),
+                      _buildStatusFilterChip('Pending', 'Pending'),
+                      const SizedBox(width: 8),
+                      _buildStatusFilterChip('Confirmed', 'coordinator_confirmed'),
+                      const SizedBox(width: 8),
+                      _buildStatusFilterChip('Completed', 'Completed'),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
               // History List
               Expanded(
                 child: StreamBuilder<List<TransactionModel>>(
-                  stream: _searchController.text.isEmpty
-                      ? _controller.getRoomSubmissionHistory()
-                      : _controller
-                          .searchRoomSubmissionHistory(_searchController.text),
+                  stream: _selectedStatus != null
+                      ? _controller.getRoomSubmissionHistoryByStatus(_selectedStatus)
+                      : _controller.getRoomSubmissionHistory(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(
@@ -156,98 +177,187 @@ class _CoordinatorHistoryViewState extends State<CoordinatorHistoryView> {
   }
 
   Widget _buildHistoryCard(TransactionModel item) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.95),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Name + Avatar
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 24,
-                backgroundColor: Colors.grey[300],
-                backgroundImage: const NetworkImage(
-                  'https://via.placeholder.com/48',
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Name: ${item.borrowerName}',
-                      style: const TextStyle(
-                        color: Color(0xFF283593),
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _formatTanggalWaktu(item.startDate),
-                      style: const TextStyle(
-                        color: Colors.grey,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          // Room info
-          RichText(
-            text: TextSpan(
+    return GestureDetector(
+      onTap: () => _showTransactionDetail(item),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.95),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Name + Avatar
+            Row(
               children: [
-                const TextSpan(
-                  text: 'Room: ',
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 12,
-                  ),
+                CircleAvatar(
+                  radius: 24,
+                  backgroundColor: Colors.grey[300],
+                  child: const Icon(Icons.person, color: Colors.grey, size: 28),
                 ),
-                TextSpan(
-                  text: item.itemNames,
-                  style: const TextStyle(
-                    color: Color(0xFF283593),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.borrowerName,
+                        style: const TextStyle(
+                          color: Color(0xFF283593),
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _formatTanggalWaktu(item.startDate),
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
+            const SizedBox(height: 12),
+            // Room info
+            RichText(
+              text: TextSpan(
+                children: [
+                  const TextSpan(
+                    text: 'Room: ',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 12,
+                    ),
+                  ),
+                  TextSpan(
+                    text: item.itemNames,
+                    style: const TextStyle(
+                      color: Color(0xFF283593),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            // Items info
+            RichText(
+              text: TextSpan(
+                children: [
+                  const TextSpan(
+                    text: 'Items: ',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 12,
+                    ),
+                  ),
+                  TextSpan(
+                    text: item.itemNames.isNotEmpty
+                        ? item.itemNames
+                        : 'No items',
+                    style: const TextStyle(
+                      color: Color(0xFF283593),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusFilterChip(String label, String? status) {
+    final isSelected = _selectedStatus == status;
+    return FilterChip(
+      label: Text(
+        label,
+        style: TextStyle(
+          color: isSelected ? Colors.white : Colors.black87,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      selected: isSelected,
+      onSelected: (selected) {
+        setState(() {
+          _selectedStatus = selected ? status : null;
+        });
+      },
+      backgroundColor: Colors.white,
+      selectedColor: const Color(0xFFF78233),
+      side: BorderSide(
+        color: isSelected ? const Color(0xFFF78233) : Colors.grey.shade300,
+        width: 1.5,
+      ),
+    );
+  }
+
+  void _showTransactionDetail(TransactionModel transaction) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Transaction Detail'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _detailRow('Borrower', transaction.borrowerName),
+              _detailRow('Room', transaction.itemNames),
+              _detailRow('Status', transaction.status),
+              _detailRow('Event', transaction.eventName ?? '-'),
+              _detailRow('Details', transaction.details),
+              _detailRow(
+                'Start Date',
+                '${transaction.startDate.day}/${transaction.startDate.month}/${transaction.startDate.year} ${transaction.startDate.hour}:${transaction.startDate.minute.toString().padLeft(2, '0')}',
+              ),
+              _detailRow(
+                'End Date',
+                '${transaction.endDate.day}/${transaction.endDate.month}/${transaction.endDate.year} ${transaction.endDate.hour}:${transaction.endDate.minute.toString().padLeft(2, '0')}',
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
-          // Items info
-          RichText(
-            text: TextSpan(
-              children: [
-                const TextSpan(
-                  text: 'Items: ',
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 12,
-                  ),
-                ),
-                TextSpan(
-                  text: item.itemNames.isNotEmpty
-                      ? item.itemNames
-                      : 'No items',
-                  style: const TextStyle(
-                    color: Color(0xFF283593),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _detailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.grey,
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: const TextStyle(
+              fontWeight: FontWeight.w500,
+              fontSize: 14,
             ),
           ),
         ],

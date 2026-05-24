@@ -7,7 +7,7 @@ import '../models/user_model.dart';
 class CoordinatorDashboardController extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  /// Get today's room submissions (status: Waiting/Pending)
+  /// Get today's room submissions (createdAt = today, status: Waiting/Pending)
   Stream<List<TransactionModel>> getTodayRoomSubmissions() {
     final today = DateTime.now();
     final startOfDay = DateTime(today.year, today.month, today.day);
@@ -21,18 +21,18 @@ class CoordinatorDashboardController extends ChangeNotifier {
       // Filter for:
       // 1. Category is 'room'
       // 2. Status is 'Waiting' or 'Pending'
-      // 3. Start date is today
+      // 3. Created date (createdAt) is today (order dibuat hari ini)
       // 4. Sort by newest first
       list = list.where((tx) {
         final isRoom = tx.category.toLowerCase() == 'room';
         final isPending = tx.status == 'Waiting' ||
             tx.status == 'Pending' ||
             tx.status == 'pending_coordinator';
-        final isToday = tx.startDate.year == today.year &&
-            tx.startDate.month == today.month &&
-            tx.startDate.day == today.day;
+        final isCreatedToday = tx.createdAt.year == today.year &&
+            tx.createdAt.month == today.month &&
+            tx.createdAt.day == today.day;
 
-        return isRoom && isPending && isToday;
+        return isRoom && isPending && isCreatedToday;
       }).toList();
 
       list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -40,7 +40,7 @@ class CoordinatorDashboardController extends ChangeNotifier {
     });
   }
 
-  /// Get room submissions history (status: Approved/Completed)
+  /// Get room submissions history (all room transactions, all statuses)
   Stream<List<TransactionModel>> getRoomSubmissionHistory() {
     return _firestore.collection('transactions').snapshots().map((snapshot) {
       var list = snapshot.docs
@@ -49,17 +49,11 @@ class CoordinatorDashboardController extends ChangeNotifier {
 
       // Filter for:
       // 1. Category is 'room'
-      // 2. Status is 'Approved', 'Completed', 'confirmed', etc
+      // 2. ALL statuses (no status filter)
       // 3. Sort by newest first
       list = list.where((tx) {
         final isRoom = tx.category.toLowerCase() == 'room';
-        final isApproved = tx.status == 'Approved' ||
-            tx.status == 'Completed' ||
-            tx.status == 'completed' ||
-            tx.status == 'confirmed' ||
-            tx.status == 'coordinator_confirmed';
-
-        return isRoom && isApproved;
+        return isRoom;
       }).toList();
 
       list.sort((a, b) => b.startDate.compareTo(a.startDate));
@@ -67,7 +61,7 @@ class CoordinatorDashboardController extends ChangeNotifier {
     });
   }
 
-  /// Search room submissions history
+  /// Search room submissions history by name, room, or details
   Stream<List<TransactionModel>> searchRoomSubmissionHistory(String query) {
     return getRoomSubmissionHistory().map((list) {
       if (query.isEmpty) return list;
@@ -81,6 +75,15 @@ class CoordinatorDashboardController extends ChangeNotifier {
 
         return nameMatch || roomMatch || detailsMatch;
       }).toList();
+    });
+  }
+
+  /// Filter room submissions by status
+  Stream<List<TransactionModel>> getRoomSubmissionHistoryByStatus(String? status) {
+    return getRoomSubmissionHistory().map((list) {
+      if (status == null || status.isEmpty) return list;
+
+      return list.where((tx) => tx.status.toLowerCase() == status.toLowerCase()).toList();
     });
   }
 
