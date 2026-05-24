@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../models/room_model.dart';
+import '../../models/equipment_model.dart';
 import '../../models/transaction_model.dart';
 import '../../models/user_model.dart';
 import '../../services/cloudinary_service.dart';
@@ -26,6 +27,7 @@ class RequestRuanganController extends ChangeNotifier {
       17,
       20,
     );
+    fetchAvailableEquipment();
   }
 
   final RoomModel room;
@@ -39,14 +41,22 @@ class RequestRuanganController extends ChangeNotifier {
   late DateTime _startDateTime;
   late DateTime _endDateTime;
   bool _isSubmitting = false;
+  bool _isLoadingEquipment = false;
   String? _documentLabel;
   File? _pickedFile;
+  List<EquipmentModel> _availableEquipment = [];
+  final List<EquipmentModel> _selectedEquipment = [];
 
   DateTime get startDateTime => _startDateTime;
   DateTime get endDateTime => _endDateTime;
   bool get isSubmitting => _isSubmitting;
+  bool get isLoadingEquipment => _isLoadingEquipment;
   String? get documentLabel => _documentLabel;
   File? get pickedFile => _pickedFile;
+  List<EquipmentModel> get availableEquipment =>
+      List.unmodifiable(_availableEquipment);
+  List<EquipmentModel> get selectedEquipment =>
+      List.unmodifiable(_selectedEquipment);
 
   @override
   void dispose() {
@@ -57,19 +67,57 @@ class RequestRuanganController extends ChangeNotifier {
 
   Future<void> pickDocument() async {
     try {
-      // FilePickerResult? result = await FilePicker.platform.pickFiles(
-      //   type: FileType.custom,
-      //   allowedExtensions: ['pdf'],
-      // );
+      FilePickerResult? result = await FilePicker.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+      );
 
-      // if (result != null && result.files.single.path != null) {
-      //   _pickedFile = File(result.files.single.path!);
-      //   _documentLabel = result.files.single.name;
-      //   notifyListeners();
-      // }
+      if (result != null && result.files.single.path != null) {
+        _pickedFile = File(result.files.single.path!);
+        _documentLabel = result.files.single.name;
+        notifyListeners();
+      }
     } catch (e) {
-      print('Error picking document: $e');
+      debugPrint('Error picking document: $e');
     }
+  }
+
+  Future<void> fetchAvailableEquipment() async {
+    _isLoadingEquipment = true;
+    notifyListeners();
+
+    try {
+      final snapshot = await _firestore.collection('equipments').get();
+      final equipment = snapshot.docs
+          .map((doc) => EquipmentModel.fromFirestore(doc))
+          .where((item) => _isAvailableStatus(item.status))
+          .toList();
+
+      equipment
+          .sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+      _availableEquipment = equipment;
+    } catch (e) {
+      debugPrint('Gagal mengambil equipment: $e');
+      _availableEquipment = [];
+    } finally {
+      _isLoadingEquipment = false;
+      notifyListeners();
+    }
+  }
+
+  bool isEquipmentSelected(EquipmentModel equipment) {
+    return _selectedEquipment.any((item) => item.id == equipment.id);
+  }
+
+  void addEquipment(EquipmentModel equipment) {
+    if (isEquipmentSelected(equipment)) return;
+    _selectedEquipment.add(equipment);
+    notifyListeners();
+  }
+
+  void removeEquipment(EquipmentModel equipment) {
+    _selectedEquipment.removeWhere((item) => item.id == equipment.id);
+    notifyListeners();
   }
 
   Future<void> pickStartDate(BuildContext context) async {
@@ -206,22 +254,35 @@ class RequestRuanganController extends ChangeNotifier {
       }
 
       final userDoc = await _firestore.collection('users').doc(user.uid).get();
-      final userData = userDoc.exists
-          ? UserModel.fromMap(userDoc.data() as Map<String, dynamic>)
-          : null;
+      String? userFullName;
+      if (userDoc.exists) {
+        final userData = UserModel.fromMap(
+          userDoc.data() as Map<String, dynamic>,
+        );
+        userFullName = userData.fullName.trim();
+      }
 
       final transactionRef = _firestore.collection('transactions').doc();
+      final transactionItems = [
+        TransactionItem(id: room.id, name: room.name, type: 'room'),
+        ..._selectedEquipment.map(
+          (equipment) => TransactionItem(
+            id: equipment.id,
+            name: equipment.name,
+            type: 'equipment',
+          ),
+        ),
+      ];
+
       final transaction = TransactionModel(
         transactionId: transactionRef.id,
         borrowerId: user.uid,
-        borrowerName: (userData?.fullName?.trim().isNotEmpty ?? false)
-            ? userData!.fullName!
+        borrowerName: (userFullName?.isNotEmpty ?? false)
+            ? userFullName!
             : (user.displayName?.trim().isNotEmpty == true
                 ? user.displayName!
                 : user.email ?? 'Unknown User'),
-        items: [
-          TransactionItem(id: room.id, name: room.name, type: 'room'),
-        ],
+        items: transactionItems,
         category: 'room',
         startDate: _startDateTime,
         endDate: _endDateTime,
@@ -250,5 +311,10 @@ class RequestRuanganController extends ChangeNotifier {
     if (normalized.isBefore(min)) return min;
     if (normalized.isAfter(max)) return max;
     return normalized;
+  }
+
+  bool _isAvailableStatus(String status) {
+    final normalized = status.trim().toLowerCase();
+    return normalized == 'available' || normalized == 'tersedia';
   }
 }
