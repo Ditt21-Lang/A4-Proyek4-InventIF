@@ -61,8 +61,22 @@ class _RegisterPasswordCreationViewState
       return;
     }
 
-    if (_passwordController.text.length < 6) {
-      _showErrorDialog('Password must be at least 6 characters');
+    // Validate password: min 8 chars, uppercase, lowercase, digit
+    final password = _passwordController.text;
+    if (password.length < 8) {
+      _showErrorDialog('Password must be at least 8 characters');
+      return;
+    }
+    if (!password.contains(RegExp(r'[A-Z]'))) {
+      _showErrorDialog('Password must include uppercase letter (A-Z)');
+      return;
+    }
+    if (!password.contains(RegExp(r'[a-z]'))) {
+      _showErrorDialog('Password must include lowercase letter (a-z)');
+      return;
+    }
+    if (!password.contains(RegExp(r'[0-9]'))) {
+      _showErrorDialog('Password must include a number (0-9)');
       return;
     }
 
@@ -262,7 +276,7 @@ class _RegisterPasswordCreationViewState
               _buildTextField(
                 label: 'Password',
                 controller: _passwordController,
-                hintText: 'Minimum 6 characters',
+                hintText: 'Minimum 8 characters with uppercase, lowercase, and number',
                 prefixIcon: Icons.lock,
                 enabled: !_isLoading,
                 isPassword: true,
@@ -312,7 +326,7 @@ class _RegisterPasswordCreationViewState
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      '• Minimum 6 characters\n• Use mix of letters and numbers\n• Keep it secure!',
+                      '• Minimum 8 characters\n• Use uppercase (A-Z) and lowercase (a-z)\n• Include at least one number (0-9)'
                       style: TextStyle(
                         fontSize: 11,
                         color: Colors.amber.shade800,

@@ -113,7 +113,7 @@ class LoginController {
       case 'too-many-requests':
         return 'Too many login attempts. Try again later.';
       case 'weak-password':
-        return 'Password is too weak. Use at least 6 characters.';
+        return 'Password is too weak. Use at least 8 characters with uppercase, lowercase, and number.';
       default:
         return 'An error occurred. Please try again.';
     }

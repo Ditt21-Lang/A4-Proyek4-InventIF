@@ -22,6 +22,7 @@ class _UserProfileViewState extends State<UserProfileView> {
   String? userID;
   String? userDate;
   String? userRole;
+  String? userProfileImage;
 
   @override
   void initState() {
@@ -39,6 +40,7 @@ class _UserProfileViewState extends State<UserProfileView> {
           userID = userProfile.identifier;
           userDate = userProfile.dateOfBirth ?? '16/08/06';
           userRole = userProfile.role;
+          userProfileImage = userProfile.profileImage;
         });
       }
     } catch (e) {
@@ -198,10 +200,19 @@ class _UserProfileViewState extends State<UserProfileView> {
               ],
             ),
             child: ClipOval(
-              child: Image.asset(
-                'assets/images/profile_01.png', // Pastikan asset ini ada
-                fit: BoxFit.cover,
-              ),
+              child: userProfileImage != null && userProfileImage!.isNotEmpty
+                  ? Image.network(
+                      userProfileImage!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        color: Colors.grey[300],
+                        child: const Icon(Icons.person, color: Colors.grey, size: 40),
+                      ),
+                    )
+                  : Container(
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.person, color: Colors.grey, size: 40),
+                    ),
             ),
           ),
           const SizedBox(width: 20),
