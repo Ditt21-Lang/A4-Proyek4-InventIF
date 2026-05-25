@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
@@ -44,6 +45,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
   String? userName;
   String? userNickname;
   String? userUID;
+  String? userProfileImage;
   String? _ktmFileName;
 
   @override
@@ -75,6 +77,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
           _emailController.text = userData.email;
           userName = userData.fullName;
           userNickname = userData.nickname;
+          userProfileImage = userData.profileImage;
           _fullNameController.text = userData.fullName;
           _nicknameController.text = userData.nickname ?? '';
           _ktmController.text = userData.ktm ?? '';
@@ -83,7 +86,8 @@ class _ManageAccountViewState extends State<ManageAccountView> {
         });
 
         // Check for existing KTM file in document directory (writable location)
-        if (userData.uid.isNotEmpty) {
+        // Only on mobile/desktop, not on web
+        if (!kIsWeb && userData.uid.isNotEmpty) {
           try {
             final appDocDir = await getApplicationDocumentsDirectory();
             final userFolder =
@@ -155,15 +159,17 @@ class _ManageAccountViewState extends State<ManageAccountView> {
         final fileName = 'KTM.$fileExtension';
 
         // Create folder path in app's document directory (writable location)
-        final appDocDir = await getApplicationDocumentsDirectory();
-        final userFolder = Directory('${appDocDir.path}/ktm_files/$userUID');
-        if (!userFolder.existsSync()) {
-          userFolder.createSync(recursive: true);
-        }
+        // Only on mobile/desktop, not on web
+        if (!kIsWeb) {
+          final appDocDir = await getApplicationDocumentsDirectory();
+          final userFolder = Directory('${appDocDir.path}/ktm_files/$userUID');
+          if (!userFolder.existsSync()) {
+            userFolder.createSync(recursive: true);
+          }
 
-        // Copy file to document directory
-        final newFilePath = '${userFolder.path}/$fileName';
-        final newFile = await file.copy(newFilePath);
+          // Copy file to document directory
+          final newFilePath = '${userFolder.path}/$fileName';
+          final newFile = await file.copy(newFilePath);
 
         // Save path to database
         final success = await _controller.updatePersonalInfo(
@@ -233,8 +239,22 @@ class _ManageAccountViewState extends State<ManageAccountView> {
       _showErrorSnackBar('New passwords do not match');
       return;
     }
-    if (_newPasswordController.text.length < 6) {
-      _showErrorSnackBar('Password must be at least 6 characters');
+    // Validate password: min 8 chars, uppercase, lowercase, digit
+    final password = _newPasswordController.text;
+    if (password.length < 8) {
+      _showErrorSnackBar('Password must be at least 8 characters');
+      return;
+    }
+    if (!password.contains(RegExp(r'[A-Z]'))) {
+      _showErrorSnackBar('Password must include uppercase letter (A-Z)');
+      return;
+    }
+    if (!password.contains(RegExp(r'[a-z]'))) {
+      _showErrorSnackBar('Password must include lowercase letter (a-z)');
+      return;
+    }
+    if (!password.contains(RegExp(r'[0-9]'))) {
+      _showErrorSnackBar('Password must include a number (0-9)');
       return;
     }
     setState(() => _isLoadingPassword = true);
@@ -378,10 +398,19 @@ class _ManageAccountViewState extends State<ManageAccountView> {
                         Border.all(color: const Color(0xFFE0E0E0), width: 2),
                   ),
                   child: ClipOval(
-                    child: Image.asset(
-                      'assets/images/profile_01.png',
-                      fit: BoxFit.cover,
-                    ),
+                    child: userProfileImage != null && userProfileImage!.isNotEmpty
+                        ? Image.network(
+                            userProfileImage!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => Container(
+                              color: Colors.grey[300],
+                              child: const Icon(Icons.person, color: Colors.grey, size: 24),
+                            ),
+                          )
+                        : Container(
+                            color: Colors.grey[300],
+                            child: const Icon(Icons.person, color: Colors.grey, size: 24),
+                          ),
                   ),
                 ),
               ],
@@ -451,7 +480,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
                       _buildPasswordField(
                         label: 'New Password',
                         hint:
-                            '*password must be at least 8 character\nand include number and letter',
+                            '*password must be at least 8 character with uppercase (A-Z),\nlowercase (a-z) and number (0-9)',
                         controller: _newPasswordController,
                         obscure: _obscureNew,
                         onToggle: () =>
@@ -461,7 +490,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
                       _buildPasswordField(
                         label: 'Confirm New Password',
                         hint:
-                            '*password must be at least 8 character\nand include number and letter',
+                            '*password must be at least 8 character with uppercase (A-Z),\nlowercase (a-z) and number (0-9)',
                         controller: _confirmPasswordController,
                         obscure: _obscureConfirm,
                         onToggle: () =>

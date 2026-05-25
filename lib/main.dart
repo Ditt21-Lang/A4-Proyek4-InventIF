@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:workmanager/workmanager.dart';
 import 'firebase_options.dart';
@@ -12,6 +13,7 @@ import 'views/profile/userProfile_view.dart';
 import 'views/auth/register_view.dart';
 import 'views/auth/register_identity_input_view.dart';
 import 'views/Teknisi/main_dashboard_teknisi.dart';
+import 'views/coordinator/coordinator_dashboard_view.dart';
 
 const String pendingSyncNotificationTask = 'pendingSyncNotificationTask';
 
@@ -32,7 +34,12 @@ final GlobalKey<ScaffoldMessengerState> globalMessengerKey =
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Workmanager().initialize(callbackDispatcher, isInDebugMode: false);
+  
+  // Initialize workmanager only on mobile platforms (not on web)
+  if (!kIsWeb) {
+    await Workmanager().initialize(callbackDispatcher, isInDebugMode: false);
+  }
+  
   await Hive.initFlutter();
   await Hive.openBox('pending_requests');
 
@@ -40,6 +47,7 @@ void main() async {
   runApp(const MyApp());
 }
 
+// OLD MyApp CLASS
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
@@ -81,9 +89,29 @@ class _MyAppState extends State<MyApp> {
         '/profile': (context) => const UserProfileView(),
         '/dashboard-teknisi': (context) => const MainDashboardTeknisi(),
         '/list-pengajuan': (context) => const ListPengajuanScreen(),
+        '/dashboard-coordinator': (context) => const CoordinatorDashboardView(),
       },
       // home: const MyHomePage(title: 'Flutter Demo Home Page'),
       // home: KatalogAlatView(controller: KatalogAlatController()),
     );
   }
 }
+
+// TEMPORARY MyAppCoordinator - COMMENTED OUT
+// class MyAppCoordinator extends StatelessWidget {
+//   const MyAppCoordinator({super.key});
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       scaffoldMessengerKey: globalMessengerKey,
+//       title: 'InventIF - Coordinator',
+//       debugShowCheckedModeBanner: false,
+//       theme: ThemeData(
+//         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2A2C8F)),
+//         useMaterial3: true,
+//       ),
+//       home: const CoordinatorDashboardView(),
+//     );
+//   }
+// }

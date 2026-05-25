@@ -69,14 +69,14 @@ class _LoginViewState extends State<LoginView> {
             duration: const Duration(seconds: 2),
           ),
         );
-        // Navigasi ke dashboard
+        // Navigasi ke dashboard sesuai role
         var userData = result['userData'];
 
         if (userData != null) {
           String role = userData.role.toLowerCase();
 
-          if (role == 'user') {
-            Navigator.pushReplacementNamed(context, '/dashboard');
+          if (role == 'coordinator') {
+            Navigator.pushReplacementNamed(context, '/dashboard-coordinator');
           } else if (role == 'teknisi') {
             Navigator.pushReplacementNamed(context, '/dashboard-teknisi');
           } else {

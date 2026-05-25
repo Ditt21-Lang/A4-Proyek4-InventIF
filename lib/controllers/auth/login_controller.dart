@@ -80,7 +80,8 @@ class LoginController {
           await _firestore.collection('users').doc(uid).get();
 
       if (doc.exists) {
-        return UserModel.fromMap(doc.data() as Map<String, dynamic>);
+        final data = doc.data() as Map<String, dynamic>;
+        return UserModel.fromMap(data);
       } else {
         return null;
       }
@@ -117,7 +118,7 @@ class LoginController {
       case 'too-many-requests':
         return 'Too many login attempts. Try again later.';
       case 'weak-password':
-        return 'Password is too weak. Use at least 6 characters.';
+        return 'Password is too weak. Use at least 8 characters with uppercase, lowercase, and number.';
       default:
         return 'An error occurred. Please try again.';
     }
