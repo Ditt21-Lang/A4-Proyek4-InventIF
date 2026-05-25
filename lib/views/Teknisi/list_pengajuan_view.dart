@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../controllers/Teknisi/list_pengajuan_controller.dart';
 import '../../models/transaction_model.dart';
+import 'return_scanner_view.dart';
 
 class ListPengajuanScreen extends StatefulWidget {
   const ListPengajuanScreen({super.key});
@@ -74,14 +75,22 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                Padding(
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _buildFilterTab('Borrowed', 'Waiting'),
-                      const SizedBox(width: 16),
-                      _buildFilterTab('History', 'Approved'),
+                      // Tab 1: Antrean Pinjam Baru
+                      _buildFilterTab('Requests', 'Waiting'),
+                      const SizedBox(width: 10),
+                      
+                      // Tab 2: Barang di Luar & Mau Dikembalikan
+                      _buildFilterTab('In Use', 'In Use'),
+                      const SizedBox(width: 10),
+                      
+                      // Tab 3: Riwayat Selesai
+                      _buildFilterTab('History', 'History'),
                     ],
                   ),
                 ),
@@ -211,14 +220,24 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
               }),
             )
           else if (_selectedStatus == 'In Use')
-            const Align(
-              alignment: Alignment.center,
-              child: Text('Sedang dipakai mahasiswa',
-                  style: TextStyle(
-                      color: Colors.blue,
-                      fontWeight: FontWeight.bold,
-                      fontStyle: FontStyle.italic)),
-            )
+            // Jika statusnya Returning, munculkan tombol Scan Pengembalian
+            if (item.status == 'Returning')
+              _buildButton('Scan Pengembalian', [Colors.orange, Colors.deepOrange], () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => ReturnScannerView(transaction: item)),
+                );
+              })
+            // Jika statusnya murni In Use (belum klik return), beri teks saja
+            else
+              const Align(
+                alignment: Alignment.center,
+                child: Text('Sedang dipakai mahasiswa',
+                    style: TextStyle(
+                        color: Colors.blue,
+                        fontWeight: FontWeight.bold,
+                        fontStyle: FontStyle.italic)),
+              )
           else if (_selectedStatus == 'History')
             Align(
               alignment: Alignment.center,

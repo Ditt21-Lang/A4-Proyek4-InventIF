@@ -13,9 +13,7 @@ class TransactionDetailController extends ChangeNotifier {
           .collection('transactions')
           .doc(transactionId)
           .update({
-        // Saya kembalikan ke 'Waiting' seperti kode Anda,
-        // tapi pastikan Teknisi paham bedanya dengan antrean pinjam baru
-        'status': 'Waiting',
+        'status': 'Returning',
       });
 
       isLoading = false;
