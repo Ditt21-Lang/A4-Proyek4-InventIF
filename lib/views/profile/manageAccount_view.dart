@@ -189,7 +189,8 @@ class _ManageAccountViewState extends State<ManageAccountView> {
         } else {
           _showErrorSnackBar('Failed to save KTM file path to database');
         }
-      }
+        } // closes if (!kIsWeb)
+      } // closes if (image != null)
     } catch (e) {
       print('Error uploading KTM: $e');
       _showErrorSnackBar('Failed to upload file: ${e.toString()}');
