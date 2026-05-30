@@ -3,6 +3,7 @@ import '../../controllers/Teknisi/equipment_list_controller.dart';
 import '../../models/equipment_model.dart';
 import 'add_equipment_view.dart';
 import 'edit_equipment_view.dart';
+import 'detail_equipment_view.dart';
 
 class EquipmentListView extends StatefulWidget {
   const EquipmentListView({super.key});
@@ -129,74 +130,86 @@ class _EquipmentListViewState extends State<EquipmentListView> {
                         itemCount: filteredItems.length,
                         itemBuilder: (context, index) {
                           final item = filteredItems[index];
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 14),
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: [
-                                  BoxShadow(
-                                      color: Colors.black.withOpacity(0.03),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 4))
-                                ]),
-                            child: Row(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: Image.network(item.image,
-                                      width: 50,
-                                      height: 50,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) => const Icon(
-                                          Icons.inventory_2_rounded,
-                                          size: 40,
-                                          color: Colors.grey)),
-                                ),
-                                const SizedBox(width: 14),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(item.name,
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 14,
-                                              color: Color(0xFF1A237E))),
-                                      Text('ID: ${item.id}',
-                                          style: const TextStyle(
-                                              fontSize: 11,
-                                              color: Colors.grey)),
-                                    ],
-                                  ),
-                                ),
-                                Row(
+                          return GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (content) =>
+                                          DetailEquipmentView(equipment: item)),
+                                );
+                              },
+                              child: Container(
+                                margin: const EdgeInsets.only(bottom: 14),
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(
+                                          color: Colors.black.withOpacity(0.03),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 4))
+                                    ]),
+                                child: Row(
                                   children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.edit_note_rounded,
-                                          color: Colors.blue),
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (_) => EditEquipmentView(
-                                                  equipment: item)),
-                                        );
-                                      },
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: Image.network(item.image,
+                                          width: 50,
+                                          height: 50,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (_, __, ___) =>
+                                              const Icon(
+                                                  Icons.inventory_2_rounded,
+                                                  size: 40,
+                                                  color: Colors.grey)),
                                     ),
-                                    IconButton(
-                                        icon: const Icon(
-                                            Icons.delete_outline_rounded,
-                                            color: Colors.redAccent),
-                                        onPressed: () =>
-                                            _showDeleteDialog(item)),
+                                    const SizedBox(width: 14),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(item.name,
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 14,
+                                                  color: Color(0xFF1A237E))),
+                                          Text('ID: ${item.id}',
+                                              style: const TextStyle(
+                                                  fontSize: 11,
+                                                  color: Colors.grey)),
+                                        ],
+                                      ),
+                                    ),
+                                    Row(
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(
+                                              Icons.edit_note_rounded,
+                                              color: Colors.blue),
+                                          onPressed: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (_) =>
+                                                      EditEquipmentView(
+                                                          equipment: item)),
+                                            );
+                                          },
+                                        ),
+                                        IconButton(
+                                            icon: const Icon(
+                                                Icons.delete_outline_rounded,
+                                                color: Colors.redAccent),
+                                            onPressed: () =>
+                                                _showDeleteDialog(item)),
+                                      ],
+                                    )
                                   ],
-                                )
-                              ],
-                            ),
-                          );
+                                ),
+                              ));
                         },
                       );
                     },
