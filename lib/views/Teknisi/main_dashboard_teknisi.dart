@@ -38,7 +38,8 @@ class _MainDashboardTeknisiState extends State<MainDashboardTeknisi> {
     return Container(
       padding: EdgeInsets.only(
         top: 15,
-        bottom: 10 + MediaQuery.of(context).padding.bottom, // Anti tertutup navigasi HP
+        bottom: 10 +
+            MediaQuery.of(context).padding.bottom, // Anti tertutup navigasi HP
       ),
       decoration: const BoxDecoration(
         color: Color(0xFFEBEBEB),
