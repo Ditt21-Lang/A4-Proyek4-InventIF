@@ -169,7 +169,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
 
           // Copy file to document directory
           final newFilePath = '${userFolder.path}/$fileName';
-          final newFile = await file.copy(newFilePath);
+          await file.copy(newFilePath);
 
           // Save path to database
           final success = await _controller.updatePersonalInfo(
@@ -189,7 +189,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
           } else {
             _showErrorSnackBar('Failed to save KTM file path to database');
           }
-        }
         } // closes if (!kIsWeb)
       } // closes if (image != null)
     } catch (e) {
@@ -826,10 +825,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
     required String label,
     required TextEditingController controller,
   }) {
-    // Create masked representation of current password
-    String maskedPassword =
-        controller.text.isNotEmpty ? '*' * controller.text.length : '';
-
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
