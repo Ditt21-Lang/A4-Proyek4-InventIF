@@ -457,6 +457,66 @@ class _SelfCheckoutViewState extends State<SelfCheckoutView> {
                 ),
               ],
             ),
+            // --- UI DINAMIS: MUNCUL HANYA JIKA LINTAS HARI ---
+            if (!_isSameDay()) ...[
+              const SizedBox(height: 24),
+              const Text(
+                'Upload Dokumen Pendukung',
+                style: TextStyle(
+                  color: Color(0xFFF78233),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                'Peminjaman lebih dari 1 hari wajib menyertakan surat izin atau jaminan (PDF/JPG).',
+                style: TextStyle(color: Colors.white70, fontSize: 12),
+              ),
+              const SizedBox(height: 12),
+              GestureDetector(
+                onTap: () => _checkoutController.pickDocument(),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE6E2E6),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.upload_file_rounded,
+                        color: Colors.black87,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        // AnimatedBuilder untuk re-render saat nama file berubah
+                        child: AnimatedBuilder(
+                          animation: _checkoutController,
+                          builder: (context, _) {
+                            return Text(
+                              _checkoutController.documentLabel ??
+                                  'Tap to upload document...',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.black54,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
             const SizedBox(height: 40),
             SizedBox(
               width: double.infinity,
@@ -473,10 +533,23 @@ class _SelfCheckoutViewState extends State<SelfCheckoutView> {
                       ),
                     ),
                     // MATIKAN TOMBOL JIKA SEDANG LOADING
+                    // MATIKAN TOMBOL JIKA SEDANG LOADING
                     onPressed: _checkoutController.isCheckingOut
                         ? null
                         : () async {
-                            // --- TAMBAHAN BARU: GABUNGKAN TANGGAL & JAM ---
+                            // VALIDASI UX: Lintas Hari Wajib Upload
+                            if (!_isSameDay() &&
+                                _checkoutController.pickedFile == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                      'Harap unggah dokumen pendukung untuk peminjaman lintas hari!'),
+                                  backgroundColor: Colors.redAccent,
+                                ),
+                              );
+                              return; // Hentikan proses
+                            }
+
                             DateTime finalStartDateTime = DateTime(
                               _startDate.year,
                               _startDate.month,
@@ -492,42 +565,38 @@ class _SelfCheckoutViewState extends State<SelfCheckoutView> {
                               _endTime.hour,
                               _endTime.minute,
                             );
-                            // ---------------------------------------------
 
-                            // 1. Eksekusi penyimpanan ke Firebase
-                            bool success =
-                                await _checkoutController.processCheckout(
-                              widget.equipments,
-                              finalStartDateTime, // Kirim tanggal & jam yang sudah digabung
-                              finalEndDateTime, // Kirim tanggal & jam yang sudah digabung
-                            );
+                            try {
+                              bool success =
+                                  await _checkoutController.processCheckout(
+                                widget.equipments,
+                                finalStartDateTime,
+                                finalEndDateTime,
+                              );
 
-                            // 2. Cek apakah berhasil
-                            if (success && mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Pesanan dicatat! Akan disinkronkan ke server.',
+                              if (success && mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Pesanan dicatat!'),
+                                    backgroundColor: Colors.green,
                                   ),
-                                  backgroundColor: Colors.green,
-                                ),
-                              );
-                              // 3. Kembali ke halaman Katalog (Anti Layar Hitam)
-                              Navigator.pushNamedAndRemoveUntil(
-                                  context,
-                                  '/dashboard',
-                                  (route) =>
-                                      false // Buang semua riwayat halaman sebelumnya agar memori HP lega
-                                  );
-                            } else if (mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Gagal melakukan checkout. Coba lagi.',
+                                );
+                                Navigator.pushNamedAndRemoveUntil(
+                                    context, '/dashboard', (route) => false);
+                              }
+                            } catch (e) {
+                              // Tangkap pesan error dari Controller (misal saat offline tapi ada upload)
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(e
+                                        .toString()
+                                        .replaceFirst('Exception: ', '')),
+                                    backgroundColor: Colors.red,
+                                    duration: const Duration(seconds: 4),
                                   ),
-                                  backgroundColor: Colors.red,
-                                ),
-                              );
+                                );
+                              }
                             }
                           },
                     // UBAH TAMPILAN TEXT MENJADI LOADING
