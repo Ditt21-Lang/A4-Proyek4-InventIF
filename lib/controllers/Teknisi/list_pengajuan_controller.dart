@@ -1,34 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:developer';
 import '../../models/transaction_model.dart';
 
 class ListPengajuanController extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Stream<List<TransactionModel>> getFilteredStream(String status) {
+    // [VAR DUMP 1] Cek parameter status apa yang dikirim oleh tombol UI
+    debugPrint("🔍 [DEBUG] UI meminta data untuk tab: '$status'");
+
     Query query = _firestore.collection('transactions');
 
     if (status == 'History') {
-      // Ambil SEMUA status yang menandakan barang sudah selesai/kembali (Termasuk data lama)
       query = query.where('status', whereIn: [
-        'Approved',
-        'Returned',
-        'Selesai',
-        'completed',
-        'dikembalikan'
+        'Approved', 'Returned', 'Selesai', 'completed', 'dikembalikan'
       ]);
-    } else {
-      // Untuk status 'Waiting' dan 'In Use'
+    } 
+    // PERBAIKAN: Tangkap kata 'Borrowed' jika UI menggunakan kata tersebut!
+    else if (status == 'In Use' || status == 'Borrowed') { 
+      query = query.where('status', whereIn: ['In Use', 'Returning']);
+    } 
+    else {
       query = query.where('status', isEqualTo: status);
     }
 
     return query.snapshots().map((snapshot) {
-      var list = snapshot.docs
-          .map((doc) => TransactionModel.fromFirestore(doc))
-          .toList();
+      // [VAR DUMP 2] Cek berapa data yang berhasil ditarik dari Firebase
+      debugPrint("📦 [DEBUG] Ditemukan ${snapshot.docs.length} dokumen untuk tab '$status'");
+      
+      var list = snapshot.docs.map((doc) {
+        var dataMap = doc.data() as Map<String, dynamic>;
+        
+        // [VAR DUMP 3] Intip langsung jeroan setiap dokumen yang ditarik (seperti print_r)
+        // inspect(dataMap); // Hapus tanda komentar di awal baris ini jika ingin membongkar seluruh isi map
 
-      // Urutkan data secara lokal (Tanggal paling baru muncul di paling atas!)
-      list.sort((a, b) => b.startDate.compareTo(a.startDate));
+        debugPrint("   => Transaksi ID: ${doc.id} | Status Asli DB: ${dataMap['status']}");
+        
+        return TransactionModel.fromFirestore(doc);
+      }).toList();
+
+      // Logika pengurutan khusus untuk menaikkan 'Returning' ke paling atas
+      list.sort((a, b) {
+        if (a.status == 'Returning' && b.status != 'Returning') {
+          return -1; 
+        } else if (a.status != 'Returning' && b.status == 'Returning') {
+          return 1;  
+        } else {
+          return b.startDate.compareTo(a.startDate);
+        }
+      });
 
       return list;
     });
