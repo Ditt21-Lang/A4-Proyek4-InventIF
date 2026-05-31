@@ -171,23 +171,24 @@ class _ManageAccountViewState extends State<ManageAccountView> {
           final newFilePath = '${userFolder.path}/$fileName';
           final newFile = await file.copy(newFilePath);
 
-        // Save path to database
-        final success = await _controller.updatePersonalInfo(
-          fullName: _fullNameController.text,
-          nickname: _nicknameController.text,
-          identifier: _identifierController.text,
-          ktm: newFilePath, // Save file path
-          birthDate: _birthDateController.text,
-        );
+          // Save path to database
+          final success = await _controller.updatePersonalInfo(
+            fullName: _fullNameController.text,
+            nickname: _nicknameController.text,
+            identifier: _identifierController.text,
+            ktm: newFilePath, // Save file path
+            birthDate: _birthDateController.text,
+          );
 
-        if (success) {
-          setState(() {
-            _ktmFileName = fileName;
-            _ktmController.text = newFilePath;
-          });
-          _showSuccessSnackBar('KTM file uploaded successfully');
-        } else {
-          _showErrorSnackBar('Failed to save KTM file path to database');
+          if (success) {
+            setState(() {
+              _ktmFileName = fileName;
+              _ktmController.text = newFilePath;
+            });
+            _showSuccessSnackBar('KTM file uploaded successfully');
+          } else {
+            _showErrorSnackBar('Failed to save KTM file path to database');
+          }
         }
       }
     } catch (e) {
