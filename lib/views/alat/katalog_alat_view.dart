@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import '../../controllers/alat/katalog_alat_controller.dart';
 import '../../models/equipment_model.dart';
-import '../../widgets/base_catalog_layout.dart'; // Import layout universal
+import '../../widgets/base_catalog_layout.dart';
+import '../teknisi/detail_equipment_view.dart';
 
 class KatalogAlatView extends StatelessWidget {
   final KatalogAlatController controller;
@@ -154,6 +155,7 @@ class KatalogAlatView extends StatelessWidget {
                   itemCount: controller.displayedEquipment.length,
                   itemBuilder: (context, index) {
                     return _buildEquipmentCard(
+                      context,
                       controller.displayedEquipment[index],
                     );
                   },
@@ -189,65 +191,78 @@ class KatalogAlatView extends StatelessWidget {
     );
   }
 
-  Widget _buildEquipmentCard(EquipmentModel equipment) {
+  // Tambahkan BuildContext pada parameter
+  Widget _buildEquipmentCard(BuildContext context, EquipmentModel equipment) {
     Color statusColor =
         equipment.status == 'Available' ? Colors.green : Colors.amber;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFE6E2E6),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            // Hapus komentar di bawah ini jika assets gambar sudah tersedia di pubspec.yaml
-            // child: Image.asset(equipment.imagePath, fit: BoxFit.contain),
+    // Bungkus dengan GestureDetector
+    return GestureDetector(
+      onTap: () {
+        // Langsung arahkan ke halaman DetailEquipmentView yang sudah Anda buat!
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DetailEquipmentView(equipment: equipment),
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  equipment.name,
-                  style: const TextStyle(
-                    color: Color(0xFFF78233), // Warna font oranye
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: statusColor,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    equipment.status,
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFE6E2E6),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              clipBehavior:
+                  Clip.antiAlias, // Wajib agar sudut gambar ikut melengkung
+              child: _buildEquipmentImage(equipment
+                  .image), // Sesuaikan .image atau .gambar dengan EquipmentModel Anda
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    equipment.name,
                     style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
+                      color: Color(0xFFF78233),
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: statusColor,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      equipment.status,
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -282,6 +297,29 @@ class KatalogAlatView extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildEquipmentImage(String imageUrl) {
+    if (imageUrl.trim().isEmpty) {
+      return const Icon(Icons.inventory_2_outlined,
+          color: Colors.grey, size: 32);
+    }
+
+    if (imageUrl.startsWith('http')) {
+      return Image.network(
+        imageUrl,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) =>
+            const Icon(Icons.broken_image, color: Colors.grey, size: 32),
+      );
+    }
+
+    return Image.asset(
+      imageUrl,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) =>
+          const Icon(Icons.broken_image, color: Colors.grey, size: 32),
     );
   }
 }
