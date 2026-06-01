@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../models/transaction_model.dart';
-import '../models/user_model.dart';
+import '../../models/transaction_model.dart';
+import '../../models/user_model.dart';
 
 class CoordinatorDashboardController extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -69,7 +69,8 @@ class CoordinatorDashboardController extends ChangeNotifier {
       return list.where((tx) {
         final nameMatch =
             tx.borrowerName.toLowerCase().contains(query.toLowerCase());
-        final roomMatch = tx.itemNames.toLowerCase().contains(query.toLowerCase());
+        final roomMatch =
+            tx.itemNames.toLowerCase().contains(query.toLowerCase());
         final detailsMatch =
             tx.details.toLowerCase().contains(query.toLowerCase());
 
@@ -79,11 +80,14 @@ class CoordinatorDashboardController extends ChangeNotifier {
   }
 
   /// Filter room submissions by status
-  Stream<List<TransactionModel>> getRoomSubmissionHistoryByStatus(String? status) {
+  Stream<List<TransactionModel>> getRoomSubmissionHistoryByStatus(
+      String? status) {
     return getRoomSubmissionHistory().map((list) {
       if (status == null || status.isEmpty) return list;
 
-      return list.where((tx) => tx.status.toLowerCase() == status.toLowerCase()).toList();
+      return list
+          .where((tx) => tx.status.toLowerCase() == status.toLowerCase())
+          .toList();
     });
   }
 
@@ -124,7 +128,8 @@ class CoordinatorDashboardController extends ChangeNotifier {
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) return null;
 
-      final userDoc = await _firestore.collection('users').doc(currentUser.uid).get();
+      final userDoc =
+          await _firestore.collection('users').doc(currentUser.uid).get();
       if (!userDoc.exists) return null;
 
       return UserModel.fromMap(userDoc.data() as Map<String, dynamic>);

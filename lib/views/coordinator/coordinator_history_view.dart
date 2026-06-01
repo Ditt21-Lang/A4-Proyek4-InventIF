@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../controllers/coordinator_dashboard_controller.dart';
+import '../../controllers/coordinator/coordinator_dashboard_controller.dart';
 import '../../models/transaction_model.dart';
 
 class CoordinatorHistoryView extends StatefulWidget {
@@ -113,7 +113,8 @@ class _CoordinatorHistoryViewState extends State<CoordinatorHistoryView> {
                       const SizedBox(width: 8),
                       _buildStatusFilterChip('Pending', 'Pending'),
                       const SizedBox(width: 8),
-                      _buildStatusFilterChip('Confirmed', 'coordinator_confirmed'),
+                      _buildStatusFilterChip(
+                          'Confirmed', 'coordinator_confirmed'),
                       const SizedBox(width: 8),
                       _buildStatusFilterChip('Completed', 'Completed'),
                     ],
@@ -125,7 +126,8 @@ class _CoordinatorHistoryViewState extends State<CoordinatorHistoryView> {
               Expanded(
                 child: StreamBuilder<List<TransactionModel>>(
                   stream: _selectedStatus != null
-                      ? _controller.getRoomSubmissionHistoryByStatus(_selectedStatus)
+                      ? _controller
+                          .getRoomSubmissionHistoryByStatus(_selectedStatus)
                       : _controller.getRoomSubmissionHistory(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
@@ -259,9 +261,8 @@ class _CoordinatorHistoryViewState extends State<CoordinatorHistoryView> {
                     ),
                   ),
                   TextSpan(
-                    text: item.itemNames.isNotEmpty
-                        ? item.itemNames
-                        : 'No items',
+                    text:
+                        item.itemNames.isNotEmpty ? item.itemNames : 'No items',
                     style: const TextStyle(
                       color: Color(0xFF283593),
                       fontSize: 12,
@@ -270,7 +271,8 @@ class _CoordinatorHistoryViewState extends State<CoordinatorHistoryView> {
                   ),
                 ],
               ),
-            ),            const SizedBox(height: 12),
+            ),
+            const SizedBox(height: 12),
             // Confirm Button (only if status is Waiting)
             if (item.status.toLowerCase() == 'waiting')
               SizedBox(
@@ -340,7 +342,8 @@ class _CoordinatorHistoryViewState extends State<CoordinatorHistoryView> {
                     ),
                   ),
                 ),
-              ),          ],
+              ),
+          ],
         ),
       ),
     );
