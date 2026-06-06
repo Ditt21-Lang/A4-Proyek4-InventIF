@@ -58,6 +58,12 @@ class _RegisterViewState extends State<RegisterView> {
         _showErrorDialog('Invalid email format');
         return;
       }
+      
+      // Validate that email is from Polban domain
+      if (!identity.toLowerCase().endsWith('@polban.ac.id')) {
+        _showErrorDialog('Only Polban email (@polban.ac.id) is allowed to register');
+        return;
+      }
     }
 
     setState(() {

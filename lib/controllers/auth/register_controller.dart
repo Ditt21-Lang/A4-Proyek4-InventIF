@@ -99,6 +99,14 @@ class RegisterController {
   // Fungsi untuk mengirim OTP ke email menggunakan EmailJS
   Future<Map<String, dynamic>> sendEmailOTP(String email) async {
     try {
+      // Validate that email is from Polban domain
+      if (!email.toLowerCase().endsWith('@polban.ac.id')) {
+        return {
+          'success': false,
+          'message': 'Only Polban email (@polban.ac.id) is allowed to register',
+        };
+      }
+      
       _tempEmail = email;
 
       // Generate OTP
