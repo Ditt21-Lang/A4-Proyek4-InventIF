@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../controllers/auth/login_controller.dart';
 import 'register_view.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -28,6 +29,7 @@ class _LoginViewState extends State<LoginView> {
     _loginController = LoginController();
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
+    _loadSavedCredentials();
   }
 
   @override
@@ -62,6 +64,16 @@ class _LoginViewState extends State<LoginView> {
     if (mounted) {
       if (result['success']) {
         // Login successful
+        final prefs = await SharedPreferences.getInstance();
+        if (_rememberMe) {
+          await prefs.setString('saved_email', _emailController.text);
+          await prefs.setString('saved_password', _passwordController.text);
+          await prefs.setBool('remember_me', true);
+        } else {
+          await prefs.remove('saved_email');
+          await prefs.remove('saved_password');
+          await prefs.setBool('remember_me', false);
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Login successful!'),
@@ -310,6 +322,78 @@ class _LoginViewState extends State<LoginView> {
     );
   }
 
+  void _showForgotPasswordDialog() {
+    final TextEditingController resetEmailController =
+        TextEditingController(text: _emailController.text);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Reset Password'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+                'Masukkan email yang terdaftar, kami akan mengirimkan tautan untuk mengatur ulang kata sandi.',
+                style: TextStyle(fontSize: 12)),
+            const SizedBox(height: 16),
+            TextField(
+              controller: resetEmailController,
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Batal')),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context); // Tutup dialog
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Mengirim email reset...')));
+
+              // Pastikan nama method ini sesuai dengan yang ada di login_controller.dart Anda
+              // Jika di controller namanya sendPasswordResetEmail, ubah baris di bawah ini:
+              final result = await _loginController
+                  .resetPassword(resetEmailController.text);
+
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(result['message']),
+                    backgroundColor:
+                        result['success'] ? Colors.green : Colors.red,
+                  ),
+                );
+              }
+            },
+            child: const Text('Kirim'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _loadSavedCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedEmail = prefs.getString('saved_email') ?? '';
+    final savedPassword = prefs.getString('saved_password') ?? '';
+    final isRemembered = prefs.getBool('remember_me') ?? false;
+
+    if (isRemembered) {
+      setState(() {
+        _emailController.text = savedEmail;
+        _passwordController.text = savedPassword;
+        _rememberMe = true;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -344,8 +428,8 @@ class _LoginViewState extends State<LoginView> {
                   padding: EdgeInsets.only(
                     left: 30.0,
                     right: 30.0,
-                    top: 15.0, 
-                    bottom: 25.0 + MediaQuery.of(context).padding.bottom, 
+                    top: 15.0,
+                    bottom: 25.0 + MediaQuery.of(context).padding.bottom,
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -471,43 +555,12 @@ class _LoginViewState extends State<LoginView> {
                             ],
                           ),
                           TextButton(
-                            onPressed: _isLoading
-                                ? null
-                                : () async {
-                                    if (_emailController.text.isEmpty) {
-                                      _showErrorDialog(
-                                          'Please enter your email first!');
-                                      return;
-                                    }
-
-                                    setState(() {
-                                      _isLoading = true;
-                                    });
-
-                                    Map<String, dynamic> result =
-                                        await _loginController
-                                            .sendPasswordResetEmail(
-                                      _emailController.text,
-                                    );
-
-                                    setState(() {
-                                      _isLoading = false;
-                                    });
-
-                                    if (mounted) {
-                                      if (result['success']) {
-                                        _showSuccessDialog(result['message']);
-                                      } else {
-                                        _showErrorDialog(result['message']);
-                                      }
-                                    }
-                                  },
+                            onPressed:
+                                _isLoading ? null : _showForgotPasswordDialog,
                             child: const Text(
                               'Forgot Password?',
                               style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 11, // Dikurangi dari 12
-                              ),
+                                  color: Colors.white70, fontSize: 11),
                             ),
                           ),
                         ],

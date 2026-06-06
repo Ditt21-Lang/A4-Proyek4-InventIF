@@ -30,12 +30,30 @@ class RoomModel {
     );
   }
 
+  // static String _readImagePath(Map<String, dynamic> data, String roomId) {
+  //   final rawPath =
+  //       data['imagePath'] ?? data['gambar'] ?? data['foto'] ?? data['photo'];
+
+  //   if (rawPath is String && rawPath.trim().isNotEmpty) {
+  //     final path = rawPath.trim();
+  //     if (path.startsWith('assets/')) return path;
+  //     return 'assets/images/ruangan/$path';
+  //   }
+
+  //   return 'assets/images/ruangan/$roomId.png';
+  // }
+
   static String _readImagePath(Map<String, dynamic> data, String roomId) {
     final rawPath =
         data['imagePath'] ?? data['gambar'] ?? data['foto'] ?? data['photo'];
 
     if (rawPath is String && rawPath.trim().isNotEmpty) {
       final path = rawPath.trim();
+
+      // === TAMBAHAN WAJIB UNTUK URL CLOUDINARY ===
+      if (path.startsWith('http')) return path;
+      // ===========================================
+
       if (path.startsWith('assets/')) return path;
       return 'assets/images/ruangan/$path';
     }

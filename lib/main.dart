@@ -13,7 +13,7 @@ import 'views/profile/userProfile_view.dart';
 import 'views/auth/register_view.dart';
 import 'views/auth/register_identity_input_view.dart';
 import 'views/Teknisi/main_dashboard_teknisi.dart';
-import 'views/coordinator/coordinator_dashboard_view.dart';
+import 'views/coordinator/main_dashboard_coordinator.dart';
 
 const String pendingSyncNotificationTask = 'pendingSyncNotificationTask';
 
@@ -34,12 +34,12 @@ final GlobalKey<ScaffoldMessengerState> globalMessengerKey =
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize workmanager only on mobile platforms (not on web)
   if (!kIsWeb) {
     await Workmanager().initialize(callbackDispatcher, isInDebugMode: false);
   }
-  
+
   await Hive.initFlutter();
   await Hive.openBox('pending_requests');
 
@@ -89,7 +89,7 @@ class _MyAppState extends State<MyApp> {
         '/profile': (context) => const UserProfileView(),
         '/dashboard-teknisi': (context) => const MainDashboardTeknisi(),
         '/list-pengajuan': (context) => const ListPengajuanScreen(),
-        '/dashboard-coordinator': (context) => const CoordinatorDashboardView(),
+        '/dashboard-coordinator': (context) => const MainDashboardCoordinator(),
       },
       // home: const MyHomePage(title: 'Flutter Demo Home Page'),
       // home: KatalogAlatView(controller: KatalogAlatController()),

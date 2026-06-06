@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../controllers/Teknisi/list_pengajuan_controller.dart';
 import '../../models/transaction_model.dart';
 import 'return_scanner_view.dart';
+import 'document_viewer_view.dart';
 
 class ListPengajuanScreen extends StatefulWidget {
   const ListPengajuanScreen({super.key});
@@ -84,11 +85,11 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
                       // Tab 1: Antrean Pinjam Baru
                       _buildFilterTab('Requests', 'Waiting'),
                       const SizedBox(width: 10),
-                      
+
                       // Tab 2: Barang di Luar & Mau Dikembalikan
                       _buildFilterTab('In Use', 'In Use'),
                       const SizedBox(width: 10),
-                      
+
                       // Tab 3: Riwayat Selesai
                       _buildFilterTab('History', 'History'),
                     ],
@@ -204,6 +205,39 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
                   color: Colors.black87)),
           Text('• ${item.itemNames}',
               style: const TextStyle(fontSize: 12, color: Colors.black87)),
+
+          // === TOMBOL LIHAT DOKUMEN (IN-APP VIEWER) ===
+          if (item.attachmentUrl != null && item.attachmentUrl!.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 12.0),
+              child: TextButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          DocumentViewerView(url: item.attachmentUrl!),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.description_rounded,
+                    color: Colors.blue, size: 20),
+                label: const Text('Lihat Dokumen',
+                    style: TextStyle(
+                        color: Colors.blue,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold)),
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.blue.withOpacity(0.1),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ),
+            ),
+          // ============================================
+
           const SizedBox(height: 16),
           if (_selectedStatus == 'Waiting')
             Align(
@@ -222,10 +256,12 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
           else if (_selectedStatus == 'In Use')
             // Jika statusnya Returning, munculkan tombol Scan Pengembalian
             if (item.status == 'Returning')
-              _buildButton('Scan Pengembalian', [Colors.orange, Colors.deepOrange], () {
+              _buildButton(
+                  'Scan Pengembalian', [Colors.orange, Colors.deepOrange], () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => ReturnScannerView(transaction: item)),
+                  MaterialPageRoute(
+                      builder: (_) => ReturnScannerView(transaction: item)),
                 );
               })
             // Jika statusnya murni In Use (belum klik return), beri teks saja

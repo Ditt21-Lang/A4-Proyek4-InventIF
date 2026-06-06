@@ -3,6 +3,7 @@ import '../../controllers/Teknisi/dashboard_teknisi_controller.dart';
 import '../../models/transaction_model.dart';
 import 'add_equipment_view.dart';
 import 'equipment_list_view.dart';
+import 'document_viewer_view.dart';
 
 class DashboardTeknisiScreen extends StatefulWidget {
   const DashboardTeknisiScreen({super.key});
@@ -302,6 +303,38 @@ class _DashboardTeknisiScreenState extends State<DashboardTeknisiScreen> {
               ),
             ],
           ),
+
+          // === TOMBOL LIHAT DOKUMEN (IN-APP VIEWER) ===
+          if (item.attachmentUrl != null && item.attachmentUrl!.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 12.0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            DocumentViewerView(url: item.attachmentUrl!),
+                      ),
+                    );
+                  },
+                  icon:
+                      const Icon(Icons.description_rounded, color: Colors.blue),
+                  label: const Text('Lihat Dokumen Pendukung',
+                      style: TextStyle(
+                          color: Colors.blue, fontWeight: FontWeight.bold)),
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.blue.withOpacity(0.1),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  ),
+                ),
+              ),
+            ),
+          // ============================================
+
           const SizedBox(height: 12),
           Container(
             decoration: BoxDecoration(

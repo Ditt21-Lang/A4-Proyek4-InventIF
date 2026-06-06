@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../models/user_model.dart';
 import '../notifications_controller.dart';
+import 'package:flutter/material.dart';
 
 class LoginController {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
@@ -47,26 +48,36 @@ class LoginController {
     }
   }
 
-  // Fungsi untuk Lupa Password - mengirim email reset
-  // SEDANG DIKERJAKAN
-  Future<Map<String, dynamic>> sendPasswordResetEmail(String email) async {
+  // Fungsi untuk mengirim email Reset Password
+  Future<Map<String, dynamic>> resetPassword(String email) async {
+    if (email.trim().isEmpty) {
+      return {
+        'success': false,
+        'message': 'Harap masukkan email Anda terlebih dahulu.'
+      };
+    }
+
     try {
       await _firebaseAuth.sendPasswordResetEmail(email: email.trim());
       return {
         'success': true,
-        'message':
-            'Email reset password telah dikirim. Periksa inbox atau folder spam Anda.',
+        'message': 'Tautan reset password telah dikirim ke email Anda!',
       };
     } on FirebaseAuthException catch (e) {
-      String message = _getErrorMessage(e.code);
+      // TAMBAHKAN BARIS INI UNTUK DEBUGGING
+      debugPrint('FIREBASE AUTH ERROR: ${e.code} - ${e.message}');
+
       return {
         'success': false,
-        'message': message,
+        'message': _getErrorMessage(e.code),
       };
     } catch (e) {
+      // TAMBAHKAN BARIS INI UNTUK DEBUGGING
+      debugPrint('GENERAL ERROR: $e');
+
       return {
         'success': false,
-        'message': 'Terjadi kesalahan: ${e.toString()}',
+        'message': 'Terjadi kesalahan. Silakan coba lagi.',
       };
     }
   }

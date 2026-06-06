@@ -56,27 +56,38 @@ class CalendarRuanganScreen extends StatelessWidget {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFFF78233),
-        foregroundColor: Colors.white,
-        onPressed: () async {
-          final shouldRefresh = await Navigator.push<bool>(
-            context,
-            MaterialPageRoute(
-              builder: (_) => RequestRuanganScreen(
-                controller: RequestRuanganController(
-                  room: controller.room,
-                  initialDate: controller.selectedDate,
-                ),
-              ),
-            ),
-          );
-
-          if (shouldRefresh == true) {
-            controller.fetchBookings();
+      floatingActionButton: AnimatedBuilder(
+        animation: controller,
+        builder: (context, child) {
+          // Jika Koordinator, kembalikan kotak kosong (tombol hilang)
+          if (controller.isCoordinator) {
+            return const SizedBox.shrink();
           }
+
+          // Jika Mahasiswa, kembalikan tombol +
+          return FloatingActionButton(
+            backgroundColor: const Color(0xFFF78233),
+            foregroundColor: Colors.white,
+            onPressed: () async {
+              final shouldRefresh = await Navigator.push<bool>(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => RequestRuanganScreen(
+                    controller: RequestRuanganController(
+                      room: controller.room,
+                      initialDate: controller.selectedDate,
+                    ),
+                  ),
+                ),
+              );
+
+              if (shouldRefresh == true) {
+                controller.fetchBookings();
+              }
+            },
+            child: const Icon(Icons.add_rounded),
+          );
         },
-        child: const Icon(Icons.add_rounded),
       ),
     );
   }
