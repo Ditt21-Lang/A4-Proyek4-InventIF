@@ -9,11 +9,15 @@ class DashboardTeknisiController {
     return _firestore
         .collection('transactions')
         .where('status', isEqualTo: 'Waiting')
+        .where('category', isEqualTo: 'equipment')
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs
+      var list = snapshot.docs
           .map((doc) => TransactionModel.fromFirestore(doc))
           .toList();
+      // Urutkan dari yang terbaru (descending) di sisi Dart
+      list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      return list;
     });
   }
 
@@ -24,13 +28,13 @@ class DashboardTeknisiController {
 
       DocumentReference txRef =
           _firestore.collection('transactions').doc(transaction.transactionId);
-      batch.update(txRef, {'status': 'Approved'});
+      batch.update(txRef, {'status': 'In Use'});
 
-      // UBAH BARANG JADI AVAILABLE
+      // UBAH BARANG JADI IN USE
       for (var item in transaction.items) {
         DocumentReference eqRef =
             _firestore.collection('equipments').doc(item.id);
-        batch.update(eqRef, {'status': 'Available'});
+        batch.update(eqRef, {'status': 'In Use'});
       }
 
       await batch.commit();

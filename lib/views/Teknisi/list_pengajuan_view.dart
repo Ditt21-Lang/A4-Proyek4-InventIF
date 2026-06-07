@@ -244,7 +244,7 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
               alignment: Alignment.center,
               child: _buildButton(
                   'Approve', const [Color(0xFFF48A42), Color(0xFFE65C00)], () {
-                _controller.updateStatus(item, 'Approved');
+                _controller.updateStatus(item, 'In Use');
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('${item.itemNames} berhasil di-Approve!'),

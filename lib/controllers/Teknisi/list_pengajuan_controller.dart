@@ -10,7 +10,8 @@ class ListPengajuanController extends ChangeNotifier {
     // [VAR DUMP 1] Cek parameter status apa yang dikirim oleh tombol UI
     debugPrint("🔍 [DEBUG] UI meminta data untuk tab: '$status'");
 
-    Query query = _firestore.collection('transactions');
+    Query query = _firestore.collection('transactions')
+        .where('category', isEqualTo: 'equipment');
 
     if (status == 'History') {
       query = query.where('status', whereIn: [
@@ -47,7 +48,7 @@ class ListPengajuanController extends ChangeNotifier {
         } else if (a.status != 'Returning' && b.status == 'Returning') {
           return 1;  
         } else {
-          return b.startDate.compareTo(a.startDate);
+          return b.createdAt.compareTo(a.createdAt);
         }
       });
 
@@ -60,17 +61,17 @@ class ListPengajuanController extends ChangeNotifier {
     try {
       WriteBatch batch = _firestore.batch();
 
-      // 1. Update transaksi (misal menjadi 'Approved')
+      // 1. Update transaksi
       DocumentReference txRef =
           _firestore.collection('transactions').doc(transaction.transactionId);
       batch.update(txRef, {'status': newStatus});
 
-      // 2. Jika Teknisi meng-Approve pengembalian, ubah barang jadi Available
-      if (newStatus == 'Approved') {
+      // 2. Jika Teknisi meng-Approve peminjaman (status -> 'In Use'), ubah barang jadi 'In Use'
+      if (newStatus == 'In Use') {
         for (var item in transaction.items) {
           DocumentReference eqRef =
               _firestore.collection('equipments').doc(item.id);
-          batch.update(eqRef, {'status': 'Available'});
+          batch.update(eqRef, {'status': 'In Use'});
         }
       }
 

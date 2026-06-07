@@ -25,6 +25,7 @@ class CoordinatorDashboardController extends ChangeNotifier {
       // 4. Sort by newest first
       list = list.where((tx) {
         final isRoom = tx.category.toLowerCase() == 'room';
+        final isNotSystemAdmin = tx.borrowerId != 'system_admin';
         final isPending = tx.status == 'Waiting' ||
             tx.status == 'Pending' ||
             tx.status == 'pending_coordinator';
@@ -32,7 +33,7 @@ class CoordinatorDashboardController extends ChangeNotifier {
             tx.createdAt.month == today.month &&
             tx.createdAt.day == today.day;
 
-        return isRoom && isPending && isCreatedToday;
+        return isRoom && isNotSystemAdmin && isPending && isCreatedToday;
       }).toList();
 
       list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -53,10 +54,11 @@ class CoordinatorDashboardController extends ChangeNotifier {
       // 3. Sort by newest first
       list = list.where((tx) {
         final isRoom = tx.category.toLowerCase() == 'room';
-        return isRoom;
+        final isNotSystemAdmin = tx.borrowerId != 'system_admin';
+        return isRoom && isNotSystemAdmin;
       }).toList();
 
-      list.sort((a, b) => b.startDate.compareTo(a.startDate));
+      list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       return list;
     });
   }
