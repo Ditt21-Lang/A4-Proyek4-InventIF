@@ -42,7 +42,7 @@ class KatalogAlatView extends StatelessWidget {
               _buildChip('All', false, onTap: () => onTabChanged(2)),
               _buildChip('Room', false, onTap: () => onTabChanged(1)),
               _buildChip('Equipment', true),
-              _buildChip('Available', false),
+              _buildChip('Available', false, onTap: () => onTabChanged(3)),
             ],
           ),
         ),

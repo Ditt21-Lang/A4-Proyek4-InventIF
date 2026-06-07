@@ -39,7 +39,7 @@ class KatalogRuanganScreen extends StatelessWidget {
               _buildChip('All', false, onTap: () => onTabChanged(2)),
               _buildChip('Room', true),
               _buildChip('Equipment', false, onTap: () => onTabChanged(0)),
-              _buildChip('Available', false),
+              _buildChip('Available', false, onTap: () => onTabChanged(3)),
             ],
           ),
         ),

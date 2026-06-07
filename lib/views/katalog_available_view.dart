@@ -5,14 +5,13 @@ import '../controllers/alat/katalog_alat_controller.dart';
 import '../controllers/ruangan/katalog_ruangan_controller.dart';
 import '../models/equipment_model.dart';
 import '../models/room_model.dart';
-import '../widgets/base_catalog_layout.dart';
 
-class KatalogAllView extends StatelessWidget {
+class KatalogAvailableView extends StatelessWidget {
   final KatalogAlatController alatController;
   final KatalogRuanganController ruanganController;
   final Function(int) onTabChanged;
 
-  const KatalogAllView({
+  const KatalogAvailableView({
     Key? key,
     required this.alatController,
     required this.ruanganController,
@@ -37,16 +36,16 @@ class KatalogAllView extends StatelessWidget {
           ),
         ),
 
-        // CHIPS (All active)
+        // CHIPS (Available active)
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: [
-              _buildChip('All', true),
+              _buildChip('All', false, onTap: () => onTabChanged(2)),
               _buildChip('Room', false, onTap: () => onTabChanged(1)),
               _buildChip('Equipment', false, onTap: () => onTabChanged(0)),
-              _buildChip('Available', false, onTap: () => onTabChanged(3)),
+              _buildChip('Available', true),
             ],
           ),
         ),
@@ -99,6 +98,14 @@ class KatalogAllView extends StatelessWidget {
                 );
               }
 
+              // FILTER EQUIPMENT
+              final availableEquipment = alatController.displayedEquipment
+                  .where((e) => e.status == 'Available' || e.status == 'Tersedia')
+                  .toList();
+                  
+              // FILTER ROOMS
+              final availableRooms = ruanganController.availableRoomsToday;
+
               return RefreshIndicator(
                 onRefresh: () async {
                   await alatController.fetchEquipmentData();
@@ -113,7 +120,7 @@ class KatalogAllView extends StatelessWidget {
                     // Equipments Section
                     const SizedBox(height: 8),
                     const Text(
-                      'Equipments',
+                      'Available Equipments',
                       style: TextStyle(
                         color: Color(0xFFF78233),
                         fontSize: 18,
@@ -121,12 +128,12 @@ class KatalogAllView extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    ..._buildEquipmentList(alatController.displayedEquipment),
+                    ..._buildEquipmentList(availableEquipment),
                     const SizedBox(height: 20),
 
                     // Rooms Section
                     const Text(
-                      'Rooms',
+                      'Available Rooms Today',
                       style: TextStyle(
                         color: Color(0xFFF78233),
                         fontSize: 18,
@@ -134,8 +141,7 @@ class KatalogAllView extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    ..._buildRoomList(
-                        context, ruanganController.displayedRooms),
+                    ..._buildRoomList(context, availableRooms),
                   ],
                 ),
               );
@@ -172,7 +178,7 @@ class KatalogAllView extends StatelessWidget {
       return [
         const SizedBox(height: 16),
         const Center(
-            child: Text('Equipment not found',
+            child: Text('No available equipments found',
                 style: TextStyle(color: Colors.white))),
       ];
     }
@@ -208,9 +214,7 @@ class KatalogAllView extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                              color: e.status == 'Available'
-                                  ? Colors.green
-                                  : Colors.amber,
+                              color: Colors.green,
                               borderRadius: BorderRadius.circular(12)),
                           child: Text(e.status,
                               style: const TextStyle(
@@ -233,7 +237,7 @@ class KatalogAllView extends StatelessWidget {
         const SizedBox(height: 16),
         const Center(
             child:
-                Text('Room not found', style: TextStyle(color: Colors.white))),
+                Text('No available rooms for today', style: TextStyle(color: Colors.white))),
       ];
     }
 
