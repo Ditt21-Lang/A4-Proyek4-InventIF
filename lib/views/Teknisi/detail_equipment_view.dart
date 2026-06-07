@@ -16,7 +16,7 @@ class DetailEquipmentView extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  const Color(0xFF283593).withOpacity(0.95),
+                  const Color(0xFF283593).withValues(alpha: 0.95),
                   const Color(0xFF1A237E),
                 ],
                 begin: Alignment.topCenter,
@@ -47,7 +47,7 @@ class DetailEquipmentView extends StatelessWidget {
                               borderRadius: BorderRadius.circular(14),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
+                                  color: Colors.black.withValues(alpha: 0.2),
                                   blurRadius: 8,
                                   offset: const Offset(2, 4),
                                 ),
@@ -116,7 +116,7 @@ class DetailEquipmentView extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.15),
+                          color: Colors.black.withValues(alpha: 0.15),
                           blurRadius: 10,
                           offset: const Offset(0, 5),
                         )

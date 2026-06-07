@@ -21,23 +21,23 @@ class _EquipmentListViewState extends State<EquipmentListView> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Konfirmasi Hapus'),
-        content: Text('Hapus "${equipment.name}" dari sistem?'),
+        title: const Text('Confirm Delete'),
+        content: Text('Delete "${equipment.name}" from the system?'),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Batal')),
+              child: const Text('Cancel')),
           TextButton(
             onPressed: () async {
               bool success = await _controller.deleteEquipment(equipment.id);
               if (success && mounted) {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text('Alat dihapus!'),
+                    content: Text('Equipment deleted!'),
                     backgroundColor: Colors.red));
               }
             },
-            child: const Text('Hapus', style: TextStyle(color: Colors.red)),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -73,7 +73,7 @@ class _EquipmentListViewState extends State<EquipmentListView> {
                     const Expanded(
                       child: Padding(
                         padding: EdgeInsets.only(right: 48.0),
-                        child: Text('Data Alat (Assets)',
+                        child: Text('Equipment Data (Assets)',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 color: Colors.white,
@@ -96,7 +96,7 @@ class _EquipmentListViewState extends State<EquipmentListView> {
                       onChanged: (val) =>
                           setState(() => _searchQuery = val.toLowerCase()),
                       decoration: const InputDecoration(
-                          hintText: 'Cari nama atau ID alat...',
+                          hintText: 'Search equipment name or ID...',
                           border: InputBorder.none,
                           suffixIcon: Icon(Icons.search, color: Colors.grey)),
                     ),
@@ -119,7 +119,7 @@ class _EquipmentListViewState extends State<EquipmentListView> {
                           .toList();
                       if (filteredItems.isEmpty)
                         return const Center(
-                            child: Text("Tidak ada alat ditemukan",
+                            child: Text("No equipment found",
                                 style: TextStyle(color: Colors.black54)));
 
                       return ListView.builder(
@@ -147,7 +147,7 @@ class _EquipmentListViewState extends State<EquipmentListView> {
                                     borderRadius: BorderRadius.circular(16),
                                     boxShadow: [
                                       BoxShadow(
-                                          color: Colors.black.withOpacity(0.03),
+                                          color: Colors.black.withValues(alpha: 0.03),
                                           blurRadius: 8,
                                           offset: const Offset(0, 4))
                                     ]),

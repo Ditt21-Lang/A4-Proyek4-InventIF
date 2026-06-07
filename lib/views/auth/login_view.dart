@@ -154,7 +154,7 @@ class _LoginViewState extends State<LoginView> {
                         ),
                         const SizedBox(height: 12),
                         const Text(
-                          'Berhasil!',
+                          'Success!',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -194,7 +194,7 @@ class _LoginViewState extends State<LoginView> {
                         ),
                         onPressed: () => Navigator.pop(context),
                         child: const Text(
-                          'Tutup',
+                          'Close',
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
@@ -303,7 +303,7 @@ class _LoginViewState extends State<LoginView> {
                         ),
                         onPressed: () => Navigator.pop(context),
                         child: const Text(
-                          'Mengerti',
+                          'Understand',
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
@@ -334,7 +334,7 @@ class _LoginViewState extends State<LoginView> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
-                'Masukkan email yang terdaftar, kami akan mengirimkan tautan untuk mengatur ulang kata sandi.',
+                'Enter your registered email, and we will send a link to reset your password.',
                 style: TextStyle(fontSize: 12)),
             const SizedBox(height: 16),
             TextField(
@@ -349,13 +349,13 @@ class _LoginViewState extends State<LoginView> {
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Batal')),
+              child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context); // Tutup dialog
 
               ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Mengirim email reset...')));
+                  const SnackBar(content: Text('Sending reset email...')));
 
               // Pastikan nama method ini sesuai dengan yang ada di login_controller.dart Anda
               // Jika di controller namanya sendPasswordResetEmail, ubah baris di bawah ini:
@@ -372,7 +372,7 @@ class _LoginViewState extends State<LoginView> {
                 );
               }
             },
-            child: const Text('Kirim'),
+            child: const Text('Send'),
           ),
         ],
       ),

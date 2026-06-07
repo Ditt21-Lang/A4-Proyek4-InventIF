@@ -50,13 +50,13 @@ class _ListOrderViewState extends State<ListOrderView> {
                       borderRadius: BorderRadius.circular(14),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.15),
+                          color: Colors.black.withValues(alpha: 0.15),
                           offset: const Offset(4, 4),
                           blurRadius: 12,
                           spreadRadius: 2,
                         ),
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
+                          color: Colors.black.withValues(alpha: 0.08),
                           offset: const Offset(2, 2),
                           blurRadius: 6,
                           spreadRadius: 1,

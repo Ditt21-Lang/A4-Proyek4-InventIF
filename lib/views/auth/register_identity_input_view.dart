@@ -15,7 +15,7 @@ class _RegisterIdentityInputViewState extends State<RegisterIdentityInputView> {
   final Color primaryOrange = const Color(0xFFF88031);
 
   bool _isLoading = false;
-  bool _isPhoneSelected = true;
+  final bool _isPhoneSelected = false;
   late RegisterController _registerController;
   late TextEditingController _identityController;
 
@@ -242,114 +242,10 @@ class _RegisterIdentityInputViewState extends State<RegisterIdentityInputView> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Choose your preferred method to receive verification code',
+                    'Enter your email address to receive verification code',
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey.shade700,
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-
-                  // Toggle Buttons (Phone / Email)
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade200,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    padding: const EdgeInsets.all(4),
-                    child: Row(
-                      children: [
-                        // Phone Button
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: _isLoading
-                                ? null
-                                : () {
-                                    setState(() {
-                                      _isPhoneSelected = true;
-                                      _identityController.clear();
-                                    });
-                                  },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              decoration: BoxDecoration(
-                                color: _isPhoneSelected
-                                    ? Colors.white
-                                    : Colors.transparent,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.phone_android,
-                                    size: 18,
-                                    color: _isPhoneSelected
-                                        ? primaryBlue
-                                        : Colors.grey,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Phone',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      color: _isPhoneSelected
-                                          ? primaryBlue
-                                          : Colors.grey,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        // Email Button
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: _isLoading
-                                ? null
-                                : () {
-                                    setState(() {
-                                      _isPhoneSelected = false;
-                                      _identityController.clear();
-                                    });
-                                  },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              decoration: BoxDecoration(
-                                color: !_isPhoneSelected
-                                    ? Colors.white
-                                    : Colors.transparent,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.email_outlined,
-                                    size: 18,
-                                    color: !_isPhoneSelected
-                                        ? primaryBlue
-                                        : Colors.grey,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Email',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      color: !_isPhoneSelected
-                                          ? primaryBlue
-                                          : Colors.grey,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
                     ),
                   ),
                   const SizedBox(height: 30),
@@ -358,11 +254,9 @@ class _RegisterIdentityInputViewState extends State<RegisterIdentityInputView> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        _isPhoneSelected
-                            ? 'Phone Number'
-                            : 'Email Address',
-                        style: const TextStyle(
+                      const Text(
+                        'Email Address',
+                        style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: Color(0xFF2A2C8F),
@@ -372,23 +266,19 @@ class _RegisterIdentityInputViewState extends State<RegisterIdentityInputView> {
                       TextField(
                         controller: _identityController,
                         enabled: !_isLoading,
-                        keyboardType: _isPhoneSelected
-                            ? TextInputType.phone
-                            : TextInputType.emailAddress,
+                        keyboardType: TextInputType.emailAddress,
                         style: const TextStyle(
                           fontSize: 14,
                           color: Color(0xFF2A2C8F),
                         ),
                         decoration: InputDecoration(
-                          hintText: _isPhoneSelected
-                              ? 'e.g., +62812345678'
-                              : 'e.g., user@example.com',
+                          hintText: 'e.g., user@example.com',
                           hintStyle: TextStyle(
                             fontSize: 13,
                             color: Colors.grey.shade400,
                           ),
                           prefixIcon: Icon(
-                            _isPhoneSelected ? Icons.phone : Icons.email,
+                            Icons.email,
                             color: primaryBlue,
                           ),
                           filled: true,
@@ -446,7 +336,7 @@ class _RegisterIdentityInputViewState extends State<RegisterIdentityInputView> {
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            'We\'ll send a verification code to verify your ${_isPhoneSelected ? 'phone number' : 'email'}.',
+                            'We\'ll send a verification code to verify your email.',
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.blue.shade700,

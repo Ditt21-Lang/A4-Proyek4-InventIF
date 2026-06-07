@@ -79,4 +79,17 @@ class ListPengajuanController extends ChangeNotifier {
       debugPrint('Error mengupdate status: $e');
     }
   }
+
+  Future<String?> getBorrowerKTM(String borrowerId) async {
+    try {
+      DocumentSnapshot userDoc = await _firestore.collection('users').doc(borrowerId).get();
+      if (userDoc.exists) {
+        var data = userDoc.data() as Map<String, dynamic>?;
+        return data?['ktm'] as String?;
+      }
+    } catch (e) {
+      debugPrint('Error getting borrower KTM: $e');
+    }
+    return null;
+  }
 }

@@ -49,7 +49,7 @@ class _DocumentViewerViewState extends State<DocumentViewerView> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Berhasil diunduh! Tersimpan di: $savePath'),
+            content: Text('Downloaded successfully! Saved to: $savePath'),
             backgroundColor: Colors.green,
             duration: const Duration(seconds: 4),
           ),
@@ -59,7 +59,7 @@ class _DocumentViewerViewState extends State<DocumentViewerView> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Gagal mengunduh file: $e'),
+            content: Text('Failed to download file: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -74,7 +74,7 @@ class _DocumentViewerViewState extends State<DocumentViewerView> {
     return Scaffold(
       backgroundColor: Colors.black87, // Latar gelap agar fokus ke dokumen
       appBar: AppBar(
-        title: const Text('Dokumen Pendukung', style: TextStyle(fontSize: 16)),
+        title: const Text('Supporting Document', style: TextStyle(fontSize: 16)),
         backgroundColor: const Color(0xFF1A237E),
         foregroundColor: Colors.white,
         actions: [
@@ -91,7 +91,7 @@ class _DocumentViewerViewState extends State<DocumentViewerView> {
               : IconButton(
                   icon: const Icon(Icons.download_rounded),
                   onPressed: _downloadFile,
-                  tooltip: 'Unduh Dokumen',
+                  tooltip: 'Download Document',
                 ),
         ],
       ),
@@ -108,7 +108,7 @@ class _DocumentViewerViewState extends State<DocumentViewerView> {
                   widget.url,
                   fit: BoxFit.contain,
                   errorBuilder: (_, __, ___) => const Center(
-                    child: Text('Gagal memuat gambar',
+                    child: Text('Failed to load image',
                         style: TextStyle(color: Colors.white)),
                   ),
                 ),

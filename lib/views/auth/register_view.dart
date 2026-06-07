@@ -15,7 +15,7 @@ class _RegisterViewState extends State<RegisterView> {
   final Color primaryOrange = const Color(0xFFF88031);
 
   bool _isLoading = false;
-  bool _isPhoneSelected = true;
+  final bool _isPhoneSelected = false;
   late RegisterController _registerController;
   late TextEditingController _identityController;
 
@@ -392,7 +392,7 @@ class _RegisterViewState extends State<RegisterView> {
               const SizedBox(height: 8),
               // Subtitle
               Text(
-                'Choose your preferred method to receive verification code',
+                'Enter your email address to receive verification code',
                 style: TextStyle(
                   fontSize: 10,
                   color: Colors.grey.shade600,
@@ -400,121 +400,10 @@ class _RegisterViewState extends State<RegisterView> {
                 ),
               ),
               const SizedBox(height: 25),
-              // Phone/Email Toggle Buttons
-              Row(
-                children: [
-                  // Phone Button
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: _isLoading
-                          ? null
-                          : () {
-                              setState(() {
-                                _isPhoneSelected = true;
-                              });
-                            },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 12,
-                          horizontal: 16,
-                        ),
-                        decoration: BoxDecoration(
-                          color: _isPhoneSelected
-                              ? Color(0xFFF88031)
-                              : Colors.grey.shade100,
-                          border: Border.all(
-                            color: _isPhoneSelected
-                                ? Colors.grey.shade300
-                                : Colors.grey.shade200,
-                          ),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.phone,
-                              size: 18,
-                              color: _isPhoneSelected
-                                  ? primaryBlue
-                                  : Colors.grey.shade500,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Phone',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: _isPhoneSelected
-                                    ? primaryBlue
-                                    : Colors.grey.shade500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  // Email Button
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: _isLoading
-                          ? null
-                          : () {
-                              setState(() {
-                                _isPhoneSelected = false;
-                              });
-                            },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 12,
-                          horizontal: 16,
-                        ),
-                        decoration: BoxDecoration(
-                          color: !_isPhoneSelected
-                              ? Color(0xFFF88031)
-                              : Colors.grey.shade100,
-                          border: Border.all(
-                            color: !_isPhoneSelected
-                                ? Colors.grey.shade300
-                                : Colors.grey.shade200,
-                          ),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.email_outlined,
-                              size: 18,
-                              color: !_isPhoneSelected
-                                  ? primaryBlue
-                                  : Colors.grey.shade500,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Email',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: !_isPhoneSelected
-                                    ? primaryBlue
-                                    : Colors.grey.shade500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 25),
-              // Label Phone Number / Email
-              Text(
-                _isPhoneSelected ? 'Phone Number' : 'Email Address',
-                style: const TextStyle(
+              // Label Email Address
+              const Text(
+                'Email Address',
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: Color(0xFF2A2C8F),
@@ -525,20 +414,16 @@ class _RegisterViewState extends State<RegisterView> {
               TextField(
                 controller: _identityController,
                 enabled: !_isLoading,
-                keyboardType: _isPhoneSelected
-                    ? TextInputType.phone
-                    : TextInputType.emailAddress,
+                keyboardType: TextInputType.emailAddress,
                 style: const TextStyle(fontSize: 14),
                 decoration: InputDecoration(
-                  hintText: _isPhoneSelected
-                      ? 'e.g., +62812345678'
-                      : 'e.g., your@gmail.com',
+                  hintText: 'e.g., your@gmail.com',
                   hintStyle: TextStyle(
                     fontSize: 12,
                     color: Colors.grey.shade400,
                   ),
                   prefixIcon: Icon(
-                    _isPhoneSelected ? Icons.phone : Icons.email_outlined,
+                    Icons.email_outlined,
                     color: Colors.grey.shade500,
                     size: 20,
                   ),
@@ -577,7 +462,7 @@ class _RegisterViewState extends State<RegisterView> {
                   vertical: 10,
                 ),
                 decoration: BoxDecoration(
-                  color:  Colors.grey.shade100,
+                  color: Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
                     color: Colors.grey.shade200,
@@ -594,7 +479,7 @@ class _RegisterViewState extends State<RegisterView> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        'We\'ll send a verification code to verify your ${_isPhoneSelected ? 'phone number' : 'email address'}.',
+                        'We\'ll send a verification code to verify your email address.',
                         style: TextStyle(
                           fontSize: 10,
                           color: Colors.grey.shade700,

@@ -51,7 +51,7 @@ class _EditRoomViewState extends State<EditRoomView> {
             children: [
               ListTile(
                 leading: const Icon(Icons.photo_library),
-                title: const Text('Galeri Foto'),
+                title: const Text('Photo Gallery'),
                 onTap: () async {
                   final pickedFile = await _picker.pickImage(
                       source: ImageSource.gallery, imageQuality: 70);
@@ -62,7 +62,7 @@ class _EditRoomViewState extends State<EditRoomView> {
               ),
               ListTile(
                 leading: const Icon(Icons.camera_alt),
-                title: const Text('Kamera Ambil Foto'),
+                title: const Text('Camera Take Photo'),
                 onTap: () async {
                   final pickedFile = await _picker.pickImage(
                       source: ImageSource.camera, imageQuality: 70);
@@ -92,7 +92,7 @@ class _EditRoomViewState extends State<EditRoomView> {
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text('Ruangan berhasil diupdate!'),
+              content: Text('Room updated successfully!'),
               backgroundColor: Colors.green),
         );
         // Kembali 2 kali untuk me-refresh List Data
@@ -104,7 +104,7 @@ class _EditRoomViewState extends State<EditRoomView> {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Gagal Update'),
+            title: const Text('Failed to Update'),
             content: Text(e.toString().replaceFirst('Exception: ', '')),
             actions: [
               TextButton(
@@ -171,7 +171,7 @@ class _EditRoomViewState extends State<EditRoomView> {
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
+                              color: Colors.black.withValues(alpha: 0.05),
                               blurRadius: 10,
                               spreadRadius: 2,
                               offset: const Offset(0, 4))
@@ -180,7 +180,7 @@ class _EditRoomViewState extends State<EditRoomView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Informasi Ruangan',
+                          const Text('Room Information',
                               style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
@@ -213,7 +213,7 @@ class _EditRoomViewState extends State<EditRoomView> {
                           ),
                           const SizedBox(height: 8),
                           const Center(
-                              child: Text('Tap gambar untuk mengubah',
+                              child: Text('Tap image to change',
                                   style: TextStyle(
                                       fontSize: 11, color: Colors.grey))),
                           const SizedBox(height: 20),
@@ -226,22 +226,22 @@ class _EditRoomViewState extends State<EditRoomView> {
                               icon: Icons.meeting_room_rounded,
                               isReadOnly: true),
                           const SizedBox(height: 16),
-                          _buildInputField(
+                           _buildInputField(
                               label: 'Room Name',
-                              hint: 'Contoh: Ruang Teori D-101',
+                              hint: 'e.g., Theory Room D-101',
                               controller: _nameController,
                               icon: Icons.class_rounded),
                           const SizedBox(height: 16),
                           _buildInputField(
-                              label: 'Capacity (Maksimum Orang)',
-                              hint: 'Contoh: 30',
+                              label: 'Capacity (Maximum People)',
+                              hint: 'e.g., 30',
                               controller: _capacityController,
                               icon: Icons.groups_rounded,
                               keyboardType: TextInputType.number),
                           const SizedBox(height: 16),
                           _buildInputField(
                               label: 'Description',
-                              hint: 'Masukkan deskripsi...',
+                              hint: 'Enter description...',
                               controller: _descController,
                               icon: Icons.description_rounded,
                               maxLines: 3),

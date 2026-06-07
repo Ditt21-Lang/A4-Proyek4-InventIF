@@ -40,7 +40,7 @@ class _AddRoomViewState extends State<AddRoomView> {
             children: [
               ListTile(
                 leading: const Icon(Icons.photo_library),
-                title: const Text('Galeri Foto'),
+                title: const Text('Photo Gallery'),
                 onTap: () async {
                   final pickedFile = await _picker.pickImage(
                       source: ImageSource.gallery, imageQuality: 70);
@@ -51,7 +51,7 @@ class _AddRoomViewState extends State<AddRoomView> {
               ),
               ListTile(
                 leading: const Icon(Icons.camera_alt),
-                title: const Text('Kamera Ambil Foto'),
+                title: const Text('Camera Take Photo'),
                 onTap: () async {
                   final pickedFile = await _picker.pickImage(
                       source: ImageSource.camera, imageQuality: 70);
@@ -70,7 +70,7 @@ class _AddRoomViewState extends State<AddRoomView> {
   Future<void> _handleSubmit() async {
     try {
       if (_pickedImage == null)
-        throw Exception('Harap pilih gambar ruangan terlebih dahulu!');
+        throw Exception('Please select a room image first!');
 
       bool success = await _controller.addRoom(
         id: _idController.text,
@@ -83,7 +83,7 @@ class _AddRoomViewState extends State<AddRoomView> {
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text('Ruangan berhasil ditambahkan!'),
+              content: Text('Room successfully added!'),
               backgroundColor: Colors.green),
         );
         Navigator.pop(context);
@@ -93,7 +93,7 @@ class _AddRoomViewState extends State<AddRoomView> {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Gagal Menambahkan'),
+            title: const Text('Failed to Add'),
             content: Text(e.toString().replaceFirst('Exception: ', '')),
             actions: [
               TextButton(
@@ -160,7 +160,7 @@ class _AddRoomViewState extends State<AddRoomView> {
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
+                              color: Colors.black.withValues(alpha: 0.05),
                               blurRadius: 10,
                               spreadRadius: 2,
                               offset: const Offset(0, 4))
@@ -169,7 +169,7 @@ class _AddRoomViewState extends State<AddRoomView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Informasi Ruangan',
+                          const Text('Room Information',
                               style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
@@ -196,7 +196,7 @@ class _AddRoomViewState extends State<AddRoomView> {
                                         Icon(Icons.camera_alt_rounded,
                                             size: 40, color: Color(0xFF7986CB)),
                                         SizedBox(height: 8),
-                                        Text('Pilih Gambar Ruangan',
+                                        Text('Select Room Image',
                                             style: TextStyle(
                                                 color: Color(0xFF7986CB),
                                                 fontSize: 12)),
@@ -211,23 +211,23 @@ class _AddRoomViewState extends State<AddRoomView> {
                           ),
                           const SizedBox(height: 20),
 
-                          _buildInputField(
+                           _buildInputField(
                               label: 'Room ID',
-                              hint: 'Contoh: D-101',
+                              hint: 'e.g., D-101',
                               controller: _idController,
                               icon: Icons.meeting_room_rounded),
                           const SizedBox(height: 16),
                           _buildInputField(
                               label: 'Room Name',
-                              hint: 'Contoh: Ruang Teori D-101',
+                              hint: 'e.g., Theory Room D-101',
                               controller: _nameController,
                               icon: Icons.class_rounded),
                           const SizedBox(height: 16),
 
                           // TAMBAHAN BARU: INPUT KAPASITAS (Angka saja)
                           _buildInputField(
-                            label: 'Capacity (Maksimum Orang)',
-                            hint: 'Contoh: 30',
+                            label: 'Capacity (Maximum People)',
+                            hint: 'e.g., 30',
                             controller: _capacityController,
                             icon: Icons.groups_rounded,
                             keyboardType: TextInputType.number,
@@ -236,7 +236,7 @@ class _AddRoomViewState extends State<AddRoomView> {
 
                           _buildInputField(
                               label: 'Description',
-                              hint: 'Masukkan deskripsi...',
+                              hint: 'Enter description...',
                               controller: _descController,
                               icon: Icons.description_rounded,
                               maxLines: 3),

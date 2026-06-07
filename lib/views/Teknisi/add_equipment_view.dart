@@ -39,7 +39,7 @@ class _AddEquipmentViewState extends State<AddEquipmentView> {
             children: [
               ListTile(
                 leading: const Icon(Icons.photo_library),
-                title: const Text('Galeri Foto'),
+                title: const Text('Photo Gallery'),
                 onTap: () async {
                   final pickedFile = await _picker.pickImage(
                       source: ImageSource.gallery, imageQuality: 70);
@@ -53,7 +53,7 @@ class _AddEquipmentViewState extends State<AddEquipmentView> {
               ),
               ListTile(
                 leading: const Icon(Icons.camera_alt),
-                title: const Text('Kamera Ambil Foto'),
+                title: const Text('Camera Take Photo'),
                 onTap: () async {
                   final pickedFile = await _picker.pickImage(
                       source: ImageSource.camera, imageQuality: 70);
@@ -76,7 +76,7 @@ class _AddEquipmentViewState extends State<AddEquipmentView> {
     try {
       // Validasi wajib gambar
       if (_pickedImage == null) {
-        throw Exception('Harap pilih gambar alat terlebih dahulu!');
+        throw Exception('Please select an equipment image first!');
       }
 
       bool success = await _controller.addEquipment(
@@ -90,7 +90,7 @@ class _AddEquipmentViewState extends State<AddEquipmentView> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-                'Alat "${_nameController.text}" berhasil ditambahkan & diunggah!'),
+                'Equipment "${_nameController.text}" successfully added & uploaded!'),
             backgroundColor: Colors.green,
           ),
         );
@@ -101,7 +101,7 @@ class _AddEquipmentViewState extends State<AddEquipmentView> {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Gagal Menambahkan'),
+            title: const Text('Failed to Add'),
             content: Text(e.toString().replaceFirst('Exception: ', '')),
             actions: [
               TextButton(
@@ -149,7 +149,7 @@ class _AddEquipmentViewState extends State<AddEquipmentView> {
                     ),
                     const Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.only(right: 48.0),
+                        padding: EdgeInsets.only(right: 48.0),
                         child: Text(
                           'Add New Equipment',
                           textAlign: TextAlign.center,
@@ -181,7 +181,7 @@ class _AddEquipmentViewState extends State<AddEquipmentView> {
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
+                            color: Colors.black.withValues(alpha: 0.05),
                             blurRadius: 10,
                             spreadRadius: 2,
                             offset: const Offset(0, 4),
@@ -192,7 +192,7 @@ class _AddEquipmentViewState extends State<AddEquipmentView> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text(
-                            'Informasi Aset Alat',
+                            'Equipment Asset Info',
                             style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
@@ -223,7 +223,7 @@ class _AddEquipmentViewState extends State<AddEquipmentView> {
                                             size: 40, color: Color(0xFF7986CB)),
                                         SizedBox(height: 8),
                                         Text(
-                                          'Pilih Gambar Alat (Wajib)',
+                                          'Choose Equipment Image (Required)',
                                           style: TextStyle(
                                               color: Color(0xFF7986CB),
                                               fontSize: 12),
@@ -253,7 +253,7 @@ class _AddEquipmentViewState extends State<AddEquipmentView> {
 
                           _buildInputField(
                             label: 'Equipment Name',
-                            hint: 'Contoh: Proyektor Lab A',
+                            hint: 'e.g., Projector Lab A',
                             controller: _nameController,
                             icon: Icons.handyman_rounded,
                           ),
@@ -261,7 +261,7 @@ class _AddEquipmentViewState extends State<AddEquipmentView> {
 
                           _buildInputField(
                             label: 'Description / Specification',
-                            hint: 'Masukkan spesifikasi singkat atau lokasi...',
+                            hint: 'Enter brief specification or location...',
                             controller: _descController,
                             icon: Icons.description_rounded,
                             maxLines: 3,
