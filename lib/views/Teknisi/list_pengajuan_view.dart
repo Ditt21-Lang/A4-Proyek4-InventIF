@@ -116,7 +116,7 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
                       if (listData.isEmpty) {
                         return Center(
                           child: Text(
-                              "No data in category $_selectedStatus",
+                              "There is no request for equipment return",
                               style: const TextStyle(color: Colors.white70)),
                         );
                       }
@@ -309,19 +309,33 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
 
           const SizedBox(height: 16),
           if (_selectedStatus == 'Waiting')
-            Align(
-              alignment: Alignment.center,
-              child: _buildButton(
-                  'Approve', const [Color(0xFFF48A42), Color(0xFFE65C00)], () {
-                _controller.updateStatus(item, 'In Use');
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('${item.itemNames} successfully approved!'),
-                    duration: const Duration(seconds: 1),
-                  ),
-                );
-              }),
-            )
+            // Jika status Returning muncul di tab Requests, tampilkan tombol Scan Return
+            if (item.status == 'Returning')
+              Align(
+                alignment: Alignment.center,
+                child: _buildButton(
+                    'Scan Return', [Colors.orange, Colors.deepOrange], () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => ReturnScannerView(transaction: item)),
+                  );
+                }),
+              )
+            else
+              Align(
+                alignment: Alignment.center,
+                child: _buildButton(
+                    'Approve', const [Color(0xFFF48A42), Color(0xFFE65C00)], () {
+                  _controller.updateStatus(item, 'In Use');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('${item.itemNames} successfully approved!'),
+                      duration: const Duration(seconds: 1),
+                    ),
+                  );
+                }),
+              )
           else if (_selectedStatus == 'In Use')
             // Jika statusnya Returning, munculkan tombol Scan Pengembalian
             if (item.status == 'Returning')

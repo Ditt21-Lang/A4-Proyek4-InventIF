@@ -18,10 +18,13 @@ class ListPengajuanController extends ChangeNotifier {
         'Approved', 'Returned', 'Selesai', 'completed', 'dikembalikan'
       ]);
     } 
-    // PERBAIKAN: Tangkap kata 'Borrowed' jika UI menggunakan kata tersebut!
     else if (status == 'In Use' || status == 'Borrowed') { 
       query = query.where('status', whereIn: ['In Use', 'Returning']);
-    } 
+    }
+    else if (status == 'Waiting') {
+      // Tab Requests: tampilkan pengajuan baru (Waiting) DAN request pengembalian (Returning)
+      query = query.where('status', whereIn: ['Waiting', 'Returning']);
+    }
     else {
       query = query.where('status', isEqualTo: status);
     }
