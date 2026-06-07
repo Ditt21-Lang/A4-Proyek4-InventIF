@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import '../../controllers/auth/register_controller.dart';
 import '../../models/user_model.dart';
+import '../../services/cloudinary_service.dart';
 import '../profile/userProfile_view.dart';
 import '../main_dashboard.dart';
 
@@ -21,12 +24,18 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
   final Color primaryOrange = const Color(0xFFF88031);
 
   bool _isLoading = false;
+  bool _isUploadingKTM = false;
   bool _showNotification = true;
+  
+  File? _ktmFile;
+  String? _ktmFileName;
+  String? _ktmUrl;
 
   late RegisterController _registerController;
   late TextEditingController _nicknameController;
   late TextEditingController _identifierController;
   late TextEditingController _dateOfBirthController;
+  late TextEditingController _kelasController;
   late TextEditingController _phoneNumberController;
 
   @override
@@ -39,6 +48,8 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
         TextEditingController(text: widget.userData.identifier);
     _dateOfBirthController =
         TextEditingController(text: widget.userData.dateOfBirth ?? '');
+    _kelasController =
+        TextEditingController(text: widget.userData.kelas ?? '');
     _phoneNumberController =
         TextEditingController(text: widget.userData.phoneNumber ?? '');
   }
@@ -48,6 +59,7 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
     _nicknameController.dispose();
     _identifierController.dispose();
     _dateOfBirthController.dispose();
+    _kelasController.dispose();
     _phoneNumberController.dispose();
     super.dispose();
   }
@@ -63,7 +75,9 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
       nickname: _nicknameController.text,
       identifier: _identifierController.text,
       dateOfBirth: _dateOfBirthController.text,
+      kelas: _kelasController.text,
       phoneNumber: _phoneNumberController.text,
+      ktm: _ktmUrl,
     );
 
     setState(() {
@@ -93,6 +107,55 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
       context,
       MaterialPageRoute(builder: (context) => const MainDashboard()),
     );
+  }
+
+  Future<void> _pickAndUploadKTM() async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 85,
+      );
+
+      if (image != null) {
+        final validExtensions = ['jpg', 'jpeg', 'png', 'pdf'];
+        final fileExtension =
+            image.path.substring(image.path.lastIndexOf('.') + 1).toLowerCase();
+
+        if (!validExtensions.contains(fileExtension)) {
+          _showErrorDialog('Unsupported file format. Use: JPG, PNG, or PDF');
+          return;
+        }
+
+        setState(() {
+          _isUploadingKTM = true;
+          _ktmFile = File(image.path);
+          _ktmFileName = image.name;
+        });
+
+        CloudinaryService cloudinaryService = CloudinaryService();
+        String? secureUrl = await cloudinaryService.uploadFile(_ktmFile!, 'ktm_files');
+
+        if (secureUrl != null) {
+          setState(() {
+            _ktmUrl = secureUrl;
+            _isUploadingKTM = false;
+          });
+        } else {
+          setState(() {
+            _isUploadingKTM = false;
+            _ktmFile = null;
+            _ktmFileName = null;
+          });
+          _showErrorDialog('Failed to upload KTM to Cloudinary');
+        }
+      }
+    } catch (e) {
+      setState(() {
+        _isUploadingKTM = false;
+      });
+      _showErrorDialog('Failed to pick file: ${e.toString()}');
+    }
   }
 
   // Tampilkan dialog error dengan design yang menarik
@@ -409,10 +472,110 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
 
                   // Identifier (NIM/Employee ID) Field
                   _buildTextFieldWithLabel(
-                    label: 'Identifier',
+                    label: (widget.userData.role == 'teknisi' || widget.userData.role == 'coordinator') ? 'NIP' : 'NIM',
                     controller: _identifierController,
                     hintText: 'NIM/NIP',
                     enabled: !_isLoading,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // KTM Upload Field
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Identity Card',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF2A2C8F),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      GestureDetector(
+                        onTap: _isUploadingKTM || _isLoading ? null : _pickAndUploadKTM,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.grey.shade300),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.upload_file,
+                                color: _isUploadingKTM ? Colors.grey : primaryBlue,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  _isUploadingKTM
+                                      ? 'Uploading...'
+                                      : (_ktmFileName ?? 'Upload Identity Card (JPG, PNG, PDF)'),
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: _ktmFileName != null ? primaryBlue : Colors.grey.shade500,
+                                    fontWeight: _ktmFileName != null ? FontWeight.w500 : FontWeight.normal,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              if (_isUploadingKTM)
+                                const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              else if (_ktmUrl != null)
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.check_circle, color: Colors.green, size: 20),
+                                    const SizedBox(width: 8),
+                                    GestureDetector(
+                                      onTap: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) => Dialog(
+                                            backgroundColor: Colors.transparent,
+                                            child: Stack(
+                                              alignment: Alignment.center,
+                                              children: [
+                                                InteractiveViewer(
+                                                  child: Image.network(
+                                                    _ktmUrl!,
+                                                    fit: BoxFit.contain,
+                                                    errorBuilder: (context, error, stackTrace) => Container(
+                                                      color: Colors.white,
+                                                      padding: const EdgeInsets.all(20),
+                                                      child: const Text('Failed to load image', style: TextStyle(color: Colors.red)),
+                                                    ),
+                                                  ),
+                                                ),
+                                                Positioned(
+                                                  top: 0,
+                                                  right: 0,
+                                                  child: IconButton(
+                                                    icon: const Icon(Icons.close, color: Colors.white, size: 30),
+                                                    onPressed: () => Navigator.pop(context),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      child: const Icon(Icons.remove_red_eye, color: Color(0xFF2A2C8F), size: 22),
+                                    ),
+                                  ],
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 16),
 
@@ -436,6 +599,17 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
                     },
                   ),
                   const SizedBox(height: 16),
+
+                  // Kelas Field
+                  if (widget.userData.role != 'teknisi' && widget.userData.role != 'coordinator') ...[
+                    _buildTextFieldWithLabel(
+                      label: 'Kelas',
+                      controller: _kelasController,
+                      hintText: 'e.g., 2A D3',
+                      enabled: !_isLoading,
+                    ),
+                    const SizedBox(height: 16),
+                  ],
 
                   // Phone Number Field
                   _buildTextFieldWithLabel(

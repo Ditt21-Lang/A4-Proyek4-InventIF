@@ -101,7 +101,7 @@ class KatalogAlatView extends StatelessWidget {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text(
-                                'Tidak dapat memuat ulang data saat Offline.'),
+                                'Unable to refresh data while offline.'),
                             backgroundColor: Colors.orange,
                             behavior: SnackBarBehavior.floating,
                           ),
@@ -122,7 +122,7 @@ class KatalogAlatView extends StatelessWidget {
                       ),
                       const Center(
                         child: Text(
-                          'Alat tidak ditemukan',
+                          'Equipment not found',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 16,
@@ -203,7 +203,10 @@ class KatalogAlatView extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => DetailEquipmentView(equipment: equipment),
+          builder: (context) => DetailEquipmentView(
+                equipment: equipment,
+                showActions: false,
+              ),
           ),
         );
       },

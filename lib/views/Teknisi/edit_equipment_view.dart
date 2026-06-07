@@ -56,7 +56,7 @@ class _EditEquipmentViewState extends State<EditEquipmentView> {
             children: [
               ListTile(
                 leading: const Icon(Icons.photo_library),
-                title: const Text('Galeri Foto'),
+                title: const Text('Photo Gallery'),
                 onTap: () async {
                   final pickedFile = await _picker.pickImage(
                       source: ImageSource.gallery, imageQuality: 70);
@@ -67,7 +67,7 @@ class _EditEquipmentViewState extends State<EditEquipmentView> {
               ),
               ListTile(
                 leading: const Icon(Icons.camera_alt),
-                title: const Text('Kamera Ambil Foto'),
+                title: const Text('Camera Take Photo'),
                 onTap: () async {
                   final pickedFile = await _picker.pickImage(
                       source: ImageSource.camera, imageQuality: 70);
@@ -98,7 +98,7 @@ class _EditEquipmentViewState extends State<EditEquipmentView> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content: Text(
-                  'Perubahan data "${_nameController.text}" berhasil disimpan!'),
+                  'Changes to "${_nameController.text}" saved successfully!'),
               backgroundColor: Colors.green),
         );
         Navigator.pop(context); // Kembali ke daftar alat
@@ -108,7 +108,7 @@ class _EditEquipmentViewState extends State<EditEquipmentView> {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Gagal Menyimpan'),
+            title: const Text('Failed to Save'),
             content: Text(e.toString().replaceFirst('Exception: ', '')),
             actions: [
               TextButton(
@@ -174,7 +174,7 @@ class _EditEquipmentViewState extends State<EditEquipmentView> {
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
+                                color: Colors.black.withValues(alpha: 0.05),
                                 blurRadius: 10,
                                 spreadRadius: 2,
                                 offset: const Offset(0, 4))
@@ -182,7 +182,7 @@ class _EditEquipmentViewState extends State<EditEquipmentView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Informasi Aset Alat',
+                          const Text('Equipment Asset Info',
                               style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
@@ -224,7 +224,7 @@ class _EditEquipmentViewState extends State<EditEquipmentView> {
                                                   color: Color(0xFF7986CB)),
                                               SizedBox(height: 8),
                                               Text(
-                                                  'Ganti Gambar Alat (Opsional)',
+                                                  'Change Equipment Image (Optional)',
                                                   style: TextStyle(
                                                       color: Color(0xFF7986CB),
                                                       fontSize: 12)),
@@ -245,9 +245,9 @@ class _EditEquipmentViewState extends State<EditEquipmentView> {
                           ),
                           const SizedBox(height: 16),
 
-                          _buildInputField(
+                           _buildInputField(
                             label: 'Equipment Name',
-                            hint: 'Masukkan nama alat',
+                            hint: 'Enter equipment name',
                             controller: _nameController,
                             icon: Icons.handyman_rounded,
                           ),
@@ -259,7 +259,7 @@ class _EditEquipmentViewState extends State<EditEquipmentView> {
 
                           _buildInputField(
                             label: 'Description / Specification',
-                            hint: 'Masukkan deskripsi...',
+                            hint: 'Enter description...',
                             controller: _descController,
                             icon: Icons.description_rounded,
                             maxLines: 3,

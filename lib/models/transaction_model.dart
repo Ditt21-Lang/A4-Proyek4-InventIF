@@ -41,6 +41,7 @@ class TransactionModel {
   final String details;
   final String? eventName; // Nullable (?) karena alat tidak butuh nama event
   final String? attachmentUrl; // Nullable (?) opsional jika ada surat
+  final String? officialLetterUrl; // Surat Izin resmi (diupload koordinator)
   final String status;
   final DateTime createdAt;
 
@@ -75,6 +76,7 @@ class TransactionModel {
     required this.details,
     this.eventName,
     this.attachmentUrl,
+    this.officialLetterUrl,
     required this.status,
     required this.createdAt,
   });
@@ -93,6 +95,7 @@ class TransactionModel {
       'details': details,
       'eventName': eventName,
       'attachmentUrl': attachmentUrl,
+      'officialLetterUrl': officialLetterUrl,
       'status': status,
       'createdAt': Timestamp.fromDate(createdAt),
     };
@@ -127,6 +130,7 @@ class TransactionModel {
           : null,
       eventName: data['eventName'],
       attachmentUrl: data['attachmentUrl'],
+      officialLetterUrl: data['officialLetterUrl'],
 
       details: data['details'] ?? '',
       status: data['status'] ?? 'Draft',

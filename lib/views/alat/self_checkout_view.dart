@@ -461,7 +461,7 @@ class _SelfCheckoutViewState extends State<SelfCheckoutView> {
             if (!_isSameDay()) ...[
               const SizedBox(height: 24),
               const Text(
-                'Upload Dokumen Pendukung',
+                'Upload Supporting Document',
                 style: TextStyle(
                   color: Color(0xFFF78233),
                   fontWeight: FontWeight.bold,
@@ -470,7 +470,7 @@ class _SelfCheckoutViewState extends State<SelfCheckoutView> {
               ),
               const SizedBox(height: 6),
               const Text(
-                'Peminjaman lebih dari 1 hari wajib menyertakan surat izin atau jaminan (PDF/JPG).',
+                'Borrowing for more than 1 day requires a permit or guarantee letter (PDF/JPG).',
                 style: TextStyle(color: Colors.white70, fontSize: 12),
               ),
               const SizedBox(height: 12),
@@ -543,7 +543,7 @@ class _SelfCheckoutViewState extends State<SelfCheckoutView> {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Text(
-                                      'Harap unggah dokumen pendukung untuk peminjaman lintas hari!'),
+                                      'Please upload supporting document for multi-day borrowing!'),
                                   backgroundColor: Colors.redAccent,
                                 ),
                               );
@@ -575,12 +575,12 @@ class _SelfCheckoutViewState extends State<SelfCheckoutView> {
                               );
 
                               if (success && mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Pesanan dicatat!'),
-                                    backgroundColor: Colors.green,
-                                  ),
-                                );
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Request recorded!'),
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  );
                                 Navigator.pushNamedAndRemoveUntil(
                                     context, '/dashboard', (route) => false);
                               }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../controllers/transactions/transaction_detail_controller.dart';
 import '../../models/transaction_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class TransactionDetailView extends StatefulWidget {
   final TransactionModel transaction;
@@ -122,13 +123,55 @@ class _TransactionDetailViewState extends State<TransactionDetailView> {
                           ),
                           child: Row(
                             children: [
-                              Container(
-                                width: 70,
-                                height: 70,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
+                              FutureBuilder<DocumentSnapshot>(
+                                future: FirebaseFirestore.instance
+                                    .collection(item.type == 'room'
+                                        ? 'rooms'
+                                        : 'equipments')
+                                    .doc(item.id)
+                                    .get(),
+                                builder: (context, snapshot) {
+                                  String? imageUrl;
+                                  if (snapshot.hasData && snapshot.data!.exists) {
+                                    final data = snapshot.data!.data()
+                                        as Map<String, dynamic>?;
+                                    if (data != null) {
+                                      imageUrl = data['imagePath'] ??
+                                          data['gambar'] ??
+                                          data['foto'] ??
+                                          data['photo'];
+                                    }
+                                  }
+
+                                  return Container(
+                                    width: 70,
+                                    height: 70,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    clipBehavior: Clip.antiAlias,
+                                    child: imageUrl != null && imageUrl.isNotEmpty
+                                        ? (imageUrl.startsWith('http')
+                                            ? Image.network(imageUrl,
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (context, err,
+                                                        stack) =>
+                                                    const Icon(Icons.image,
+                                                        color: Colors.grey))
+                                            : Image.asset(
+                                                item.type == 'room'
+                                                    ? (imageUrl.startsWith('assets') ? imageUrl : 'assets/images/ruangan/$imageUrl')
+                                                    : (imageUrl.startsWith('assets') ? imageUrl : 'assets/images/peralatan/$imageUrl'),
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (context, err,
+                                                        stack) =>
+                                                    const Icon(Icons.image,
+                                                        color: Colors.grey)))
+                                        : const Icon(Icons.image,
+                                            color: Colors.grey),
+                                  );
+                                },
                               ),
                               const SizedBox(width: 16),
                               Expanded(
@@ -251,7 +294,7 @@ class _TransactionDetailViewState extends State<TransactionDetailView> {
                                             .showSnackBar(
                                           const SnackBar(
                                             content: Text(
-                                                'Permintaan pengembalian dikirim ke Teknisi'),
+                                                'Return request sent to Technician'),
                                             backgroundColor: Colors.green,
                                           ),
                                         );
@@ -261,7 +304,7 @@ class _TransactionDetailViewState extends State<TransactionDetailView> {
                                             .showSnackBar(
                                           const SnackBar(
                                             content: Text(
-                                                'Gagal mengirim permintaan'),
+                                                'Failed to send request'),
                                             backgroundColor: Colors.red,
                                           ),
                                         );

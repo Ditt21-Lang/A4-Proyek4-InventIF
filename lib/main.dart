@@ -14,6 +14,8 @@ import 'views/auth/register_view.dart';
 import 'views/auth/register_identity_input_view.dart';
 import 'views/Teknisi/main_dashboard_teknisi.dart';
 import 'views/coordinator/main_dashboard_coordinator.dart';
+import 'views/auth/onboarding_view.dart';
+
 
 const String pendingSyncNotificationTask = 'pendingSyncNotificationTask';
 
@@ -80,8 +82,9 @@ class _MyAppState extends State<MyApp> {
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2A2C8F)),
         useMaterial3: true,
       ),
-      initialRoute: '/login',
+      initialRoute: '/onboarding',
       routes: {
+        '/onboarding': (context) => const OnboardingView(),
         '/login': (context) => const LoginView(),
         '/register': (context) => const RegisterView(),
         '/register-identity': (context) => const RegisterIdentityInputView(),

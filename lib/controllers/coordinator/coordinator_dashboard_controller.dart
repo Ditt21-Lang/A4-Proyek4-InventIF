@@ -7,33 +7,58 @@ import '../../models/user_model.dart';
 class CoordinatorDashboardController extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  /// Get today's room submissions (createdAt = today, status: Waiting/Pending)
+  void _lazyUpdateRoomStatus(List<TransactionModel> transactions) {
+    final now = DateTime.now();
+    for (var tx in transactions) {
+      if (tx.category.toLowerCase() == 'room') {
+        if (tx.status == 'Booked' &&
+            now.isAfter(tx.startDate) &&
+            now.isBefore(tx.endDate)) {
+          // Time to start using
+          _firestore.collection('transactions').doc(tx.id).update({
+            'status': 'In Use',
+          }).catchError((e) => debugPrint('Lazy update failed: $e'));
+        } else if ((tx.status == 'Booked' || tx.status == 'In Use') &&
+            now.isAfter(tx.endDate)) {
+          // Time ended
+          _firestore.collection('transactions').doc(tx.id).update({
+            'status': 'Completed',
+          }).catchError((e) => debugPrint('Lazy update failed: $e'));
+        }
+      }
+    }
+  }
+
+  /// Get today's active room submissions
   Stream<List<TransactionModel>> getTodayRoomSubmissions() {
     final today = DateTime.now();
-    final startOfDay = DateTime(today.year, today.month, today.day);
-    final endOfDay = startOfDay.add(const Duration(days: 1));
 
     return _firestore.collection('transactions').snapshots().map((snapshot) {
       var list = snapshot.docs
           .map((doc) => TransactionModel.fromFirestore(doc))
           .toList();
 
+      // Trigger lazy update in the background
+      _lazyUpdateRoomStatus(list);
+
       // Filter for:
       // 1. Category is 'room'
-      // 2. Status is 'Waiting' or 'Pending'
-      // 3. Created date (createdAt) is today (order dibuat hari ini)
-      // 4. Sort by newest first
+      // 2. Status is booked, in use, or completed
+      // 3. Created date is today
       list = list.where((tx) {
         final isRoom = tx.category.toLowerCase() == 'room';
-        final isNotSystemAdmin = tx.borrowerId != 'system_admin';
-        final isPending = tx.status == 'Waiting' ||
-            tx.status == 'Pending' ||
-            tx.status == 'pending_coordinator';
+        final statusLower = tx.status.toLowerCase();
+        final isValidStatus = statusLower == 'booked' ||
+            statusLower == 'in use' ||
+            statusLower == 'completed';
         final isCreatedToday = tx.createdAt.year == today.year &&
             tx.createdAt.month == today.month &&
             tx.createdAt.day == today.day;
+            
+        final isRoutine = (tx.eventName?.toLowerCase().contains('rutin') ?? false) ||
+                          (tx.details.toLowerCase().contains('rutin'));
 
-        return isRoom && isNotSystemAdmin && isPending && isCreatedToday;
+        return isRoom && isValidStatus && isCreatedToday && !isRoutine;
       }).toList();
 
       list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -41,28 +66,43 @@ class CoordinatorDashboardController extends ChangeNotifier {
     });
   }
 
-  /// Get room submissions history (all room transactions, all statuses)
+  /// Get room submissions history (all room transactions except routine classes)
   Stream<List<TransactionModel>> getRoomSubmissionHistory() {
     return _firestore.collection('transactions').snapshots().map((snapshot) {
       var list = snapshot.docs
           .map((doc) => TransactionModel.fromFirestore(doc))
           .toList();
 
+      // Trigger lazy update
+      _lazyUpdateRoomStatus(list);
+
       // Filter for:
       // 1. Category is 'room'
-      // 2. ALL statuses (no status filter)
-      // 3. Sort by newest first
+      // 2. Exclude "jadwal rutin kuliah"
       list = list.where((tx) {
         final isRoom = tx.category.toLowerCase() == 'room';
-        final isNotSystemAdmin = tx.borrowerId != 'system_admin';
-        return isRoom && isNotSystemAdmin;
+        final isRoutine = (tx.eventName?.toLowerCase().contains('rutin') ?? false) ||
+                          (tx.details.toLowerCase().contains('rutin'));
+        return isRoom && !isRoutine;
       }).toList();
 
+      // Sort by newest created first
       list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       return list;
     });
   }
 
+  /// Upload Official Letter (Surat Peminjaman Resmi)
+  Future<void> uploadOfficialLetter(TransactionModel tx, String fileUrl) async {
+    try {
+      await _firestore.collection('transactions').doc(tx.id).update({
+        'officialLetterUrl': fileUrl,
+      });
+    } catch (e) {
+      debugPrint("Failed to upload official letter: $e");
+      rethrow;
+    }
+  }
   /// Search room submissions history by name, room, or details
   Stream<List<TransactionModel>> searchRoomSubmissionHistory(String query) {
     return getRoomSubmissionHistory().map((list) {
@@ -93,21 +133,8 @@ class CoordinatorDashboardController extends ChangeNotifier {
     });
   }
 
-  /// Confirm submission (update status to confirmed)
-  Future<void> confirmSubmission(TransactionModel transaction) async {
-    try {
-      await _firestore
-          .collection('transactions')
-          .doc(transaction.transactionId)
-          .update({
-        'status': 'coordinator_confirmed',
-        'updatedAt': Timestamp.now(),
-      });
-    } catch (e) {
-      debugPrint('Error confirming submission: $e');
-      rethrow;
-    }
-  }
+  // Confirm submission removed (no longer needs approval)
+
 
   /// Format date for display
   String formatTanggal(DateTime date) {

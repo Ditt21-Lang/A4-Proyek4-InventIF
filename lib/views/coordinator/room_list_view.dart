@@ -46,7 +46,7 @@ class _RoomListViewState extends State<RoomListView> {
                       child: Padding(
                         padding:
                             EdgeInsets.only(right: 8.0), // Padding disesuaikan
-                        child: Text('Data Ruangan',
+                        child: Text('Room Data',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 color: Colors.white,
@@ -58,7 +58,7 @@ class _RoomListViewState extends State<RoomListView> {
                     IconButton(
                       icon: const Icon(Icons.upload_file_rounded,
                           color: Colors.white),
-                      tooltip: 'Import Jadwal CSV',
+                      tooltip: 'Import Schedule CSV',
                       onPressed: () {
                         Navigator.push(
                             context,
@@ -83,7 +83,7 @@ class _RoomListViewState extends State<RoomListView> {
 
                       if (rooms.isEmpty) {
                         return const Center(
-                          child: Text("Belum ada ruangan yang ditambahkan.",
+                          child: Text("No rooms have been added yet.",
                               style: TextStyle(color: Colors.black54)),
                         );
                       }
@@ -119,7 +119,7 @@ class _RoomListViewState extends State<RoomListView> {
                                 borderRadius: BorderRadius.circular(16),
                                 boxShadow: [
                                   BoxShadow(
-                                      color: Colors.black.withOpacity(0.03),
+                                      color: Colors.black.withValues(alpha: 0.03),
                                       blurRadius: 8,
                                       offset: const Offset(0, 4))
                                 ],

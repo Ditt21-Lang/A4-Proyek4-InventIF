@@ -2,6 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../services/user_service.dart';
 import '../../models/user_model.dart';
+import 'dart:io';
+import '../../services/cloudinary_service.dart';
 
 class ManageAccountController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -34,14 +36,47 @@ class ManageAccountController {
     required String identifier,
     required String ktm,
     required String birthDate,
+    required String kelas,
+    File? imageFile,
   }) async {
-    return await UserService.updatePersonalInfo(
-      fullName: fullName,
-      nickname: nickname,
-      identifier: identifier,
-      ktm: ktm,
-      birthDate: birthDate,
-    );
+    try {
+      String? imageUrl;
+
+      // 1. Upload gambar ke Cloudinary jika user memilih foto baru
+      if (imageFile != null) {
+        final CloudinaryService cloudinary = CloudinaryService();
+        imageUrl = await cloudinary.uploadFile(imageFile, 'profile_images');
+      }
+
+      final User? currentUser = _auth.currentUser;
+      if (currentUser != null) {
+        // 2. Siapkan data teks yang akan diupdate
+        Map<String, dynamic> updateData = {
+          'fullName': fullName,
+          'nickname': nickname,
+          'identifier': identifier,
+          'ktm': ktm,
+          'dateOfBirth': birthDate,
+          'kelas': kelas,
+        };
+
+        // 3. Jika upload gambar berhasil, tambahkan URL-nya ke dalam data Firestore
+        if (imageUrl != null) {
+          updateData['profileImage'] = imageUrl;
+        }
+
+        // 4. Update Firestore secara langsung (tanpa melalui UserService agar lebih ringkas)
+        await _firestore
+            .collection('users')
+            .doc(currentUser.uid)
+            .update(updateData);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print('Error updating profile info: $e');
+      return false;
+    }
   }
 
   // Change password

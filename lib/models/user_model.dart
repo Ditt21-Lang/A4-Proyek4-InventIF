@@ -7,6 +7,7 @@ class UserModel {
   final String fullName;
   final String? nickname;
   final String? dateOfBirth;
+  final String? kelas;
   final String? ktm;
   final String? phoneNumber;
   final String? profileImage;
@@ -21,6 +22,7 @@ class UserModel {
     required this.fullName,
     this.nickname,
     this.dateOfBirth,
+    this.kelas,
     required this.ktm,
     this.phoneNumber,
     this.profileImage,
@@ -38,6 +40,7 @@ class UserModel {
       'fullName': fullName,
       'nickname': nickname ?? '',
       'dateOfBirth': dateOfBirth ?? '',
+      'kelas': kelas ?? '',
       'ktm': ktm ?? '',
       'phoneNumber': phoneNumber ?? '',
       'profileImage': profileImage,
@@ -56,6 +59,7 @@ class UserModel {
       fullName: map['Fullname'] ?? map['fullName'] ?? 'User',
       nickname: map['nickname'] ?? '',
       dateOfBirth: map['dateOfBirth'] ?? '',
+      kelas: map['kelas'] ?? '',
       ktm: map['ktm'] ?? '',
       phoneNumber: map['phoneNumber'] ?? '',
       profileImage: map['profileImage'],
@@ -75,6 +79,7 @@ class UserModel {
     String? fullName,
     String? nickname,
     String? dateOfBirth,
+    String? kelas,
     String? ktm,
     String? phoneNumber,
     String? profileImage,
@@ -89,6 +94,7 @@ class UserModel {
       fullName: fullName ?? this.fullName,
       nickname: nickname ?? this.nickname,
       dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+      kelas: kelas ?? this.kelas,
       ktm: ktm ?? this.ktm,
       phoneNumber: phoneNumber ?? this.phoneNumber,
       profileImage: profileImage ?? this.profileImage,
@@ -100,6 +106,6 @@ class UserModel {
 
   @override
   String toString() {
-    return 'UserModel(uid: $uid, identifier: $identifier, email: $email, fullName: $fullName, nickname: $nickname, dateOfBirth: $dateOfBirth, ktm: $ktm, phoneNumber: $phoneNumber, profileImage: $profileImage, role: $role, createdAt: $createdAt, isActive: $isActive)';
+    return 'UserModel(uid: $uid, identifier: $identifier, email: $email, fullName: $fullName, nickname: $nickname, dateOfBirth: $dateOfBirth, kelas: $kelas, ktm: $ktm, phoneNumber: $phoneNumber, profileImage: $profileImage, role: $role, createdAt: $createdAt, isActive: $isActive)';
   }
 }

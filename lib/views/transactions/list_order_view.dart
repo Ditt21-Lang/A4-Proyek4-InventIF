@@ -3,6 +3,7 @@ import '../../controllers/transactions/list_order_controller.dart';
 import '../../models/transaction_model.dart';
 import 'transaction_detail_view.dart';
 import '../../widgets/custom_bottom_nav.dart'; // Import navigasi universal
+import '../Teknisi/document_viewer_view.dart';
 
 class ListOrderView extends StatefulWidget {
   final VoidCallback onBack;
@@ -137,7 +138,7 @@ class _ListOrderViewState extends State<ListOrderView> {
                   if (_controller.orders.isEmpty) {
                     return const Center(
                       child: Text(
-                        'Belum ada riwayat peminjaman.',
+                        'No borrowing history found.',
                         style: TextStyle(color: Colors.white70),
                       ),
                     );
@@ -241,6 +242,36 @@ class _ListOrderViewState extends State<ListOrderView> {
             // Memanggil getter itemNames yang pintar (otomatis gabung string jika lebih dari 1)
             Text('• ${transaction.itemNames}',
                 style: const TextStyle(fontSize: 12, color: Colors.black87)),
+                
+            // Tampilkan dokumen persetujuan dari koordinator jika ada
+            if (transaction.officialLetterUrl != null &&
+                transaction.officialLetterUrl!.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 12.0),
+                child: TextButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DocumentViewerView(
+                            url: transaction.officialLetterUrl!),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.description, color: Colors.blue),
+                  label: const Text(
+                    'Approved Permit Letter',
+                    style: TextStyle(
+                        color: Colors.blue, fontWeight: FontWeight.bold),
+                  ),
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.blue.withOpacity(0.1),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  ),
+                ),
+              ),
+              
             const SizedBox(height: 16),
 
             // Indikator Status di tengah (mirip tombol Approve di Teknisi)

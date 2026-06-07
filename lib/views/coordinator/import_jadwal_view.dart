@@ -19,10 +19,10 @@ class _ImportJadwalViewState extends State<ImportJadwalView> {
         showDialog(
           context: context,
           builder: (_) => AlertDialog(
-            title: const Text('Import Berhasil 🎉',
+            title: const Text('Import Successful 🎉',
                 style: TextStyle(color: Colors.green)),
             content: Text(
-                'Sebanyak ${_controller.totalJadwalImported} jadwal perkuliahan rutin berhasil disingkronisasi ke kalender ruangan.'),
+                'A total of ${_controller.totalJadwalImported} recurring lecture schedules were successfully synced to the room calendar.'),
             actions: [
               TextButton(
                   onPressed: () => Navigator.pop(context),
@@ -33,7 +33,7 @@ class _ImportJadwalViewState extends State<ImportJadwalView> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text('Gagal mengimpor jadwal atau file dibatalkan.'),
+              content: Text('Failed to import schedule or file selection cancelled.'),
               backgroundColor: Colors.red),
         );
       }
@@ -46,7 +46,7 @@ class _ImportJadwalViewState extends State<ImportJadwalView> {
       backgroundColor: const Color(0xFFF0F0F0),
       appBar: AppBar(
         backgroundColor: const Color(0xFF1A237E),
-        title: const Text('Import Jadwal Rutin',
+        title: const Text('Import Routine Schedule',
             style: TextStyle(
                 color: Colors.white,
                 fontSize: 18,
@@ -72,29 +72,29 @@ class _ImportJadwalViewState extends State<ImportJadwalView> {
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha: 0.05),
                           blurRadius: 10,
                           offset: const Offset(0, 4))
                     ]),
                 child: const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Panduan Import:',
+                    Text('Import Guide:',
                         style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                             color: Color(0xFF1A237E))),
                     SizedBox(height: 12),
                     Text(
-                        '1. Pastikan file PDF jadwal telah di-convert ke format CSV (.csv).',
+                        '1. Make sure the schedule PDF file has been converted to CSV format (.csv).',
                         style: TextStyle(fontSize: 13, color: Colors.black87)),
                     SizedBox(height: 8),
                     Text(
-                        '2. Pastikan ID Ruangan di database sesuai/mirip dengan nama ruangan di dalam CSV (contoh: D-108).',
+                        '2. Make sure the Room ID in the database matches or is similar to the room name in the CSV (e.g. D-108).',
                         style: TextStyle(fontSize: 13, color: Colors.black87)),
                     SizedBox(height: 8),
                     Text(
-                        '3. Sistem akan otomatis mengisi jadwal dari 9 Februari hingga 13 Juni 2026.',
+                        '3. The system will automatically populate the schedule from February 9 to June 13, 2026.',
                         style: TextStyle(fontSize: 13, color: Colors.black87)),
                   ],
                 ),
@@ -114,7 +114,7 @@ class _ImportJadwalViewState extends State<ImportJadwalView> {
                       onPressed: _controller.isLoading ? null : _handleImport,
                       child: _controller.isLoading
                           ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text('PILIH FILE CSV & IMPORT',
+                          : const Text('CHOOSE CSV FILE & IMPORT',
                               style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,

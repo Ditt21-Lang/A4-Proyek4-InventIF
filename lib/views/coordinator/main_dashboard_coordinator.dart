@@ -86,8 +86,8 @@ class _MainDashboardCoordinatorState extends State<MainDashboardCoordinator> {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                const Color(0xFF283593).withOpacity(0.85),
-                const Color(0xFF1A237E).withOpacity(0.95)
+                const Color(0xFF283593).withValues(alpha: 0.85),
+                const Color(0xFF1A237E).withValues(alpha: 0.95)
               ],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
@@ -106,8 +106,8 @@ class _MainDashboardCoordinatorState extends State<MainDashboardCoordinator> {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                const Color(0xFF283593).withOpacity(0.85),
-                const Color(0xFF1A237E).withOpacity(0.95)
+                const Color(0xFF283593).withValues(alpha: 0.85),
+                const Color(0xFF1A237E).withValues(alpha: 0.95)
               ],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,

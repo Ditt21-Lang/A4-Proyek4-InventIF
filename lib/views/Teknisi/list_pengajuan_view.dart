@@ -16,7 +16,7 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
   String _selectedStatus = 'Waiting';
 
   String _formatTanggal(DateTime? date) {
-    if (date == null) return 'Belum ada tanggal';
+    if (date == null) return 'No date set';
     String day = date.day.toString().padLeft(2, '0');
     String month = date.month.toString().padLeft(2, '0');
     String year = date.year.toString().substring(2);
@@ -41,8 +41,8 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  const Color(0xFF283593).withOpacity(0.85),
-                  const Color(0xFF1A237E).withOpacity(0.95),
+                  const Color(0xFF283593).withValues(alpha: 0.85),
+                  const Color(0xFF1A237E).withValues(alpha: 0.95),
                 ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -116,7 +116,7 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
                       if (listData.isEmpty) {
                         return Center(
                           child: Text(
-                              "Tidak ada data di kategori $_selectedStatus",
+                              "No data in category $_selectedStatus",
                               style: const TextStyle(color: Colors.white70)),
                         );
                       }
@@ -206,36 +206,105 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
           Text('• ${item.itemNames}',
               style: const TextStyle(fontSize: 12, color: Colors.black87)),
 
-          // === TOMBOL LIHAT DOKUMEN (IN-APP VIEWER) ===
-          if (item.attachmentUrl != null && item.attachmentUrl!.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 12.0),
-              child: TextButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          DocumentViewerView(url: item.attachmentUrl!),
+          // === TOMBOL DOKUMEN & KTM ===
+          Padding(
+            padding: const EdgeInsets.only(top: 12.0),
+            child: Wrap(
+              spacing: 8.0,
+              runSpacing: 8.0,
+              children: [
+                if (item.attachmentUrl != null && item.attachmentUrl!.isNotEmpty)
+                  TextButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              DocumentViewerView(url: item.attachmentUrl!),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.description_rounded,
+                        color: Colors.blue, size: 20),
+                    label: const Text('View Document',
+                        style: TextStyle(
+                            color: Colors.blue,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold)),
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.blue.withValues(alpha: 0.1),
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
-                  );
-                },
-                icon: const Icon(Icons.description_rounded,
-                    color: Colors.blue, size: 20),
-                label: const Text('Lihat Dokumen',
-                    style: TextStyle(
-                        color: Colors.blue,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold)),
-                style: TextButton.styleFrom(
-                  backgroundColor: Colors.blue.withOpacity(0.1),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                TextButton.icon(
+                  onPressed: () async {
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (_) => const Center(child: CircularProgressIndicator()),
+                    );
+
+                    String? ktmUrl = await _controller.getBorrowerKTM(item.borrowerId);
+                    
+                    if (context.mounted) Navigator.pop(context);
+
+                    if (ktmUrl != null && ktmUrl.isNotEmpty) {
+                      if (context.mounted) {
+                        showDialog(
+                          context: context,
+                          builder: (context) => Dialog(
+                            backgroundColor: Colors.transparent,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                InteractiveViewer(
+                                  child: Image.network(
+                                    ktmUrl,
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (context, error, stackTrace) => Container(
+                                      color: Colors.white,
+                                      padding: const EdgeInsets.all(20),
+                                      child: const Text('Failed to load identity card', style: TextStyle(color: Colors.red)),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 0,
+                                  right: 0,
+                                  child: IconButton(
+                                    icon: const Icon(Icons.close, color: Colors.white, size: 30),
+                                    onPressed: () => Navigator.pop(context),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }
+                    } else {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Borrower has not uploaded an Identity Card.')),
+                        );
+                      }
+                    }
+                  },
+                  icon: const Icon(Icons.badge, color: Colors.orange, size: 20),
+                  label: const Text('View Identity',
+                      style: TextStyle(color: Colors.orange, fontSize: 12, fontWeight: FontWeight.bold)),
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.orange.withValues(alpha: 0.1),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
                 ),
-              ),
+              ],
             ),
+          ),
           // ============================================
 
           const SizedBox(height: 16),
@@ -247,7 +316,7 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
                 _controller.updateStatus(item, 'In Use');
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('${item.itemNames} berhasil di-Approve!'),
+                    content: Text('${item.itemNames} successfully approved!'),
                     duration: const Duration(seconds: 1),
                   ),
                 );
@@ -257,7 +326,7 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
             // Jika statusnya Returning, munculkan tombol Scan Pengembalian
             if (item.status == 'Returning')
               _buildButton(
-                  'Scan Pengembalian', [Colors.orange, Colors.deepOrange], () {
+                  'Scan Return', [Colors.orange, Colors.deepOrange], () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -268,7 +337,7 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
             else
               const Align(
                 alignment: Alignment.center,
-                child: Text('Sedang dipakai mahasiswa',
+                child: Text('Currently used by student',
                     style: TextStyle(
                         color: Colors.blue,
                         fontWeight: FontWeight.bold,
@@ -277,7 +346,7 @@ class _ListPengajuanScreenState extends State<ListPengajuanScreen> {
           else if (_selectedStatus == 'History')
             Align(
               alignment: Alignment.center,
-              child: Text('Selesai (${item.status})',
+              child: Text('Completed (${item.status})',
                   style: const TextStyle(
                       color: Colors.green,
                       fontWeight: FontWeight.bold,

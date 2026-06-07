@@ -14,6 +14,7 @@ class DashboardTeknisiController {
         .map((snapshot) {
       var list = snapshot.docs
           .map((doc) => TransactionModel.fromFirestore(doc))
+          .where((tx) => tx.category.toLowerCase() == 'equipment')
           .toList();
       // Urutkan dari yang terbaru (descending) di sisi Dart
       list.sort((a, b) => b.createdAt.compareTo(a.createdAt));

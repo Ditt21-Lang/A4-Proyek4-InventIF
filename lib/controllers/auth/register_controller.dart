@@ -561,6 +561,7 @@ class RegisterController {
     String? studentID,
     String? identifier,
     String? dateOfBirth,
+    String? kelas,
     String? ktm,
     String? phoneNumber,
     String? profileImage,
@@ -572,6 +573,7 @@ class RegisterController {
       if (studentID != null && studentID.isNotEmpty) updateData['studentID'] = studentID;
       if (identifier != null && identifier.isNotEmpty) updateData['identifier'] = identifier;
       if (dateOfBirth != null && dateOfBirth.isNotEmpty) updateData['dateOfBirth'] = dateOfBirth;
+      if (kelas != null && kelas.isNotEmpty) updateData['kelas'] = kelas;
       if (ktm != null && ktm.isNotEmpty) updateData['ktm'] = ktm;
       if (phoneNumber != null && phoneNumber.isNotEmpty) updateData['phoneNumber'] = phoneNumber;
       if (profileImage != null && profileImage.isNotEmpty) updateData['profileImage'] = profileImage;
