@@ -13,6 +13,7 @@ class DashboardTeknisiController {
         .map((snapshot) {
       return snapshot.docs
           .map((doc) => TransactionModel.fromFirestore(doc))
+          .where((tx) => tx.category.toLowerCase() == 'equipment')
           .toList();
     });
   }

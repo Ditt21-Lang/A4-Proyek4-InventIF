@@ -43,11 +43,14 @@ class CoordinatorDashboardController extends ChangeNotifier {
 
       // Filter for:
       // 1. Category is 'room'
-      // 2. Status is not Completed or Cancelled
+      // 2. Status is booked, in use, or completed
       // 3. Created date is today
       list = list.where((tx) {
         final isRoom = tx.category.toLowerCase() == 'room';
-        final isActive = tx.status != 'Completed' && tx.status != 'Cancelled';
+        final statusLower = tx.status.toLowerCase();
+        final isValidStatus = statusLower == 'booked' ||
+            statusLower == 'in use' ||
+            statusLower == 'completed';
         final isCreatedToday = tx.createdAt.year == today.year &&
             tx.createdAt.month == today.month &&
             tx.createdAt.day == today.day;
@@ -55,7 +58,7 @@ class CoordinatorDashboardController extends ChangeNotifier {
         final isRoutine = (tx.eventName?.toLowerCase().contains('rutin') ?? false) ||
                           (tx.details.toLowerCase().contains('rutin'));
 
-        return isRoom && isActive && isCreatedToday && !isRoutine;
+        return isRoom && isValidStatus && isCreatedToday && !isRoutine;
       }).toList();
 
       list.sort((a, b) => b.createdAt.compareTo(a.createdAt));

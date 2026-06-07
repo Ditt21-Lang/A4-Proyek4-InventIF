@@ -11,6 +11,7 @@ class ListPengajuanController extends ChangeNotifier {
     debugPrint("🔍 [DEBUG] UI meminta data untuk tab: '$status'");
 
     Query query = _firestore.collection('transactions');
+    query = query.where('category', isEqualTo: 'equipment');
 
     if (status == 'History') {
       query = query.where('status', whereIn: [

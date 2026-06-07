@@ -203,7 +203,10 @@ class KatalogAlatView extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => DetailEquipmentView(equipment: equipment),
+          builder: (context) => DetailEquipmentView(
+                equipment: equipment,
+                showActions: false,
+              ),
           ),
         );
       },
