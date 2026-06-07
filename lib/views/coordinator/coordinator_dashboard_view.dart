@@ -151,20 +151,6 @@ class _CoordinatorDashboardViewState extends State<CoordinatorDashboardView> {
           ),
         ],
       ),
-
-      // TOMBOL MELAYANG MENGELOLA RUANGAN
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(
-            bottom: 90.0), // Jarak aman agar tidak menabrak Navigasi Bawah
-        child: FloatingActionButton(
-          backgroundColor: const Color(0xFFFF8A2A),
-          onPressed: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (_) => const RoomListView()));
-          },
-          child: const Icon(Icons.meeting_room_rounded, color: Colors.white),
-        ),
-      ),
     );
   }
 
