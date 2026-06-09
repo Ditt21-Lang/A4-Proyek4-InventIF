@@ -36,34 +36,31 @@ class _RegisterViewState extends State<RegisterView> {
   Future<void> _handleSendOTP() async {
     String identity = _identityController.text.trim();
 
-    // Validate if input is empty
-    if (identity.isEmpty) {
-      _showErrorDialog(
-          'Enter your ${_isPhoneSelected ? 'phone number' : 'email'}');
-      return;
-    }
+      // Validate if input is empty
+      if (identity.isEmpty) {
+        _showErrorSnackBar('Enter your ${_isPhoneSelected ? 'phone number' : 'email'}');
+        return;
+      }
 
     // Validate format
     if (_isPhoneSelected) {
       // Validate phone number (minimum 10 digits)
-      if (!RegExp(r'^[+]?[0-9]{10,}$').hasMatch(identity)) {
-        _showErrorDialog(
-            'Invalid phone number format. Use format +62812345678 or 081234567890');
-        return;
-      }
+        if (!RegExp(r'^[+]?[0-9]{10,}$').hasMatch(identity)) {
+          _showErrorSnackBar('Invalid phone number format. Use format +62812345678 or 081234567890');
+          return;
+        }
     } else {
       // Validate email
-      if (!RegExp(r'^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$')
-          .hasMatch(identity)) {
-        _showErrorDialog('Invalid email format');
-        return;
-      }
+        if (!RegExp(r'^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$').hasMatch(identity)) {
+          _showErrorSnackBar('Invalid email format');
+          return;
+        }
       
       // Validate that email is from Polban domain
-      if (!identity.toLowerCase().endsWith('@polban.ac.id')) {
-        _showErrorDialog('Only Polban email (@polban.ac.id) is allowed to register');
-        return;
-      }
+        if (!identity.toLowerCase().endsWith('@polban.ac.id')) {
+          _showErrorSnackBar('Only Polban email (@polban.ac.id) is allowed to register');
+          return;
+        }
     }
 
     setState(() {
@@ -95,7 +92,7 @@ class _RegisterViewState extends State<RegisterView> {
           ),
         );
       } else {
-        _showErrorDialog(result['message']);
+        _showErrorSnackBar(result['message']);
       }
     }
   }
@@ -124,7 +121,7 @@ class _RegisterViewState extends State<RegisterView> {
             ),
           );
         } else {
-          _showSuccessDialog(result['message']);
+          _showSuccessSnackBar(result['message']);
           Future.delayed(const Duration(seconds: 1), () {
             if (mounted) {
               Navigator.pop(context);
@@ -132,226 +129,45 @@ class _RegisterViewState extends State<RegisterView> {
           });
         }
       } else {
-        _showErrorDialog(result['message']);
+        _showErrorSnackBar(result['message']);
       }
     }
   }
 
-  // Tampilkan dialog error dengan design yang menarik
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => Center(
-        child: SingleChildScrollView(
-          child: AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            backgroundColor: Colors.white,
-            insetPadding: const EdgeInsets.symmetric(horizontal: 24),
-            contentPadding: const EdgeInsets.all(0),
-            content: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Header dengan background merah
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFF6B6B),
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(16),
-                        topRight: Radius.circular(16),
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 60,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.error_outline,
-                            color: Colors.white,
-                            size: 32,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Oops!',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Message
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Text(
-                      message,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF333333),
-                        height: 1.5,
-                      ),
-                    ),
-                  ),
-                  // Button
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFF6B6B),
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text(
-                          'OK',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+  // Tampilkan snackbar error sederhana
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: const Color(0xFFE53935),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
         ),
+        duration: const Duration(seconds: 3),
       ),
     );
   }
 
-  // Tampilkan dialog success dengan design yang menarik
-  void _showSuccessDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => Center(
-        child: SingleChildScrollView(
-          child: AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            backgroundColor: Colors.white,
-            insetPadding: const EdgeInsets.symmetric(horizontal: 24),
-            contentPadding: const EdgeInsets.all(0),
-            content: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Header dengan background hijau
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF51CF66),
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(16),
-                        topRight: Radius.circular(16),
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 60,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.check_circle_outline,
-                            color: Colors.white,
-                            size: 32,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Success!',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Message
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Text(
-                      message,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF333333),
-                        height: 1.5,
-                      ),
-                    ),
-                  ),
-                  // Button
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF51CF66),
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text(
-                          'Close',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+
+
+  // Tampilkan snackbar success sederhana
+  void _showSuccessSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: const Color(0xFF51CF66),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
         ),
+        duration: const Duration(seconds: 3),
       ),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {

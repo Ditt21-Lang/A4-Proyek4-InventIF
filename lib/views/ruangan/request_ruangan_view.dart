@@ -66,7 +66,7 @@ class _RequestRuanganScreenState extends State<RequestRuanganScreen> {
                       borderRadius: BorderRadius.circular(18),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.32),
+                          color: Colors.black.withOpacity(0.32),
                           blurRadius: 14,
                           offset: const Offset(4, 6),
                         ),
@@ -336,7 +336,7 @@ class _BackCircle extends StatelessWidget {
             borderRadius: BorderRadius.circular(18),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.35),
+                color: Colors.black.withOpacity(0.35),
                 blurRadius: 10,
                 offset: const Offset(2, 5),
               ),
@@ -395,8 +395,7 @@ class _InputField extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide.none,
         ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
     );
   }

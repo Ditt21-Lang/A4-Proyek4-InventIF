@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../controllers/auth/login_controller.dart';
 import 'register_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,9 +14,10 @@ class LoginView extends StatefulWidget {
 class _LoginViewState extends State<LoginView> {
   final Color primaryBlue = const Color(0xFF2A2C8F);
   final Color primaryOrange = const Color(0xFFF88031);
+bool _obscurePassword = true;
   final Color creamColor = const Color(0xFFFAF0E6);
 
-  bool _obscurePassword = true;
+  bool _isPhoneSelected = false;
   bool _rememberMe = false;
   bool _isLoading = false;
 
@@ -41,9 +43,25 @@ class _LoginViewState extends State<LoginView> {
 
   // Handle login
   Future<void> _handleLogin() async {
-    // Validasi apakah email dan password kosong
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      _showErrorDialog('Email and password must be filled!');
+    String identity = _emailController.text.trim();
+    // Validate if input is empty
+    if (identity.isEmpty) {
+      _showErrorSnackBar('Enter your email');
+      return;
+    }
+    // Validate email format
+    if (!RegExp(r'^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$').hasMatch(identity)) {
+      _showErrorSnackBar('Invalid email format');
+      return;
+    }
+    // Validate that email is from Polban domain
+    if (!identity.toLowerCase().endsWith('@polban.ac.id')) {
+      _showErrorSnackBar('Only Polban email (@polban.ac.id) is allowed to register');
+      return;
+    }
+
+    if (_passwordController.text.isEmpty) {
+      _showErrorSnackBar('Password must be filled!');
       return;
     }
 
@@ -98,10 +116,26 @@ class _LoginViewState extends State<LoginView> {
           Navigator.pushReplacementNamed(context, '/dashboard');
         }
       } else {
-        // Login failed
-        _showErrorDialog(result['message']);
+        // Login failed — tampilkan snackbar
+        _showErrorSnackBar(result['message']);
       }
     }
+  }
+
+  // Tampilkan snackbar error sederhana
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: const Color(0xFFE53935),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 
   // Tampilkan dialog success dengan design yang menarik
@@ -143,7 +177,7 @@ class _LoginViewState extends State<LoginView> {
                           width: 60,
                           height: 60,
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
+                            color: Colors.white.withOpacity(0.2),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
@@ -252,7 +286,7 @@ class _LoginViewState extends State<LoginView> {
                           width: 60,
                           height: 60,
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
+                            color: Colors.white.withOpacity(0.2),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
@@ -340,7 +374,15 @@ class _LoginViewState extends State<LoginView> {
             TextField(
               controller: resetEmailController,
               decoration: const InputDecoration(
-                labelText: 'Email',
+                // Email Address
+                label: Text(
+                  'Email Address',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF2A2C8F),
+                  ),
+                ),
                 border: OutlineInputBorder(),
               ),
             ),
@@ -385,13 +427,11 @@ class _LoginViewState extends State<LoginView> {
     final savedPassword = prefs.getString('saved_password') ?? '';
     final isRemembered = prefs.getBool('remember_me') ?? false;
 
-    if (isRemembered) {
-      setState(() {
-        _emailController.text = savedEmail;
-        _passwordController.text = savedPassword;
-        _rememberMe = true;
-      });
-    }
+    setState(() {
+      _emailController.text = savedEmail;
+      _passwordController.text = savedPassword;
+      _rememberMe = isRemembered;
+    });
   }
 
   @override
@@ -626,7 +666,7 @@ class _LoginViewState extends State<LoginView> {
                                       ),
                                     );
                                   },
-                            child: Text(
+                            child: const Text(
                               "Sign Up",
                               style: TextStyle(
                                 color: Colors.blue,

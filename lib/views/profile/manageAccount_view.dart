@@ -1,5 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
@@ -85,8 +86,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
           _phoneController.text = userData.phoneNumber ?? '';
         });
 
-        // Check for existing KTM file in document directory (writable location)
-        // Only on mobile/desktop, not on web
         if (!kIsWeb && userData.uid.isNotEmpty) {
           try {
             final appDocDir = await getApplicationDocumentsDirectory();
@@ -115,7 +114,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
           }
         }
 
-        // Also check from database
         if (userData.ktm != null && userData.ktm!.isNotEmpty) {
           final file = File(userData.ktm!);
           if (file.existsSync()) {
@@ -145,7 +143,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
       );
 
       if (image != null) {
-        // Validate file format - only allow jpg, jpeg, png, pdf
         final validExtensions = ['jpg', 'jpeg', 'png', 'pdf'];
         final fileExtension =
             image.path.substring(image.path.lastIndexOf('.') + 1).toLowerCase();
@@ -158,8 +155,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
         final file = File(image.path);
         final fileName = 'KTM.$fileExtension';
 
-        // Create folder path in app's document directory (writable location)
-        // Only on mobile/desktop, not on web
         if (!kIsWeb) {
           final appDocDir = await getApplicationDocumentsDirectory();
           final userFolder = Directory('${appDocDir.path}/ktm_files/$userUID');
@@ -167,16 +162,14 @@ class _ManageAccountViewState extends State<ManageAccountView> {
             userFolder.createSync(recursive: true);
           }
 
-          // Copy file to document directory
           final newFilePath = '${userFolder.path}/$fileName';
           await file.copy(newFilePath);
 
-          // Save path to database
           final success = await _controller.updatePersonalInfo(
             fullName: _fullNameController.text,
             nickname: _nicknameController.text,
             identifier: _identifierController.text,
-            ktm: newFilePath, // Save file path
+            ktm: newFilePath,
             birthDate: _birthDateController.text,
           );
 
@@ -189,8 +182,8 @@ class _ManageAccountViewState extends State<ManageAccountView> {
           } else {
             _showErrorSnackBar('Failed to save KTM file path to database');
           }
-        } // closes if (!kIsWeb)
-      } // closes if (image != null)
+        }
+      }
     } catch (e) {
       print('Error uploading KTM: $e');
       _showErrorSnackBar('Failed to upload file: ${e.toString()}');
@@ -207,7 +200,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
       final file = File(_ktmController.text);
       if (file.existsSync()) {
         _showSuccessSnackBar('KTM file found: ${file.path}');
-        // TODO: Open file dengan package 'open_file' untuk preview
       } else {
         _showErrorSnackBar('KTM file not found. Path: ${_ktmController.text}');
       }
@@ -240,7 +232,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
       _showErrorSnackBar('New passwords do not match');
       return;
     }
-    // Validate password: min 8 chars, uppercase, lowercase, digit
     final password = _newPasswordController.text;
     if (password.length < 8) {
       _showErrorSnackBar('Password must be at least 8 characters');
@@ -328,7 +319,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
       backgroundColor: primaryBlue,
       body: Column(
         children: [
-          // Header (cream background)
           Container(
             color: creamColor,
             padding: EdgeInsets.only(
@@ -340,7 +330,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Back button
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
                   child: Container(
@@ -378,7 +367,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
                   ),
                 ),
                 const SizedBox(width: 16),
-                // Greeting - gunakan nickname, jika kosong pakai fullName
                 Expanded(
                   child: Text(
                     'Hello, ${(userNickname != null && userNickname!.isNotEmpty) ? userNickname : userName}!',
@@ -389,7 +377,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
                     ),
                   ),
                 ),
-                // Profile photo
                 Container(
                   width: 54,
                   height: 54,
@@ -418,7 +405,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
             ),
           ),
 
-          // Scrollable content (blue background)
           Expanded(
             child: SingleChildScrollView(
               padding: EdgeInsets.only(
@@ -450,6 +436,8 @@ class _ManageAccountViewState extends State<ManageAccountView> {
                         label: 'NIM',
                         controller: _identifierController,
                         suffixIcon: Icons.edit,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       ),
                       _buildKtmField(),
                       _buildNavyField(
@@ -539,7 +527,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
     );
   }
 
-  // Section (collapsed & expanded)
   Widget _buildSection({
     required String title,
     required IconData icon,
@@ -555,7 +542,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
       clipBehavior: Clip.hardEdge,
       child: Column(
         children: [
-          // Header row
           GestureDetector(
             onTap: onToggle,
             child: Container(
@@ -583,7 +569,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
               ),
             ),
           ),
-          // Expanded content
           if (isExpanded)
             Container(
               width: double.infinity,
@@ -599,11 +584,12 @@ class _ManageAccountViewState extends State<ManageAccountView> {
     );
   }
 
-  // Navy input field (Personal Info)
   Widget _buildNavyField({
     required String label,
     required TextEditingController controller,
     IconData? suffixIcon,
+    TextInputType keyboardType = TextInputType.text,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -628,6 +614,8 @@ class _ManageAccountViewState extends State<ManageAccountView> {
                 ),
                 TextField(
                   controller: controller,
+                  keyboardType: keyboardType,
+                  inputFormatters: inputFormatters,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 14,
@@ -648,6 +636,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
       ),
     );
   }
+
 
   // KTM field with Upload & Open File buttons
   Widget _buildKtmField() {

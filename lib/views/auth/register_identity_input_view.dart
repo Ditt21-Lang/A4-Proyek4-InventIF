@@ -131,7 +131,7 @@ class _RegisterIdentityInputViewState extends State<RegisterIdentityInputView> {
                           width: 60,
                           height: 60,
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
+                            color: Colors.white.withOpacity(0.2),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../models/user_model.dart';
@@ -37,6 +38,13 @@ class LoginController {
         'user': null,
         'userData': null,
         'message': message,
+      };
+    } on SocketException {
+      return {
+        'success': false,
+        'user': null,
+        'userData': null,
+        'message': 'Tidak ada koneksi internet. Periksa jaringan Anda.',
       };
     } catch (e) {
       return {
@@ -119,19 +127,23 @@ class LoginController {
   String _getErrorMessage(String errorCode) {
     switch (errorCode) {
       case 'user-not-found':
-        return 'Email is not registered in our system.';
+        return 'Email tidak terdaftar di sistem kami.';
       case 'wrong-password':
-        return 'Incorrect password.';
+        return 'Password yang Anda masukkan salah.';
       case 'invalid-email':
-        return 'Invalid email format.';
+        return 'Format email tidak valid. Gunakan email @polban.ac.id.';
+      case 'invalid-credential':
+        return 'Email tidak terdaftar atau password salah.';
       case 'user-disabled':
-        return 'This account has been disabled.';
+        return 'Akun ini telah dinonaktifkan.';
       case 'too-many-requests':
-        return 'Too many login attempts. Try again later.';
+        return 'Terlalu banyak percobaan login. Coba lagi nanti.';
       case 'weak-password':
-        return 'Password is too weak. Use at least 8 characters with uppercase, lowercase, and number.';
+        return 'Password terlalu lemah. Gunakan minimal 8 karakter dengan huruf besar, kecil, dan angka.';
+      case 'network-request-failed':
+        return 'Tidak ada koneksi internet. Periksa jaringan Anda.';
       default:
-        return 'An error occurred. Please try again.';
+        return 'Terjadi kesalahan. Silakan coba lagi.';
     }
   }
 }
