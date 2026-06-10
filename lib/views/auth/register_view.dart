@@ -14,6 +14,7 @@ class _RegisterViewState extends State<RegisterView> {
   final Color primaryOrange = const Color(0xFFF88031);
 
   bool _isLoading = false;
+
   late RegisterController _registerController;
   late TextEditingController _emailController;
 
@@ -145,8 +146,14 @@ class _RegisterViewState extends State<RegisterView> {
                 ),
               ),
               const SizedBox(height: 25),
-              // Email Input
-              Text('Email Address', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF2A2C8F))),
+              const Text(
+                'Email Address',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF2A2C8F),
+                ),
+              ),
               const SizedBox(height: 8),
               TextField(
                 controller: _emailController,

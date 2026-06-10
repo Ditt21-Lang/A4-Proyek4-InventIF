@@ -26,4 +26,19 @@ class TransactionDetailController extends ChangeNotifier {
       return false; // Gagal
     }
   }
+
+  Future<String?> getBorrowerKTM(String borrowerId) async {
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(borrowerId)
+          .get();
+      if (doc.exists && doc.data() != null) {
+        return doc.data()!['ktm'] as String?;
+      }
+    } catch (e) {
+      debugPrint('Error get KTM: $e');
+    }
+    return null;
+  }
 }

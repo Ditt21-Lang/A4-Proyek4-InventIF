@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import '../../controllers/profile/manageAccount_controller.dart';
+import '../../services/cloudinary_service.dart';
 
 class ManageAccountView extends StatefulWidget {
   const ManageAccountView({super.key});
@@ -32,11 +32,14 @@ class _ManageAccountViewState extends State<ManageAccountView> {
   bool _obscureNew = true;
   bool _obscureConfirm = true;
 
+  File? _imageFile;
+
   late TextEditingController _identifierController;
   late TextEditingController _emailController;
   late TextEditingController _fullNameController;
   late TextEditingController _nicknameController;
   late TextEditingController _birthDateController;
+  late TextEditingController _kelasController;
   late TextEditingController _ktmController;
   late TextEditingController _phoneController;
   late TextEditingController _currentPasswordController;
@@ -46,6 +49,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
   String? userName;
   String? userNickname;
   String? userUID;
+  String? userRole;
   String? userProfileImage;
   String? _ktmFileName;
 
@@ -62,6 +66,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
     _fullNameController = TextEditingController();
     _nicknameController = TextEditingController();
     _birthDateController = TextEditingController();
+    _kelasController = TextEditingController();
     _ktmController = TextEditingController();
     _phoneController = TextEditingController();
     _currentPasswordController = TextEditingController();
@@ -75,17 +80,22 @@ class _ManageAccountViewState extends State<ManageAccountView> {
       if (userData != null) {
         setState(() {
           userUID = userData.uid;
+          userRole = userData.role;
           _emailController.text = userData.email;
           userName = userData.fullName;
           userNickname = userData.nickname;
           userProfileImage = userData.profileImage;
           _fullNameController.text = userData.fullName;
           _nicknameController.text = userData.nickname ?? '';
+          _identifierController.text = userData.identifier;
+          _kelasController.text = userData.kelas ?? '';
           _ktmController.text = userData.ktm ?? '';
           _birthDateController.text = userData.dateOfBirth ?? '';
           _phoneController.text = userData.phoneNumber ?? '';
         });
 
+        // Check for existing KTM file in document directory (writable location)
+        // Only on mobile/desktop, not on web
         if (!kIsWeb && userData.uid.isNotEmpty) {
           try {
             final appDocDir = await getApplicationDocumentsDirectory();
@@ -114,14 +124,12 @@ class _ManageAccountViewState extends State<ManageAccountView> {
           }
         }
 
+        // Also check from database
         if (userData.ktm != null && userData.ktm!.isNotEmpty) {
-          final file = File(userData.ktm!);
-          if (file.existsSync()) {
-            setState(() {
-              _ktmFileName = userData.ktm?.split('/').last ?? '';
-              _ktmController.text = userData.ktm ?? '';
-            });
-          }
+          setState(() {
+            _ktmFileName = userData.ktm?.split('/').last ?? '';
+            _ktmController.text = userData.ktm ?? '';
+          });
         }
       }
     } catch (e) {
@@ -155,6 +163,8 @@ class _ManageAccountViewState extends State<ManageAccountView> {
         final file = File(image.path);
         final fileName = 'KTM.$fileExtension';
 
+        // Create folder path in app's document directory (writable location)
+        // Only on mobile/desktop, not on web
         if (!kIsWeb) {
           final appDocDir = await getApplicationDocumentsDirectory();
           final userFolder = Directory('${appDocDir.path}/ktm_files/$userUID');
@@ -162,28 +172,30 @@ class _ManageAccountViewState extends State<ManageAccountView> {
             userFolder.createSync(recursive: true);
           }
 
+          // Copy file to document directory
           final newFilePath = '${userFolder.path}/$fileName';
-          await file.copy(newFilePath);
+          final newFile = await file.copy(newFilePath);
 
-          final success = await _controller.updatePersonalInfo(
-            fullName: _fullNameController.text,
-            nickname: _nicknameController.text,
-            identifier: _identifierController.text,
-            ktm: newFilePath,
-            birthDate: _birthDateController.text,
-          );
+        // Save path to database
+        final success = await _controller.updatePersonalInfo(
+          fullName: _fullNameController.text,
+          nickname: _nicknameController.text,
+          identifier: _identifierController.text,
+          ktm: newFilePath, // Save file path
+          birthDate: _birthDateController.text,
+        );
 
-          if (success) {
-            setState(() {
-              _ktmFileName = fileName;
-              _ktmController.text = newFilePath;
-            });
-            _showSuccessSnackBar('KTM file uploaded successfully');
-          } else {
-            _showErrorSnackBar('Failed to save KTM file path to database');
-          }
+        if (success) {
+          setState(() {
+            _ktmFileName = fileName;
+            _ktmController.text = newFilePath;
+          });
+          _showSuccessSnackBar('KTM file uploaded successfully');
+        } else {
+          _showErrorSnackBar('Failed to save KTM file path to database');
         }
-      }
+        } // closes if (!kIsWeb)
+      } // closes if (image != null)
     } catch (e) {
       print('Error uploading KTM: $e');
       _showErrorSnackBar('Failed to upload file: ${e.toString()}');
@@ -192,7 +204,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
 
   Future<void> _openKTMFile() async {
     if (_ktmController.text.isEmpty) {
-      _showErrorSnackBar('No KTM file yet. Please upload first.');
+      _showErrorSnackBar('No Identity Card file yet. Please upload first.');
       return;
     }
 
@@ -200,6 +212,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
       final file = File(_ktmController.text);
       if (file.existsSync()) {
         _showSuccessSnackBar('KTM file found: ${file.path}');
+        // TODO: Open file dengan package 'open_file' untuk preview
       } else {
         _showErrorSnackBar('KTM file not found. Path: ${_ktmController.text}');
       }
@@ -209,23 +222,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
     }
   }
 
-  Future<void> _savePersonalInfo() async {
-    setState(() => _isLoadingPersonalInfo = true);
-    final success = await _controller.updatePersonalInfo(
-      fullName: _fullNameController.text,
-      nickname: _nicknameController.text,
-      identifier: _identifierController.text,
-      ktm: _ktmController.text,
-      birthDate: _birthDateController.text,
-    );
-    setState(() => _isLoadingPersonalInfo = false);
-    if (success) {
-      _showSuccessSnackBar('Personal info updated successfully');
-      setState(() => _isPersonalInfoExpanded = false);
-    } else {
-      _showErrorSnackBar('Failed to update personal info');
-    }
-  }
+
 
   Future<void> _savePassword() async {
     if (_newPasswordController.text != _confirmPasswordController.text) {
@@ -340,13 +337,13 @@ class _ManageAccountViewState extends State<ManageAccountView> {
                       borderRadius: BorderRadius.circular(14),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.15),
+                          color: Colors.black.withValues(alpha: 0.15),
                           offset: const Offset(4, 4),
                           blurRadius: 12,
                           spreadRadius: 2,
                         ),
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
+                          color: Colors.black.withValues(alpha: 0.08),
                           offset: const Offset(2, 2),
                           blurRadius: 6,
                           spreadRadius: 1,
@@ -386,19 +383,23 @@ class _ManageAccountViewState extends State<ManageAccountView> {
                         Border.all(color: const Color(0xFFE0E0E0), width: 2),
                   ),
                   child: ClipOval(
-                    child: userProfileImage != null && userProfileImage!.isNotEmpty
-                        ? Image.network(
-                            userProfileImage!,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => Container(
-                              color: Colors.grey[300],
-                              child: const Icon(Icons.person, color: Colors.grey, size: 24),
-                            ),
-                          )
-                        : Container(
-                            color: Colors.grey[300],
-                            child: const Icon(Icons.person, color: Colors.grey, size: 24),
-                          ),
+                    child:
+                        userProfileImage != null && userProfileImage!.isNotEmpty
+                            ? Image.network(
+                                userProfileImage!,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Container(
+                                  color: Colors.grey[300],
+                                  child: const Icon(Icons.person,
+                                      color: Colors.grey, size: 24),
+                                ),
+                              )
+                            : Container(
+                                color: Colors.grey[300],
+                                child: const Icon(Icons.person,
+                                    color: Colors.grey, size: 24),
+                              ),
                   ),
                 ),
               ],
@@ -411,7 +412,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
                 left: 16,
                 right: 16,
                 top: 20,
-                bottom: 20 + MediaQuery.of(context).padding.bottom, 
+                bottom: 20 + MediaQuery.of(context).padding.bottom,
               ),
               child: Column(
                 children: [
@@ -433,23 +434,66 @@ class _ManageAccountViewState extends State<ManageAccountView> {
                         suffixIcon: Icons.edit,
                       ),
                       _buildNavyField(
-                        label: 'NIM',
+                        label: (userRole == 'teknisi' || userRole == 'coordinator') ? 'NIP' : 'NIM',
                         controller: _identifierController,
                         suffixIcon: Icons.edit,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       ),
                       _buildKtmField(),
                       _buildNavyField(
                         label: 'Birth Date',
                         controller: _birthDateController,
                         suffixIcon: Icons.calendar_today_outlined,
+                        readOnly: true,
+                        onTap: () async {
+                          DateTime? pickedDate = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(1900),
+                            lastDate: DateTime.now(),
+                          );
+                          if (pickedDate != null) {
+                            String formattedDate =
+                                "${pickedDate.day.toString().padLeft(2, '0')}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.year}";
+                            setState(() {
+                              _birthDateController.text = formattedDate;
+                            });
+                          }
+                        },
                       ),
                       const SizedBox(height: 14),
                       _buildSaveButton(
                         label: 'Save Changes',
                         isLoading: _isLoadingPersonalInfo,
-                        onPressed: _savePersonalInfo,
+                        onPressed: () async {
+                          setState(() => _isLoadingPersonalInfo = true);
+
+                          // Panggil controller dan selipkan _imageFile di sini
+                          bool success = await _controller.updatePersonalInfo(
+                            fullName: _fullNameController.text,
+                            nickname: _nicknameController.text,
+                            identifier: _identifierController.text,
+                            ktm: _ktmController.text,
+                            birthDate: _birthDateController.text,
+                            kelas: _kelasController.text,
+                            imageFile: _imageFile,
+                          );
+
+                          setState(() => _isLoadingPersonalInfo = false);
+
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  success
+                                      ? 'Personal info updated!'
+                                      : 'Failed to update info',
+                                ),
+                                backgroundColor:
+                                    success ? Colors.green : Colors.red,
+                              ),
+                            );
+                          }
+                        },
                       ),
                     ],
                   ),
@@ -469,7 +513,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
                       _buildPasswordField(
                         label: 'New Password',
                         hint:
-                            '*password must be at least 8 character with uppercase (A-Z),\nlowercase (a-z) and number (0-9)',
+                            '*password must be at least 8 characters with uppercase (A-Z),\nlowercase (a-z) and number (0-9)',
                         controller: _newPasswordController,
                         obscure: _obscureNew,
                         onToggle: () =>
@@ -479,7 +523,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
                       _buildPasswordField(
                         label: 'Confirm New Password',
                         hint:
-                            '*password must be at least 8 character with uppercase (A-Z),\nlowercase (a-z) and number (0-9)',
+                            '*password must be at least 8 characters with uppercase (A-Z),\nlowercase (a-z) and number (0-9)',
                         controller: _confirmPasswordController,
                         obscure: _obscureConfirm,
                         onToggle: () =>
@@ -508,6 +552,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
                       _buildContactField(
                         label: 'Phone Number',
                         controller: _phoneController,
+                        showVerify: false,
                       ),
                       const SizedBox(height: 14),
                       _buildSaveButton(
@@ -588,8 +633,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
     required String label,
     required TextEditingController controller,
     IconData? suffixIcon,
-    TextInputType keyboardType = TextInputType.text,
-    List<TextInputFormatter>? inputFormatters,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -614,8 +657,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
                 ),
                 TextField(
                   controller: controller,
-                  keyboardType: keyboardType,
-                  inputFormatters: inputFormatters,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 14,
@@ -634,7 +675,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
             Icon(suffixIcon, color: primaryOrange, size: 18),
         ],
       ),
-    );
+    ));
   }
 
 
@@ -651,7 +692,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'KTM',
+            'Identity Card',
             style: TextStyle(
               fontSize: 11,
               color: Color(0xFFAAAAAA),
@@ -703,7 +744,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
                     padding: const EdgeInsets.symmetric(
                         vertical: 10, horizontal: 12),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       border: Border.all(color: primaryOrange, width: 1),
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -814,6 +855,10 @@ class _ManageAccountViewState extends State<ManageAccountView> {
     required String label,
     required TextEditingController controller,
   }) {
+    // Create masked representation of current password
+    String maskedPassword =
+        controller.text.isNotEmpty ? '*' * controller.text.length : '';
+
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
@@ -851,6 +896,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
   Widget _buildContactField({
     required String label,
     required TextEditingController controller,
+    bool showVerify = true,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -886,19 +932,20 @@ class _ManageAccountViewState extends State<ManageAccountView> {
               ],
             ),
           ),
-          GestureDetector(
-            onTap: () {
-              // TODO: verify logic
-            },
-            child: Text(
-              'Verify',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: primaryOrange,
+          if (showVerify)
+            GestureDetector(
+              onTap: () {
+                // TODO: verify logic
+              },
+              child: Text(
+                'Verify',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: primaryOrange,
+                ),
               ),
             ),
-          ),
         ],
       ),
     );
@@ -920,7 +967,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.15),
+                color: Colors.black.withValues(alpha: 0.15),
                 blurRadius: 6,
                 offset: const Offset(0, 2),
               ),

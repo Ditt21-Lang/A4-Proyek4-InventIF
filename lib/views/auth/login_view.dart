@@ -122,7 +122,7 @@ bool _obscurePassword = true;
     }
   }
 
-  // Tampilkan snackbar error sederhana
+  // Tampilkan snackbar
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -138,221 +138,6 @@ bool _obscurePassword = true;
     );
   }
 
-        // Show success dialog with English design
-        void _showSuccessDialog(String message) {
-          showDialog(
-            context: context,
-            builder: (context) => Center(
-              child: SingleChildScrollView(
-                child: AlertDialog(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  backgroundColor: Colors.white,
-                  insetPadding: const EdgeInsets.symmetric(horizontal: 24),
-                  contentPadding: const EdgeInsets.all(0),
-                  content: Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Header with green background
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF51CF66),
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(16),
-                              topRight: Radius.circular(16),
-                            ),
-                          ),
-                          child: Column(
-                            children: [
-                              Container(
-                                width: 60,
-                                height: 60,
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.check_circle_outline,
-                                  color: Colors.white,
-                                  size: 32,
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              const Text(
-                                'Success!',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        // Message
-                        Padding(
-                          padding: const EdgeInsets.all(20),
-                          child: Text(
-                            message,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Color(0xFF333333),
-                              height: 1.5,
-                            ),
-                          ),
-                        ),
-                        // Button
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF51CF66),
-                                elevation: 0,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text(
-                                'Close',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          );
-        }
-        // Show error dialog with English design
-        void _showErrorDialog(String message) {
-          showDialog(
-            context: context,
-            builder: (context) => Center(
-              child: SingleChildScrollView(
-                child: AlertDialog(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  backgroundColor: Colors.white,
-                  insetPadding: const EdgeInsets.symmetric(horizontal: 24),
-                  contentPadding: const EdgeInsets.all(0),
-                  content: Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Header with red background
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFF6B6B),
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(16),
-                              topRight: Radius.circular(16),
-                            ),
-                          ),
-                          child: Column(
-                            children: [
-                              Container(
-                                width: 60,
-                                height: 60,
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.error_outline,
-                                  color: Colors.white,
-                                  size: 32,
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              const Text(
-                                'Error!',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        // Message
-                        Padding(
-                          padding: const EdgeInsets.all(20),
-                          child: Text(
-                            message,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Color(0xFF333333),
-                              height: 1.5,
-                            ),
-                          ),
-                        ),
-                        // Button
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFFFF6B6B),
-                                elevation: 0,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text(
-                                'Close',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          );
-        }
-
   void _showForgotPasswordDialog() {
     final TextEditingController resetEmailController =
         TextEditingController(text: _emailController.text);
@@ -365,7 +150,7 @@ bool _obscurePassword = true;
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
-                'Masukkan email yang terdaftar, kami akan mengirimkan tautan untuk mengatur ulang kata sandi.',
+                'Enter your registered email, and we will send a link to reset your password.',
                 style: TextStyle(fontSize: 12)),
             const SizedBox(height: 16),
             TextField(
@@ -388,13 +173,13 @@ bool _obscurePassword = true;
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Batal')),
+              child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context); // Tutup dialog
 
               ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Mengirim email reset...')));
+                  const SnackBar(content: Text('Sending reset email...')));
 
               // Pastikan nama method ini sesuai dengan yang ada di login_controller.dart Anda
               // Jika di controller namanya sendPasswordResetEmail, ubah baris di bawah ini:
@@ -411,7 +196,7 @@ bool _obscurePassword = true;
                 );
               }
             },
-            child: const Text('Kirim'),
+            child: const Text('Send'),
           ),
         ],
       ),

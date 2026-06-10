@@ -6,6 +6,7 @@ import '../../widgets/custom_bottom_nav.dart';
 import 'coordinator_dashboard_view.dart';
 import 'coordinator_history_view.dart';
 import '../profile/userProfile_view.dart';
+import 'room_list_view.dart';
 
 class MainDashboardCoordinator extends StatefulWidget {
   const MainDashboardCoordinator({super.key});
@@ -86,8 +87,8 @@ class _MainDashboardCoordinatorState extends State<MainDashboardCoordinator> {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                const Color(0xFF283593).withOpacity(0.85),
-                const Color(0xFF1A237E).withOpacity(0.95)
+                const Color(0xFF283593).withValues(alpha: 0.85),
+                const Color(0xFF1A237E).withValues(alpha: 0.95)
               ],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
@@ -106,8 +107,8 @@ class _MainDashboardCoordinatorState extends State<MainDashboardCoordinator> {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                const Color(0xFF283593).withOpacity(0.85),
-                const Color(0xFF1A237E).withOpacity(0.95)
+                const Color(0xFF283593).withValues(alpha: 0.85),
+                const Color(0xFF1A237E).withValues(alpha: 0.95)
               ],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
@@ -142,6 +143,19 @@ class _MainDashboardCoordinatorState extends State<MainDashboardCoordinator> {
         currentIndex: _bottomNavIndex,
         onTap: _onBottomNavTapped,
         middleIcon: Icons.assignment, // Ikon riwayat untuk koordinator
+      ),
+
+      // TOMBOL MELAYANG MENGELOLA RUANGAN — muncul di semua tab
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 20.0),
+        child: FloatingActionButton(
+          backgroundColor: const Color(0xFFFF8A2A),
+          onPressed: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const RoomListView()));
+          },
+          child: const Icon(Icons.meeting_room_rounded, color: Colors.white),
+        ),
       ),
     );
   }

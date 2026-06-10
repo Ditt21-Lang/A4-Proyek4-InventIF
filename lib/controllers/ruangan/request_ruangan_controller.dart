@@ -290,7 +290,7 @@ class RequestRuanganController extends ChangeNotifier {
         details: description,
         eventName: eventName,
         attachmentUrl: attachmentUrl,
-        status: 'Waiting',
+        status: 'Booked',
         createdAt: DateTime.now(),
       );
 

@@ -374,7 +374,7 @@ class _SelectedDatePanel extends StatelessWidget {
               padding: EdgeInsets.symmetric(vertical: 18),
               child: Center(
                 child: Text(
-                  'Belum ada jadwal untuk tanggal ini',
+                  'No schedules for this date yet',
                   style: TextStyle(
                     color: Colors.white70,
                     fontSize: 13,
@@ -545,18 +545,18 @@ String _formatTime(DateTime date) {
 
 String _monthName(int month) {
   const names = [
-    'Januari',
-    'Februari',
-    'Maret',
+    'January',
+    'February',
+    'March',
     'April',
-    'Mei',
-    'Juni',
-    'Juli',
-    'Agustus',
+    'May',
+    'June',
+    'July',
+    'August',
     'September',
-    'Oktober',
+    'October',
     'November',
-    'Desember',
+    'December',
   ];
 
   return names[month - 1];

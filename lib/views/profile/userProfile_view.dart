@@ -131,7 +131,7 @@ class _UserProfileViewState extends State<UserProfileView> {
                     },
                   ),
                   const SizedBox(height: 24),
-                  if (userRole != 'teknisi') ...[
+                  if (userRole != 'teknisi' && userRole != 'coordinator') ...[
                     _buildMenuButton(
                       icon: Icons.shopping_bag_outlined,
                       label: 'List Order',
@@ -171,7 +171,7 @@ class _UserProfileViewState extends State<UserProfileView> {
         color: creamColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -193,7 +193,7 @@ class _UserProfileViewState extends State<UserProfileView> {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 )
@@ -273,7 +273,7 @@ class _UserProfileViewState extends State<UserProfileView> {
           borderRadius: BorderRadius.circular(50),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.15),
+              color: Colors.black.withValues(alpha: 0.15),
               blurRadius: 15,
               offset: const Offset(0, 8),
             ),

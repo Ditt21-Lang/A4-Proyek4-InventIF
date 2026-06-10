@@ -39,7 +39,7 @@ class KatalogRuanganScreen extends StatelessWidget {
               _buildChip('All', false, onTap: () => onTabChanged(2)),
               _buildChip('Room', true),
               _buildChip('Equipment', false, onTap: () => onTabChanged(0)),
-              _buildChip('Available', false),
+              _buildChip('Available', false, onTap: () => onTabChanged(3)),
             ],
           ),
         ),
@@ -96,7 +96,7 @@ class KatalogRuanganScreen extends StatelessWidget {
                       ),
                       const Center(
                         child: Text(
-                          'Ruangan tidak ditemukan',
+                          'Room not found',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 16,
@@ -192,15 +192,27 @@ class KatalogRuanganScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 clipBehavior: Clip.antiAlias,
-                child: Image.asset(
-                  room.gambar,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => const Icon(
-                    Icons.meeting_room_rounded,
-                    color: Color(0xFF3B3B98),
-                    size: 40,
-                  ),
-                ),
+                child: room.gambar.startsWith('http')
+                    ? Image.network(
+                        room.gambar,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(
+                          Icons.meeting_room_rounded,
+                          color: Color(0xFF3B3B98),
+                          size: 40,
+                        ),
+                      )
+                    : Image.asset(
+                        room.gambar,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(
+                          Icons.meeting_room_rounded,
+                          color: Color(0xFF3B3B98),
+                          size: 40,
+                        ),
+                      ),
               ),
               const SizedBox(width: 16),
               Expanded(

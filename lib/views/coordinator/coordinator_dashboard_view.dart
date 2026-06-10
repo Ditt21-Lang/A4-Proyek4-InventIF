@@ -38,8 +38,8 @@ class _CoordinatorDashboardViewState extends State<CoordinatorDashboardView> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  const Color(0xFF283593).withOpacity(0.85),
-                  const Color(0xFF1A237E).withOpacity(0.95),
+                  const Color(0xFF283593).withValues(alpha: 0.85),
+                  const Color(0xFF1A237E).withValues(alpha: 0.95),
                 ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -61,7 +61,7 @@ class _CoordinatorDashboardViewState extends State<CoordinatorDashboardView> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text(
-                              'Halo,',
+                              'Hello,',
                               style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 18,
@@ -126,7 +126,7 @@ class _CoordinatorDashboardViewState extends State<CoordinatorDashboardView> {
                         return Center(
                           child: Text('No room submissions today',
                               style: TextStyle(
-                                  color: Colors.white.withOpacity(0.7),
+                                  color: Colors.white.withValues(alpha: 0.7),
                                   fontSize: 16)),
                         );
                       }
@@ -151,20 +151,6 @@ class _CoordinatorDashboardViewState extends State<CoordinatorDashboardView> {
           ),
         ],
       ),
-
-      // TOMBOL MELAYANG MENGELOLA RUANGAN
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(
-            bottom: 90.0), // Jarak aman agar tidak menabrak Navigasi Bawah
-        child: FloatingActionButton(
-          backgroundColor: const Color(0xFFFF8A2A),
-          onPressed: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (_) => const RoomListView()));
-          },
-          child: const Icon(Icons.meeting_room_rounded, color: Colors.white),
-        ),
-      ),
     );
   }
 
@@ -176,7 +162,7 @@ class _CoordinatorDashboardViewState extends State<CoordinatorDashboardView> {
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.95),
+          color: Colors.white.withValues(alpha: 0.95),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
@@ -237,54 +223,22 @@ class _CoordinatorDashboardViewState extends State<CoordinatorDashboardView> {
                       fontWeight: FontWeight.w600))
             ])),
             const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () async {
-                  final confirmed = await showDialog<bool>(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text('Confirm Submission'),
-                      content: Text(
-                          'Confirm room submission from ${submission.borrowerName}?'),
-                      actions: [
-                        TextButton(
-                            onPressed: () => Navigator.pop(context, false),
-                            child: const Text('Cancel')),
-                        TextButton(
-                            onPressed: () => Navigator.pop(context, true),
-                            child: const Text('Confirm',
-                                style: TextStyle(color: Colors.blue))),
-                      ],
-                    ),
-                  );
-
-                  if (confirmed == true) {
-                    try {
-                      await _controller.confirmSubmission(submission);
-                      if (mounted)
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Submission confirmed'),
-                                backgroundColor: Colors.green));
-                    } catch (e) {
-                      if (mounted)
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text('Error: $e'),
-                            backgroundColor: Colors.red));
-                    }
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFF9500),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    padding: const EdgeInsets.symmetric(vertical: 12)),
-                child: const Text('Confirm submission',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14)),
+            // Menghapus tombol konfirmasi. Sebagai ganti, tampilkan status saja
+            Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: _getStatusColor(submission.status).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  submission.status.toUpperCase(),
+                  style: TextStyle(
+                    color: _getStatusColor(submission.status),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                  ),
+                ),
               ),
             ),
           ],
@@ -293,11 +247,12 @@ class _CoordinatorDashboardViewState extends State<CoordinatorDashboardView> {
     );
   }
 
+
   void _showTransactionDetail(TransactionModel transaction) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Transaction Detail'),
+        title: const Text('Room Details', style: TextStyle(fontWeight: FontWeight.bold)),
         content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -307,21 +262,32 @@ class _CoordinatorDashboardViewState extends State<CoordinatorDashboardView> {
               _detailRow('Room', transaction.itemNames),
               _detailRow('Status', transaction.status),
               _detailRow('Event', transaction.eventName ?? '-'),
-              _detailRow('Details', transaction.details),
-              _detailRow('Start Date',
-                  '${transaction.startDate.day}/${transaction.startDate.month}/${transaction.startDate.year} ${transaction.startDate.hour}:${transaction.startDate.minute.toString().padLeft(2, '0')}'),
-              _detailRow('End Date',
-                  '${transaction.endDate.day}/${transaction.endDate.month}/${transaction.endDate.year} ${transaction.endDate.hour}:${transaction.endDate.minute.toString().padLeft(2, '0')}'),
+              _detailRow('Purpose', transaction.details),
+              _detailRow('Time', '${_controller.formatTanggal(transaction.startDate)} - ${_controller.formatTanggal(transaction.endDate)}'),
             ],
           ),
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Close'))
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close', style: TextStyle(color: Color(0xFFFF8A2A))),
+          ),
         ],
       ),
     );
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'in use':
+        return Colors.green;
+      case 'completed':
+        return Colors.blueGrey;
+      case 'booked':
+        return Colors.blue;
+      default:
+        return const Color(0xFFFF8A2A);
+    }
   }
 
   Widget _detailRow(String label, String value) {

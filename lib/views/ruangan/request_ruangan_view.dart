@@ -28,7 +28,7 @@ class _RequestRuanganScreenState extends State<RequestRuanganScreen> {
 
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Request room berhasil dikirim')),
+          const SnackBar(content: Text('Room request successfully sent')),
         );
         Navigator.pop(context, true);
       }
@@ -536,18 +536,18 @@ class _EquipmentPickerHeader extends StatelessWidget {
   ];
 
   static const List<String> _months = [
-    'Januari',
-    'Februari',
-    'Maret',
+    'January',
+    'February',
+    'March',
     'April',
-    'Mei',
-    'Juni',
-    'Juli',
-    'Agustus',
+    'May',
+    'June',
+    'July',
+    'August',
     'September',
-    'Oktober',
+    'October',
     'November',
-    'Desember',
+    'December',
   ];
 
   @override
@@ -683,7 +683,7 @@ class _EquipmentPickerContent extends StatelessWidget {
           const SizedBox(height: 48),
           const Center(
             child: Text(
-              'Equipment tersedia belum ada',
+              'No equipment available',
               style:
                   TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
             ),

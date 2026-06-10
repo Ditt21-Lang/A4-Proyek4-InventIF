@@ -11,16 +11,20 @@ class ListPengajuanController extends ChangeNotifier {
     debugPrint("🔍 [DEBUG] UI meminta data untuk tab: '$status'");
 
     Query query = _firestore.collection('transactions');
+    query = query.where('category', isEqualTo: 'equipment');
 
     if (status == 'History') {
       query = query.where('status', whereIn: [
         'Approved', 'Returned', 'Selesai', 'completed', 'dikembalikan'
       ]);
     } 
-    // PERBAIKAN: Tangkap kata 'Borrowed' jika UI menggunakan kata tersebut!
     else if (status == 'In Use' || status == 'Borrowed') { 
       query = query.where('status', whereIn: ['In Use', 'Returning']);
-    } 
+    }
+    else if (status == 'Waiting') {
+      // Tab Requests: tampilkan pengajuan baru (Waiting) DAN request pengembalian (Returning)
+      query = query.where('status', whereIn: ['Waiting', 'Returning']);
+    }
     else {
       query = query.where('status', isEqualTo: status);
     }
@@ -78,5 +82,18 @@ class ListPengajuanController extends ChangeNotifier {
     } catch (e) {
       debugPrint('Error mengupdate status: $e');
     }
+  }
+
+  Future<String?> getBorrowerKTM(String borrowerId) async {
+    try {
+      DocumentSnapshot userDoc = await _firestore.collection('users').doc(borrowerId).get();
+      if (userDoc.exists) {
+        var data = userDoc.data() as Map<String, dynamic>?;
+        return data?['ktm'] as String?;
+      }
+    } catch (e) {
+      debugPrint('Error getting borrower KTM: $e');
+    }
+    return null;
   }
 }

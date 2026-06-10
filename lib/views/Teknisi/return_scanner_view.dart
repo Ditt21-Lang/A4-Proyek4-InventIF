@@ -77,14 +77,14 @@ class _ReturnScannerViewState extends State<ReturnScannerView> {
                   String result = _controller.processScannedCode(rawQr);
                   if (result == 'SUCCESS') {
                     setState(() {});
-                    _showSnackbar('Item valid! Berhasil discan.', true);
+                    _showSnackbar('Item valid! Scanned successfully.', true);
                   } else if (result == 'WRONG_ITEM') {
-                    _showSnackbar('Item tidak ada dalam transaksi ini!', false);
+                    _showSnackbar('Item is not in this transaction!', false);
                   } else if (result == 'ALREADY_SCANNED') {
                     // Tidak spam snackbar
                   } else if (result == 'ALL_SCANNED') {
                     setState(() {});
-                    _showSnackbar('Semua item komplit!', true);
+                    _showSnackbar('All items complete!', true);
                   }
                 }
               }
@@ -105,7 +105,7 @@ class _ReturnScannerViewState extends State<ReturnScannerView> {
                 ),
               ),
               child: Container(
-                color: const Color(0xFF3B3B98).withOpacity(0.9),
+                color: const Color(0xFF3B3B98).withValues(alpha: 0.9),
               ),
             ),
           ),
@@ -131,7 +131,7 @@ class _ReturnScannerViewState extends State<ReturnScannerView> {
             right: 0,
             top: 180,
             child: Text(
-              'Arahkan kamera ke QR Code item\nuntuk validasi pengembalian',
+              'Point the camera to the item\'s QR Code\nto validate return',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.white,
@@ -156,12 +156,12 @@ class _ReturnScannerViewState extends State<ReturnScannerView> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
+                      color: Colors.black.withValues(alpha: 0.3),
                       offset: const Offset(3, 3),
                       blurRadius: 6,
                     ),
                     BoxShadow(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       offset: const Offset(-3, -3),
                       blurRadius: 6,
                     ),
@@ -183,14 +183,14 @@ class _ReturnScannerViewState extends State<ReturnScannerView> {
             right: 0,
             child: Center(
               child: Text(
-                'Validasi Pengembalian',
+                'Return Validation',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   shadows: [
                     Shadow(
-                      color: Colors.black.withOpacity(0.3),
+                      color: Colors.black.withValues(alpha: 0.3),
                       offset: const Offset(0, 2),
                       blurRadius: 4,
                     ),
@@ -235,7 +235,7 @@ class _ReturnScannerViewState extends State<ReturnScannerView> {
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        'Status Item (${_controller.scannedItemIds.length}/${widget.transaction.items.length})',
+                        'Item Status (${_controller.scannedItemIds.length}/${widget.transaction.items.length})',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -270,7 +270,7 @@ class _ReturnScannerViewState extends State<ReturnScannerView> {
                                   width: 40,
                                   height: 40,
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF3B3B98).withOpacity(0.1),
+                                    color: const Color(0xFF3B3B98).withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: const Icon(
@@ -350,7 +350,7 @@ class _ReturnScannerViewState extends State<ReturnScannerView> {
                             ? const CircularProgressIndicator(
                                 color: Colors.white)
                             : const Text(
-                                'APPROVE PENGEMBALIAN',
+                                'APPROVE RETURN',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 18,

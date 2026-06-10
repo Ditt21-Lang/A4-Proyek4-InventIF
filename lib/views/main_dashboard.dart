@@ -4,6 +4,7 @@ import 'ruangan/katalog_ruangan.dart';
 import 'alat/qr_scanner_view.dart';
 import 'profile/userProfile_view.dart';
 import 'katalog_all_view.dart';
+import 'katalog_available_view.dart';
 import '../controllers/alat/katalog_alat_controller.dart';
 import '../controllers/ruangan/katalog_ruangan_controller.dart';
 import '../widgets/custom_bottom_nav.dart';
@@ -18,7 +19,7 @@ class MainDashboard extends StatefulWidget {
 
 class _MainDashboardState extends State<MainDashboard> {
   int _bottomNavIndex = 0;
-  int _catalogIndex = 0; // 0: Alat, 1: Ruangan, 2: Semua
+  int _catalogIndex = 0; // 0: Alat, 1: Ruangan, 2: Semua, 3: Available
 
   // Controller dibuat SEKALI di sini agar data tidak ke-load ulang!
   late final KatalogAlatController _alatController;
@@ -64,6 +65,11 @@ class _MainDashboardState extends State<MainDashboard> {
                     controller: _ruanganController,
                     onTabChanged: _onCatalogTabChanged),
                 KatalogAllView(
+                  alatController: _alatController,
+                  ruanganController: _ruanganController,
+                  onTabChanged: _onCatalogTabChanged,
+                ),
+                KatalogAvailableView(
                   alatController: _alatController,
                   ruanganController: _ruanganController,
                   onTabChanged: _onCatalogTabChanged,

@@ -11,13 +11,13 @@ class DetailRuanganScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Hapus Ruangan'),
+        title: const Text('Delete Room'),
         content: Text(
-            'Apakah Anda yakin ingin menghapus ruangan ${controller.title} secara permanen?'),
+            'Are you sure you want to permanently delete room ${controller.title}?'),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Batal')),
+              child: const Text('Cancel')),
           TextButton(
             onPressed: () async {
               try {
@@ -26,18 +26,18 @@ class DetailRuanganScreen extends StatelessWidget {
                   Navigator.pop(context); // Tutup dialog
                   Navigator.pop(context); // Kembali ke list
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text('Ruangan berhasil dihapus!'),
+                      content: Text('Room successfully deleted!'),
                       backgroundColor: Colors.red));
                 }
               } catch (e) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text('Gagal menghapus ruangan'),
+                      content: Text('Failed to delete room'),
                       backgroundColor: Colors.red));
                 }
               }
             },
-            child: const Text('Hapus', style: TextStyle(color: Colors.red)),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -233,7 +233,7 @@ class _PhotoSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _DetailCard(
-      height: 176,
+      height: 280, // Mengubah ukuran agar foto terlihat lebih jelas dan besar
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -312,10 +312,10 @@ class _DescriptionSection extends StatelessWidget {
           const SizedBox(height: 8),
           _BulletText(controller.description),
           const SizedBox(height: 5),
-          _BulletText('Mampu menampung hingga ${controller.capacity} orang'),
+          _BulletText('Can accommodate up to ${controller.capacity} people'),
           if (availableItems.isNotEmpty) ...[
             const SizedBox(height: 12),
-            const _SectionTitle('Barang Tersedia'),
+            const _SectionTitle('Available Items'),
             const SizedBox(height: 8),
             for (final item in availableItems) ...[
               _BulletText(item),
