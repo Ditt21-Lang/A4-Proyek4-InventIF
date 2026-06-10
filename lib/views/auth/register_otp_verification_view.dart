@@ -80,12 +80,8 @@ class _RegisterOTPVerificationViewState
       _isLoading = true;
     });
 
-    Map<String, dynamic> result;
-    if (widget.isPhone) {
-      result = await widget.registerController.verifyPhoneOTP(otpCode);
-    } else {
-      result = await widget.registerController.verifyEmailOTP(otpCode);
-    }
+    // Email-only verification
+    Map<String, dynamic> result = await widget.registerController.verifyEmailOTP(otpCode);
 
     setState(() {
       _isLoading = false;
@@ -94,12 +90,13 @@ class _RegisterOTPVerificationViewState
     if (mounted) {
       if (result['success']) {
         // OTP terverifikasi - navigasi ke halaman pembuatan password
+        // Navigate to password creation with email identity
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => RegisterPasswordCreationView(
-              identity: result['email'] ?? result['phoneNumber'] ?? widget.identity,
-              isPhone: widget.isPhone,
+              identity: result['email'] ?? widget.identity,
+              isPhone: false,
               registerController: widget.registerController,
             ),
           ),
@@ -116,12 +113,8 @@ class _RegisterOTPVerificationViewState
       _isResending = true;
     });
 
-    Map<String, dynamic> result;
-    if (widget.isPhone) {
-      result = await widget.registerController.sendPhoneOTP(widget.identity);
-    } else {
-      result = await widget.registerController.sendEmailOTP(widget.identity);
-    }
+    // Email-only resend
+    Map<String, dynamic> result = await widget.registerController.sendEmailOTP(widget.identity);
 
     setState(() {
       _isResending = false;
@@ -462,7 +455,7 @@ class _RegisterOTPVerificationViewState
                   Text(
                     _canResend
                         ? 'Didn\'t receive code?'
-                        : 'Resend code in ${_resendCountdown}s',
+                        : 'Resend code in ${_resendCountdown}s', // Email OTP
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey.shade700,

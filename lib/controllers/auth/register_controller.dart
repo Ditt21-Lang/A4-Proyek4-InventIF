@@ -21,80 +21,80 @@ class RegisterController {
 
   // === OTP VERIFICATION FLOW ===
 
-  // Fungsi untuk kirim OTP ke nomor HP
-  Future<Map<String, dynamic>> sendPhoneOTP(String phoneNumber) async {
-    try {
-      _tempPhoneNumber = phoneNumber;
+  // // Fungsi untuk kirim OTP ke nomor HP
+  // Future<Map<String, dynamic>> sendPhoneOTP(String phoneNumber) async {
+  //   try {
+  //     _tempPhoneNumber = phoneNumber;
       
-      // Pastikan format +62
-      if (phoneNumber.startsWith('08')) {
-        phoneNumber = '+62${phoneNumber.substring(1)}';
-        _tempPhoneNumber = phoneNumber;
-      }
+  //     // Pastikan format +62
+  //     if (phoneNumber.startsWith('08')) {
+  //       phoneNumber = '+62${phoneNumber.substring(1)}';
+  //       _tempPhoneNumber = phoneNumber;
+  //     }
 
-      // Gunakan Completer untuk menunggu callback
-      final completer = Completer<Map<String, dynamic>>();
+  //     // Gunakan Completer untuk menunggu callback
+  //     final completer = Completer<Map<String, dynamic>>();
 
-      await _firebaseAuth.verifyPhoneNumber(
-        phoneNumber: phoneNumber,
-        timeout: const Duration(seconds: 60),
-        verificationCompleted: (PhoneAuthCredential credential) {
-          // Verifikasi otomatis (hanya Android)
-          print('Nomor telepon terverifikasi secara otomatis');
-        },
-        verificationFailed: (FirebaseAuthException e) {
-          // Dipanggil jika ada error (contoh: nomor tidak valid)
-          print('ERROR CODE: ${e.code}');
-          print('ERROR MESSAGE: ${e.message}');
-          if (!completer.isCompleted) {
-            completer.complete({
-              'success': false,
-              'message': _getPhoneSendErrorMessage(e.code),
-            });
-          }
-        },
-        codeSent: (String verificationId, int? resendToken) {
-          // OTP berhasil dikirim - simpan verificationId
-          _verificationId = verificationId;
-          _resendToken = resendToken;
-          if (!completer.isCompleted) {
-            completer.complete({
-              'success': true,
-              'message': 'OTP successfully sent to $phoneNumber',
-            });
-          }
-        },
-        codeAutoRetrievalTimeout: (String verificationId) {
-          _verificationId = verificationId;
-        },
-        forceResendingToken: _resendToken,
-      );
+  //     await _firebaseAuth.verifyPhoneNumber(
+  //       phoneNumber: phoneNumber,
+  //       timeout: const Duration(seconds: 60),
+  //       verificationCompleted: (PhoneAuthCredential credential) {
+  //         // Verifikasi otomatis (hanya Android)
+  //         print('Nomor telepon terverifikasi secara otomatis');
+  //       },
+  //       verificationFailed: (FirebaseAuthException e) {
+  //         // Dipanggil jika ada error (contoh: nomor tidak valid)
+  //         print('ERROR CODE: ${e.code}');
+  //         print('ERROR MESSAGE: ${e.message}');
+  //         if (!completer.isCompleted) {
+  //           completer.complete({
+  //             'success': false,
+  //             'message': _getPhoneSendErrorMessage(e.code),
+  //           });
+  //         }
+  //       },
+  //       codeSent: (String verificationId, int? resendToken) {
+  //         // OTP berhasil dikirim - simpan verificationId
+  //         _verificationId = verificationId;
+  //         _resendToken = resendToken;
+  //         if (!completer.isCompleted) {
+  //           completer.complete({
+  //             'success': true,
+  //             'message': 'OTP successfully sent to $phoneNumber',
+  //           });
+  //         }
+  //       },
+  //       codeAutoRetrievalTimeout: (String verificationId) {
+  //         _verificationId = verificationId;
+  //       },
+  //       forceResendingToken: _resendToken,
+  //     );
 
-      return await completer.future;
-    } catch (e) {
-      return {
-        'success': false,
-        'message': 'Failed to send OTP: ${e.toString()}',
-      };
-    }
-  }
+  //     return await completer.future;
+  //   } catch (e) {
+  //     return {
+  //       'success': false,
+  //       'message': 'Failed to send OTP: ${e.toString()}',
+  //     };
+  //   }
+  // }
 
-  String _getPhoneSendErrorMessage(String code) {
-    switch (code) {
-      case 'invalid-phone-number':
-        return 'Invalid phone number format. Use format +62-xxx-xxxx-xxxx';
-      case 'too-many-requests':
-        return 'Too many attempts. Wait a few minutes.';
-      case 'quota-exceeded':
-        return 'SMS quota exceeded. Try again tomorrow or contact admin.';
-      case 'app-not-authorized':
-        return 'App not authorized. Check SHA-1 in Firebase Console.';
-      case 'missing-client-identifier':
-        return 'SafetyNet/Play Integrity not configured.';
-      default:
-        return 'Failed to send OTP: $code';
-    }
-  }
+  // String _getPhoneSendErrorMessage(String code) {
+  //   switch (code) {
+  //     case 'invalid-phone-number':
+  //       return 'Invalid phone number format. Use format +62-xxx-xxxx-xxxx';
+  //     case 'too-many-requests':
+  //       return 'Too many attempts. Wait a few minutes.';
+  //     case 'quota-exceeded':
+  //       return 'SMS quota exceeded. Try again tomorrow or contact admin.';
+  //     case 'app-not-authorized':
+  //       return 'App not authorized. Check SHA-1 in Firebase Console.';
+  //     case 'missing-client-identifier':
+  //       return 'SafetyNet/Play Integrity not configured.';
+  //     default:
+  //       return 'Failed to send OTP: $code';
+  //   }
+  // }
 
   // Fungsi untuk mengirim OTP ke email menggunakan EmailJS
   Future<Map<String, dynamic>> sendEmailOTP(String email) async {
@@ -173,49 +173,49 @@ class RegisterController {
     }
   }
 
-  // Fungsi untuk verifikasi OTP dari nomor telepon
-  Future<Map<String, dynamic>> verifyPhoneOTP(String otpCode) async {
-    try {
-      if (_verificationId == null) {
-        return {
-          'success': false,
-          'message': 'Session expired. Please resend OTP.',
-        };
-      }
+  // // Fungsi untuk verifikasi OTP dari nomor telepon
+  // Future<Map<String, dynamic>> verifyPhoneOTP(String otpCode) async {
+  //   try {
+  //     if (_verificationId == null) {
+  //       return {
+  //         'success': false,
+  //         'message': 'Session expired. Please resend OTP.',
+  //       };
+  //     }
 
-      // Buat credential untuk verifikasi kevaliditasan OTP
-      PhoneAuthCredential credential = PhoneAuthProvider.credential(
-        verificationId: _verificationId!,
-        smsCode: otpCode,
-      );
+  //     // Buat credential untuk verifikasi kevaliditasan OTP
+  //     PhoneAuthCredential credential = PhoneAuthProvider.credential(
+  //       verificationId: _verificationId!,
+  //       smsCode: otpCode,
+  //     );
 
-      // Masuk sementara hanya untuk validasi OTP
-      await _firebaseAuth.signInWithCredential(credential);
+  //     // Masuk sementara hanya untuk validasi OTP
+  //     await _firebaseAuth.signInWithCredential(credential);
 
-      // Simpan smsCode sebelum sign out
-      // Akan digunakan lagi di createAccountAfterOTPVerification
-      _verifiedSmsCode = otpCode;
+  //     // Simpan smsCode sebelum sign out
+  //     // Akan digunakan lagi di createAccountAfterOTPVerification
+  //     _verifiedSmsCode = otpCode;
 
-      // Keluar setelah menyimpan smsCode
-      await _firebaseAuth.signOut();
+  //     // Keluar setelah menyimpan smsCode
+  //     await _firebaseAuth.signOut();
 
-      return {
-        'success': true,
-        'phoneNumber': _tempPhoneNumber,
-        'message': 'Phone number successfully verified!',
-      };
-    } on FirebaseAuthException catch (e) {
-      return {
-        'success': false,
-        'message': _getOTPErrorMessage(e.code),
-      };
-    } catch (e) {
-      return {
-        'success': false,
-        'message': 'Error verifying OTP: ${e.toString()}',
-      };
-    }
-  }
+  //     return {
+  //       'success': true,
+  //       'phoneNumber': _tempPhoneNumber,
+  //       'message': 'Phone number successfully verified!',
+  //     };
+  //   } on FirebaseAuthException catch (e) {
+  //     return {
+  //       'success': false,
+  //       'message': _getOTPErrorMessage(e.code),
+  //     };
+  //   } catch (e) {
+  //     return {
+  //       'success': false,
+  //       'message': 'Error verifying OTP: ${e.toString()}',
+  //     };
+  //   }
+  // }
 
   // Fungsi untuk verifikasi OTP dari email
   Future<Map<String, dynamic>> verifyEmailOTP(String otpCode) async {
@@ -288,7 +288,7 @@ class RegisterController {
 
   // Fungsi untuk membuat akun setelah OTP diverifikasi
   Future<Map<String, dynamic>> createAccountAfterOTPVerification({
-    required String identity,   // email atau nomor telepon
+    required String identity, 
     required String password,
     required String fullName,
     required bool isPhone,
@@ -297,8 +297,7 @@ class RegisterController {
       UserCredential userCredential;
 
       if (isPhone) {
-        // Jalur telepon: gunakan PhoneAuthCredential, tidak perlu email/password
-        if (_verificationId == null || _verifiedSmsCode == null) {
+        if (_verificationId == null) {
           return {
             'success': false,
             'user': null,
@@ -309,7 +308,7 @@ class RegisterController {
 
         PhoneAuthCredential phoneCredential = PhoneAuthProvider.credential(
           verificationId: _verificationId!,
-          smsCode: _verifiedSmsCode!,
+          smsCode: _verifiedSmsCode ?? '',
         );
 
         userCredential =
@@ -375,7 +374,6 @@ class RegisterController {
     _tempPhoneNumber = null;
     _tempEmail = null;
     _resendToken = null;
-    _verifiedSmsCode = null;
   }
 
   // Function to map Firebase OTP error messages
@@ -387,8 +385,6 @@ class RegisterController {
         return 'Verification session expired. Please request a new OTP.';
       case 'missing-verification-code':
         return 'Please enter OTP code!';
-      case 'invalid-phone-number':
-        return 'Invalid phone number format!';
       case 'too-many-requests':
         return 'Too many attempts. Try again later!';
       default:
@@ -398,20 +394,20 @@ class RegisterController {
 
   // Function to map Firebase error messages
   String _getErrorMessage(String errorCode) {
-    switch (errorCode) {
-      case 'weak-password':
-        return 'Password is too weak!';
-      case 'email-already-in-use':
-        return 'This email is already in use!';
-      case 'invalid-email':
-        return 'Invalid email format!';
-      case 'operation-not-allowed':
-        return 'Email/Password login is not enabled!';
-      case 'too-many-requests':
-        return 'Too many attempts. Try again later!';
-      default:
-        return 'An error occurred: $errorCode';
-    }
+      switch (errorCode) {
+        case 'weak-password':
+          return 'Password is too weak!';
+        case 'email-already-in-use':
+          return 'This email is already in use!';
+        case 'invalid-email':
+          return 'Invalid email format!';
+        case 'operation-not-allowed':
+          return 'Email/Password login is not enabled!';
+        case 'too-many-requests':
+          return 'Too many attempts. Please try again later!';
+        default:
+          return 'An unexpected error occurred: $errorCode';
+      }
   }
 
   // Check if email already exists

@@ -15,7 +15,8 @@ class _RegisterIdentityInputViewState extends State<RegisterIdentityInputView> {
   final Color primaryOrange = const Color(0xFFF88031);
 
   bool _isLoading = false;
-  bool _isPhoneSelected = true;
+  // Force email-only flow
+  bool _isPhoneSelected = false;
   late RegisterController _registerController;
   late TextEditingController _identityController;
 
@@ -38,36 +39,22 @@ class _RegisterIdentityInputViewState extends State<RegisterIdentityInputView> {
 
     // Validate if input is empty
     if (identity.isEmpty) {
-      _showErrorDialog('Enter your ${_isPhoneSelected ? 'phone number' : 'email'}');
+      _showErrorDialog('Enter your email');
       return;
     }
 
-    // Validate format
-    if (_isPhoneSelected) {
-      // Validate phone number (minimum 10 digits)
-      if (!RegExp(r'^[+]?[0-9]{10,}$').hasMatch(identity)) {
-        _showErrorDialog('Invalid phone number format. Use format +62812345678 or 081234567890');
-        return;
-      }
-    } else {
-      // Validate email
-      if (!RegExp(r'^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$')
-          .hasMatch(identity)) {
-        _showErrorDialog('Invalid email format');
-        return;
-      }
+    // Validate email only
+    if (!RegExp(r'^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$')
+        .hasMatch(identity)) {
+      _showErrorDialog('Invalid email format');
+      return;
     }
 
     setState(() {
       _isLoading = true;
     });
 
-    Map<String, dynamic> result;
-    if (_isPhoneSelected) {
-      result = await _registerController.sendPhoneOTP(identity);
-    } else {
-      result = await _registerController.sendEmailOTP(identity);
-    }
+    Map<String, dynamic> result = await _registerController.sendEmailOTP(identity);
 
     setState(() {
       _isLoading = false;
@@ -242,7 +229,7 @@ class _RegisterIdentityInputViewState extends State<RegisterIdentityInputView> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Choose your preferred method to receive verification code',
+                    'Enter your email to receive verification code',
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey.shade700,
@@ -250,119 +237,17 @@ class _RegisterIdentityInputViewState extends State<RegisterIdentityInputView> {
                   ),
                   const SizedBox(height: 30),
 
-                  // Toggle Buttons (Phone / Email)
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade200,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    padding: const EdgeInsets.all(4),
-                    child: Row(
-                      children: [
-                        // Phone Button
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: _isLoading
-                                ? null
-                                : () {
-                                    setState(() {
-                                      _isPhoneSelected = true;
-                                      _identityController.clear();
-                                    });
-                                  },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              decoration: BoxDecoration(
-                                color: _isPhoneSelected
-                                    ? Colors.white
-                                    : Colors.transparent,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.phone_android,
-                                    size: 18,
-                                    color: _isPhoneSelected
-                                        ? primaryBlue
-                                        : Colors.grey,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Phone',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      color: _isPhoneSelected
-                                          ? primaryBlue
-                                          : Colors.grey,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        // Email Button
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: _isLoading
-                                ? null
-                                : () {
-                                    setState(() {
-                                      _isPhoneSelected = false;
-                                      _identityController.clear();
-                                    });
-                                  },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              decoration: BoxDecoration(
-                                color: !_isPhoneSelected
-                                    ? Colors.white
-                                    : Colors.transparent,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.email_outlined,
-                                    size: 18,
-                                    color: !_isPhoneSelected
-                                        ? primaryBlue
-                                        : Colors.grey,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Email',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      color: !_isPhoneSelected
-                                          ? primaryBlue
-                                          : Colors.grey,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  // Toggle Buttons (Phone / Email) removed
+                  const SizedBox(height: 0),
                   const SizedBox(height: 30),
 
                   // Input Field
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        _isPhoneSelected
-                            ? 'Phone Number'
-                            : 'Email Address',
-                        style: const TextStyle(
+                      const Text(
+                        'Email Address',
+                        style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: Color(0xFF2A2C8F),
@@ -372,23 +257,19 @@ class _RegisterIdentityInputViewState extends State<RegisterIdentityInputView> {
                       TextField(
                         controller: _identityController,
                         enabled: !_isLoading,
-                        keyboardType: _isPhoneSelected
-                            ? TextInputType.phone
-                            : TextInputType.emailAddress,
+                        keyboardType: TextInputType.emailAddress,
                         style: const TextStyle(
                           fontSize: 14,
                           color: Color(0xFF2A2C8F),
                         ),
                         decoration: InputDecoration(
-                          hintText: _isPhoneSelected
-                              ? 'e.g., +62812345678'
-                              : 'e.g., user@example.com',
+                          hintText: 'e.g., user@example.com',
                           hintStyle: TextStyle(
                             fontSize: 13,
                             color: Colors.grey.shade400,
                           ),
                           prefixIcon: Icon(
-                            _isPhoneSelected ? Icons.phone : Icons.email,
+                            Icons.email,
                             color: primaryBlue,
                           ),
                           filled: true,
