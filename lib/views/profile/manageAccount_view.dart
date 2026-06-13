@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import '../../controllers/profile/manageAccount_controller.dart';
 import '../../services/cloudinary_service.dart';
@@ -176,24 +177,25 @@ class _ManageAccountViewState extends State<ManageAccountView> {
           final newFilePath = '${userFolder.path}/$fileName';
           final newFile = await file.copy(newFilePath);
 
-        // Save path to database
-        final success = await _controller.updatePersonalInfo(
-          fullName: _fullNameController.text,
-          nickname: _nicknameController.text,
-          identifier: _identifierController.text,
-          ktm: newFilePath, // Save file path
-          birthDate: _birthDateController.text,
-        );
+          // Save path to database
+          final success = await _controller.updatePersonalInfo(
+            fullName: _fullNameController.text,
+            nickname: _nicknameController.text,
+            identifier: _identifierController.text,
+            ktm: newFilePath, // Save file path
+            birthDate: _birthDateController.text,
+            kelas: _kelasController.text,
+          );
 
-        if (success) {
-          setState(() {
-            _ktmFileName = fileName;
-            _ktmController.text = newFilePath;
-          });
-          _showSuccessSnackBar('KTM file uploaded successfully');
-        } else {
-          _showErrorSnackBar('Failed to save KTM file path to database');
-        }
+          if (success) {
+            setState(() {
+              _ktmFileName = fileName;
+              _ktmController.text = newFilePath;
+            });
+            _showSuccessSnackBar('KTM file uploaded successfully');
+          } else {
+            _showErrorSnackBar('Failed to save KTM file path to database');
+          }
         } // closes if (!kIsWeb)
       } // closes if (image != null)
     } catch (e) {
@@ -221,8 +223,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
       _showErrorSnackBar('Failed to open file: ${e.toString()}');
     }
   }
-
-
 
   Future<void> _savePassword() async {
     if (_newPasswordController.text != _confirmPasswordController.text) {
@@ -405,7 +405,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
               ],
             ),
           ),
-
           Expanded(
             child: SingleChildScrollView(
               padding: EdgeInsets.only(
@@ -434,7 +433,10 @@ class _ManageAccountViewState extends State<ManageAccountView> {
                         suffixIcon: Icons.edit,
                       ),
                       _buildNavyField(
-                        label: (userRole == 'teknisi' || userRole == 'coordinator') ? 'NIP' : 'NIM',
+                        label:
+                            (userRole == 'teknisi' || userRole == 'coordinator')
+                                ? 'NIP'
+                                : 'NIM',
                         controller: _identifierController,
                         suffixIcon: Icons.edit,
                       ),
@@ -633,6 +635,8 @@ class _ManageAccountViewState extends State<ManageAccountView> {
     required String label,
     required TextEditingController controller,
     IconData? suffixIcon,
+    bool readOnly = false,
+    VoidCallback? onTap,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -657,6 +661,8 @@ class _ManageAccountViewState extends State<ManageAccountView> {
                 ),
                 TextField(
                   controller: controller,
+                  readOnly: readOnly,
+                  onTap: onTap,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 14,
@@ -675,9 +681,8 @@ class _ManageAccountViewState extends State<ManageAccountView> {
             Icon(suffixIcon, color: primaryOrange, size: 18),
         ],
       ),
-    ));
+    );
   }
-
 
   // KTM field with Upload & Open File buttons
   Widget _buildKtmField() {

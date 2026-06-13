@@ -1,12 +1,9 @@
 
 
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
 import 'package:flutter/services.dart'; // Added for input formatters
-=======
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
->>>>>>> 90d3e47487ff6e629572fcdc8c4c34560489e1a7
 import '../../controllers/auth/register_controller.dart';
 import '../../models/user_model.dart';
 import '../../services/cloudinary_service.dart';

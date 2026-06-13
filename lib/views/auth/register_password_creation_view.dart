@@ -52,36 +52,36 @@ class _RegisterPasswordCreationViewState
   Future<void> _handleCreateAccount() async {
     // Create account
     if (_fullNameController.text.isEmpty) {
-      _showErrorDialog('Enter your full name');
+      _showErrorSnackBar('Enter your full name');
       return;
     }
 
     if (_passwordController.text.isEmpty) {
-      _showErrorDialog('Enter password');
+      _showErrorSnackBar('Enter password');
       return;
     }
 
     // Validate password: min 8 chars, uppercase, lowercase, digit
     final password = _passwordController.text;
     if (password.length < 8) {
-      _showErrorDialog('Password must be at least 8 characters');
+      _showErrorSnackBar('Password must be at least 8 characters');
       return;
     }
     if (!password.contains(RegExp(r'[A-Z]'))) {
-      _showErrorDialog('Password must include uppercase letter (A-Z)');
+      _showErrorSnackBar('Password must include uppercase letter (A-Z)');
       return;
     }
     if (!password.contains(RegExp(r'[a-z]'))) {
-      _showErrorDialog('Password must include lowercase letter (a-z)');
+      _showErrorSnackBar('Password must include lowercase letter (a-z)');
       return;
     }
     if (!password.contains(RegExp(r'[0-9]'))) {
-      _showErrorDialog('Password must include a number (0-9)');
+      _showErrorSnackBar('Password must include a number (0-9)');
       return;
     }
 
     if (_passwordController.text != _confirmPasswordController.text) {
-      _showErrorDialog('Passwords do not match');
+      _showErrorSnackBar('Passwords do not match');
       return;
     }
 
@@ -114,115 +114,22 @@ class _RegisterPasswordCreationViewState
           ),
         );
       } else {
-        _showErrorDialog(result['message']);
+        _showErrorSnackBar(result['message']);
       }
     }
   }
 
-  // Tampilkan dialog error dengan design yang menarik
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => Center(
-        child: SingleChildScrollView(
-          child: AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            backgroundColor: Colors.white,
-            insetPadding: const EdgeInsets.symmetric(horizontal: 24),
-            contentPadding: const EdgeInsets.all(0),
-            content: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Header dengan background merah
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFF6B6B),
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(16),
-                        topRight: Radius.circular(16),
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 60,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.error_outline,
-                            color: Colors.white,
-                            size: 32,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Oops!',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Message
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Text(
-                      message,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF333333),
-                        height: 1.5,
-                      ),
-                    ),
-                  ),
-                  // Button
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFF6B6B),
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text(
-                          'OK',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: const Color(0xFFE53935),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
         ),
+        duration: const Duration(seconds: 3),
       ),
     );
   }
@@ -276,7 +183,8 @@ class _RegisterPasswordCreationViewState
               _buildTextField(
                 label: 'Password',
                 controller: _passwordController,
-                hintText: 'Minimum 8 characters with uppercase, lowercase, and number',
+                hintText:
+                    'Minimum 8 characters with uppercase, lowercase, and number',
                 prefixIcon: Icons.lock,
                 enabled: !_isLoading,
                 isPassword: true,
@@ -326,7 +234,7 @@ class _RegisterPasswordCreationViewState
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      '• Minimum 8 characters\n• Use uppercase (A-Z) and lowercase (a-z)\n• Include at least one number (0-9)',
+                      '- Minimum 8 characters\n- Use uppercase (A-Z) and lowercase (a-z)\n- Include at least one number (0-9)',
                       style: TextStyle(
                         fontSize: 11,
                         color: Colors.amber.shade800,
@@ -439,7 +347,8 @@ class _RegisterPasswordCreationViewState
           controller: controller,
           enabled: enabled,
           obscureText: isPassword && obscureText,
-          keyboardType: isPassword ? TextInputType.visiblePassword : TextInputType.text,
+          keyboardType:
+              isPassword ? TextInputType.visiblePassword : TextInputType.text,
           style: const TextStyle(
             fontSize: 14,
             color: Color(0xFF2A2C8F),
