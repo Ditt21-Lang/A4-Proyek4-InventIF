@@ -72,7 +72,7 @@ class _RegisterOTPVerificationViewState
     String otpCode = _otpDigitControllers.map((c) => c.text).join();
 
     if (otpCode.length < 6) {
-      _showErrorDialog('Enter 6-digit code');
+      _showErrorSnackBar('Enter 6-digit code');
       return;
     }
 
@@ -80,12 +80,8 @@ class _RegisterOTPVerificationViewState
       _isLoading = true;
     });
 
-    Map<String, dynamic> result;
-    if (widget.isPhone) {
-      result = await widget.registerController.verifyPhoneOTP(otpCode);
-    } else {
-      result = await widget.registerController.verifyEmailOTP(otpCode);
-    }
+    // Email-only verification
+    Map<String, dynamic> result = await widget.registerController.verifyEmailOTP(otpCode);
 
     setState(() {
       _isLoading = false;
@@ -94,18 +90,19 @@ class _RegisterOTPVerificationViewState
     if (mounted) {
       if (result['success']) {
         // OTP terverifikasi - navigasi ke halaman pembuatan password
+        // Navigate to password creation with email identity
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => RegisterPasswordCreationView(
-              identity: result['email'] ?? result['phoneNumber'] ?? widget.identity,
-              isPhone: widget.isPhone,
+              identity: result['email'] ?? widget.identity,
+              isPhone: false,
               registerController: widget.registerController,
             ),
           ),
         );
       } else {
-        _showErrorDialog(result['message']);
+        _showErrorSnackBar(result['message']);
       }
     }
   }
@@ -116,12 +113,8 @@ class _RegisterOTPVerificationViewState
       _isResending = true;
     });
 
-    Map<String, dynamic> result;
-    if (widget.isPhone) {
-      result = await widget.registerController.sendPhoneOTP(widget.identity);
-    } else {
-      result = await widget.registerController.sendEmailOTP(widget.identity);
-    }
+    // Email-only resend
+    Map<String, dynamic> result = await widget.registerController.sendEmailOTP(widget.identity);
 
     setState(() {
       _isResending = false;
@@ -139,228 +132,45 @@ class _RegisterOTPVerificationViewState
           }
         });
         _startCountdown();
-        _showSuccessDialog('Verification code resent');
+        _showSuccessSnackBar('Verification code resent');
       } else {
-        _showErrorDialog(result['message']);
+        _showErrorSnackBar(result['message']);
       }
     }
   }
 
-  // Tampilkan dialog error dengan design yang menarik
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => Center(
-        child: SingleChildScrollView(
-          child: AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            backgroundColor: Colors.white,
-            insetPadding: const EdgeInsets.symmetric(horizontal: 24),
-            contentPadding: const EdgeInsets.all(0),
-            content: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Header dengan background merah
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFF6B6B),
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(16),
-                        topRight: Radius.circular(16),
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 60,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.error_outline,
-                            color: Colors.white,
-                            size: 18,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Oops!',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Message
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Text(
-                      message,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF333333),
-                        height: 1.5,
-                      ),
-                    ),
-                  ),
-                  // Button
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFF6B6B),
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text(
-                          'OK',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+  // Show error SnackBar
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: const Color(0xFFE53935),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
         ),
+        duration: const Duration(seconds: 3),
       ),
     );
   }
 
-  // Tampilkan dialog success
-  void _showSuccessDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => Center(
-        child: SingleChildScrollView(
-          child: AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            backgroundColor: Colors.white,
-            insetPadding: const EdgeInsets.symmetric(horizontal: 24),
-            contentPadding: const EdgeInsets.all(0),
-            content: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Header dengan background hijau
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF51CF66),
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(16),
-                        topRight: Radius.circular(16),
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 60,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.check_circle_outline,
-                            color: Colors.white,
-                            size: 18,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Success!',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Message
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Text(
-                      message,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF333333),
-                        height: 1.5,
-                      ),
-                    ),
-                  ),
-                  // Button
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF51CF66),
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text(
-                          'Close',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+  // Show success SnackBar
+  void _showSuccessSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: const Color(0xFF51CF66),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
         ),
+        duration: const Duration(seconds: 3),
       ),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -462,7 +272,7 @@ class _RegisterOTPVerificationViewState
                   Text(
                     _canResend
                         ? 'Didn\'t receive code?'
-                        : 'Resend code in ${_resendCountdown}s',
+                        : 'Resend code in ${_resendCountdown}s', // Email OTP
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey.shade700,

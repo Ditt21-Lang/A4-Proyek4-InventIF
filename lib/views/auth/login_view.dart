@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../controllers/auth/login_controller.dart';
 import 'register_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,9 +14,10 @@ class LoginView extends StatefulWidget {
 class _LoginViewState extends State<LoginView> {
   final Color primaryBlue = const Color(0xFF2A2C8F);
   final Color primaryOrange = const Color(0xFFF88031);
+bool _obscurePassword = true;
   final Color creamColor = const Color(0xFFFAF0E6);
 
-  bool _obscurePassword = true;
+  bool _isPhoneSelected = false;
   bool _rememberMe = false;
   bool _isLoading = false;
 
@@ -41,9 +43,25 @@ class _LoginViewState extends State<LoginView> {
 
   // Handle login
   Future<void> _handleLogin() async {
-    // Validasi apakah email dan password kosong
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      _showErrorDialog('Email and password must be filled!');
+    String identity = _emailController.text.trim();
+    // Validate if input is empty
+    if (identity.isEmpty) {
+      _showErrorSnackBar('Enter your email');
+      return;
+    }
+    // Validate email format
+    if (!RegExp(r'^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$').hasMatch(identity)) {
+      _showErrorSnackBar('Invalid email format');
+      return;
+    }
+    // Validate that email is from Polban domain
+    if (!identity.toLowerCase().endsWith('@polban.ac.id')) {
+      _showErrorSnackBar('Only Polban email (@polban.ac.id) is allowed to register');
+      return;
+    }
+
+    if (_passwordController.text.isEmpty) {
+      _showErrorSnackBar('Password must be filled!');
       return;
     }
 
@@ -98,226 +116,24 @@ class _LoginViewState extends State<LoginView> {
           Navigator.pushReplacementNamed(context, '/dashboard');
         }
       } else {
-        // Login failed
-        _showErrorDialog(result['message']);
+        // Login failed — tampilkan snackbar
+        _showErrorSnackBar(result['message']);
       }
     }
   }
 
-  // Tampilkan dialog success dengan design yang menarik
-  void _showSuccessDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => Center(
-        child: SingleChildScrollView(
-          child: AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            backgroundColor: Colors.white,
-            insetPadding: const EdgeInsets.symmetric(horizontal: 24),
-            contentPadding: const EdgeInsets.all(0),
-            content: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Header dengan background hijau
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF51CF66),
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(16),
-                        topRight: Radius.circular(16),
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 60,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.check_circle_outline,
-                            color: Colors.white,
-                            size: 32,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Success!',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Message
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Text(
-                      message,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF333333),
-                        height: 1.5,
-                      ),
-                    ),
-                  ),
-                  // Button
-                  Padding(
-                    padding:
-                        const EdgeInsets.only(bottom: 16, left: 16, right: 16),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF51CF66),
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text(
-                          'Close',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+  // Tampilkan snackbar
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: const Color(0xFFE53935),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
         ),
-      ),
-    );
-  }
-
-  // Tampilkan dialog error dengan design yang menarik
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => Center(
-        child: SingleChildScrollView(
-          child: AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            backgroundColor: Colors.white,
-            insetPadding: const EdgeInsets.symmetric(horizontal: 24),
-            contentPadding: const EdgeInsets.all(0),
-            content: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Header dengan background merah
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFF6B6B),
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(16),
-                        topRight: Radius.circular(16),
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 60,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.error_outline,
-                            color: Colors.white,
-                            size: 32,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Oops!',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Message
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Text(
-                      message,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF333333),
-                        height: 1.5,
-                      ),
-                    ),
-                  ),
-                  // Button
-                  Padding(
-                    padding:
-                        const EdgeInsets.only(bottom: 16, left: 16, right: 16),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFF6B6B),
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text(
-                          'Understand',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
+        duration: const Duration(seconds: 3),
       ),
     );
   }
@@ -340,7 +156,15 @@ class _LoginViewState extends State<LoginView> {
             TextField(
               controller: resetEmailController,
               decoration: const InputDecoration(
-                labelText: 'Email',
+                // Email Address
+                label: Text(
+                  'Email Address',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF2A2C8F),
+                  ),
+                ),
                 border: OutlineInputBorder(),
               ),
             ),
@@ -385,13 +209,11 @@ class _LoginViewState extends State<LoginView> {
     final savedPassword = prefs.getString('saved_password') ?? '';
     final isRemembered = prefs.getBool('remember_me') ?? false;
 
-    if (isRemembered) {
-      setState(() {
-        _emailController.text = savedEmail;
-        _passwordController.text = savedPassword;
-        _rememberMe = true;
-      });
-    }
+    setState(() {
+      _emailController.text = savedEmail;
+      _passwordController.text = savedPassword;
+      _rememberMe = isRemembered;
+    });
   }
 
   @override
@@ -626,7 +448,7 @@ class _LoginViewState extends State<LoginView> {
                                       ),
                                     );
                                   },
-                            child: Text(
+                            child: const Text(
                               "Sign Up",
                               style: TextStyle(
                                 color: Colors.blue,

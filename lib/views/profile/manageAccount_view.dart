@@ -1,5 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import '../../controllers/profile/manageAccount_controller.dart';
 import '../../services/cloudinary_service.dart';
@@ -92,7 +95,37 @@ class _ManageAccountViewState extends State<ManageAccountView> {
           _phoneController.text = userData.phoneNumber ?? '';
         });
 
-        // Check from database
+        // Check for existing KTM file in document directory (writable location)
+        // Only on mobile/desktop, not on web
+        if (!kIsWeb && userData.uid.isNotEmpty) {
+          try {
+            final appDocDir = await getApplicationDocumentsDirectory();
+            final userFolder =
+                Directory('${appDocDir.path}/ktm_files/${userData.uid}');
+            if (userFolder.existsSync()) {
+              try {
+                final files = userFolder.listSync();
+                for (var file in files) {
+                  if (file is File && file.path.contains('KTM')) {
+                    final fileName = file.path.split('/').last;
+                    final filePath = file.path;
+                    setState(() {
+                      _ktmFileName = fileName;
+                      _ktmController.text = filePath;
+                    });
+                    break;
+                  }
+                }
+              } catch (e) {
+                print('Error listing KTM files: $e');
+              }
+            }
+          } catch (e) {
+            print('Error accessing document directory: $e');
+          }
+        }
+
+        // Also check from database
         if (userData.ktm != null && userData.ktm!.isNotEmpty) {
           setState(() {
             _ktmFileName = userData.ktm?.split('/').last ?? '';
@@ -119,7 +152,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
       );
 
       if (image != null) {
-        // Validate file format - only allow jpg, jpeg, png, pdf
         final validExtensions = ['jpg', 'jpeg', 'png', 'pdf'];
         final fileExtension =
             image.path.substring(image.path.lastIndexOf('.') + 1).toLowerCase();
@@ -130,35 +162,41 @@ class _ManageAccountViewState extends State<ManageAccountView> {
         }
 
         final file = File(image.path);
+        final fileName = 'KTM.$fileExtension';
 
-        _showSuccessSnackBar('Uploading Identity Card to Cloudinary...');
+        // Create folder path in app's document directory (writable location)
+        // Only on mobile/desktop, not on web
+        if (!kIsWeb) {
+          final appDocDir = await getApplicationDocumentsDirectory();
+          final userFolder = Directory('${appDocDir.path}/ktm_files/$userUID');
+          if (!userFolder.existsSync()) {
+            userFolder.createSync(recursive: true);
+          }
 
-        CloudinaryService cloudinaryService = CloudinaryService();
-        String? secureUrl = await cloudinaryService.uploadFile(file, 'ktm_files');
+          // Copy file to document directory
+          final newFilePath = '${userFolder.path}/$fileName';
+          final newFile = await file.copy(newFilePath);
 
-        if (secureUrl != null) {
           // Save path to database
           final success = await _controller.updatePersonalInfo(
             fullName: _fullNameController.text,
             nickname: _nicknameController.text,
             identifier: _identifierController.text,
-            ktm: secureUrl, // Save Cloudinary URL
+            ktm: newFilePath, // Save file path
             birthDate: _birthDateController.text,
             kelas: _kelasController.text,
           );
 
           if (success) {
             setState(() {
-              _ktmFileName = secureUrl.split('/').last;
-              _ktmController.text = secureUrl;
+              _ktmFileName = fileName;
+              _ktmController.text = newFilePath;
             });
-            _showSuccessSnackBar('Identity Card file uploaded successfully!');
+            _showSuccessSnackBar('KTM file uploaded successfully');
           } else {
-            _showErrorSnackBar('Failed to save Identity Card file path to database');
+            _showErrorSnackBar('Failed to save KTM file path to database');
           }
-        } else {
-          _showErrorSnackBar('Failed to upload to Cloudinary');
-        }
+        } // closes if (!kIsWeb)
       } // closes if (image != null)
     } catch (e) {
       print('Error uploading KTM: $e');
@@ -173,50 +211,24 @@ class _ManageAccountViewState extends State<ManageAccountView> {
     }
 
     try {
-      showDialog(
-        context: context,
-        builder: (context) => Dialog(
-          backgroundColor: Colors.transparent,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              InteractiveViewer(
-                child: Image.network(
-                  _ktmController.text,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    color: Colors.white,
-                    padding: const EdgeInsets.all(20),
-                    child: const Text('Failed to load image', style: TextStyle(color: Colors.red)),
-                  ),
-                ),
-              ),
-              Positioned(
-                top: 0,
-                right: 0,
-                child: IconButton(
-                  icon: const Icon(Icons.close, color: Colors.white, size: 30),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
+      final file = File(_ktmController.text);
+      if (file.existsSync()) {
+        _showSuccessSnackBar('KTM file found: ${file.path}');
+        // TODO: Open file dengan package 'open_file' untuk preview
+      } else {
+        _showErrorSnackBar('KTM file not found. Path: ${_ktmController.text}');
+      }
     } catch (e) {
       print('Error opening KTM: $e');
       _showErrorSnackBar('Failed to open file: ${e.toString()}');
     }
   }
 
-
-
   Future<void> _savePassword() async {
     if (_newPasswordController.text != _confirmPasswordController.text) {
       _showErrorSnackBar('New passwords do not match');
       return;
     }
-    // Validate password: min 8 chars, uppercase, lowercase, digit
     final password = _newPasswordController.text;
     if (password.length < 8) {
       _showErrorSnackBar('Password must be at least 8 characters');
@@ -304,7 +316,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
       backgroundColor: primaryBlue,
       body: Column(
         children: [
-          // Header (cream background)
           Container(
             color: creamColor,
             padding: EdgeInsets.only(
@@ -316,7 +327,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Back button
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
                   child: Container(
@@ -354,7 +364,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
                   ),
                 ),
                 const SizedBox(width: 16),
-                // Greeting - gunakan nickname, jika kosong pakai fullName
                 Expanded(
                   child: Text(
                     'Hello, ${(userNickname != null && userNickname!.isNotEmpty) ? userNickname : userName}!',
@@ -365,7 +374,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
                     ),
                   ),
                 ),
-                // Profile photo
                 Container(
                   width: 54,
                   height: 54,
@@ -397,8 +405,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
               ],
             ),
           ),
-
-          // Scrollable content (blue background)
           Expanded(
             child: SingleChildScrollView(
               padding: EdgeInsets.only(
@@ -427,16 +433,13 @@ class _ManageAccountViewState extends State<ManageAccountView> {
                         suffixIcon: Icons.edit,
                       ),
                       _buildNavyField(
-                        label: (userRole == 'teknisi' || userRole == 'coordinator') ? 'NIP' : 'NIM',
+                        label:
+                            (userRole == 'teknisi' || userRole == 'coordinator')
+                                ? 'NIP'
+                                : 'NIM',
                         controller: _identifierController,
                         suffixIcon: Icons.edit,
                       ),
-                      if (userRole != 'teknisi' && userRole != 'coordinator')
-                        _buildNavyField(
-                          label: 'Class',
-                          controller: _kelasController,
-                          suffixIcon: Icons.edit,
-                        ),
                       _buildKtmField(),
                       _buildNavyField(
                         label: 'Birth Date',
@@ -571,7 +574,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
     );
   }
 
-  // Section (collapsed & expanded)
   Widget _buildSection({
     required String title,
     required IconData icon,
@@ -587,7 +589,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
       clipBehavior: Clip.hardEdge,
       child: Column(
         children: [
-          // Header row
           GestureDetector(
             onTap: onToggle,
             child: Container(
@@ -615,7 +616,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
               ),
             ),
           ),
-          // Expanded content
           if (isExpanded)
             Container(
               width: double.infinity,
@@ -631,7 +631,6 @@ class _ManageAccountViewState extends State<ManageAccountView> {
     );
   }
 
-  // Navy input field (Personal Info)
   Widget _buildNavyField({
     required String label,
     required TextEditingController controller,
@@ -639,44 +638,42 @@ class _ManageAccountViewState extends State<ManageAccountView> {
     bool readOnly = false,
     VoidCallback? onTap,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        decoration: BoxDecoration(
-          color: navyField,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: Color(0xFFAAAAAA),
-                      fontWeight: FontWeight.w500,
-                    ),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: navyField,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Color(0xFFAAAAAA),
+                    fontWeight: FontWeight.w500,
                   ),
-                  TextField(
-                    controller: controller,
-                    readOnly: readOnly,
-                    onTap: onTap,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      isDense: true,
-                      contentPadding: EdgeInsets.zero,
-                    ),
+                ),
+                TextField(
+                  controller: controller,
+                  readOnly: readOnly,
+                  onTap: onTap,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
                   ),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
               ],
             ),
           ),
@@ -684,7 +681,7 @@ class _ManageAccountViewState extends State<ManageAccountView> {
             Icon(suffixIcon, color: primaryOrange, size: 18),
         ],
       ),
-    ));
+    );
   }
 
   // KTM field with Upload & Open File buttons
@@ -863,6 +860,9 @@ class _ManageAccountViewState extends State<ManageAccountView> {
     required String label,
     required TextEditingController controller,
   }) {
+    // Create masked representation of current password
+    String maskedPassword =
+        controller.text.isNotEmpty ? '*' * controller.text.length : '';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),

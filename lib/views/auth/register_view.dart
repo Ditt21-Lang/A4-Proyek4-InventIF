@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../controllers/auth/register_controller.dart';
-import 'profile_completion_view.dart';
 import 'register_otp_verification_view.dart';
+import 'profile_completion_view.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -15,61 +15,50 @@ class _RegisterViewState extends State<RegisterView> {
   final Color primaryOrange = const Color(0xFFF88031);
 
   bool _isLoading = false;
-  final bool _isPhoneSelected = false;
   late RegisterController _registerController;
-  late TextEditingController _identityController;
+  late TextEditingController _emailController;
 
   @override
   void initState() {
     super.initState();
     _registerController = RegisterController();
-    _identityController = TextEditingController();
+    _emailController = TextEditingController();
   }
 
   @override
   void dispose() {
-    _identityController.dispose();
+    _emailController.dispose();
     super.dispose();
   }
 
-  // Send OTP
+  // Send OTP (email only)
   Future<void> _handleSendOTP() async {
-    String identity = _identityController.text.trim();
+    String email = _emailController.text.trim();
 
-    // Validate if input is empty
-    if (identity.isEmpty) {
-      _showErrorDialog(
-          'Enter your ${_isPhoneSelected ? 'phone number' : 'email'}');
+    // Validate input
+    if (email.isEmpty) {
+      _showErrorSnackBar('Please enter your email');
       return;
     }
-
-    // Validate format
-    if (_isPhoneSelected) {
-      // Validate phone number (minimum 10 digits)
-      if (!RegExp(r'^[+]?[0-9]{10,}$').hasMatch(identity)) {
-        _showErrorDialog(
-            'Invalid phone number format. Use format +62812345678 or 081234567890');
-        return;
-      }
-    } else {
-      // Validate email
-      if (!RegExp(r'^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$')
-          .hasMatch(identity)) {
-        _showErrorDialog('Invalid email format');
-        return;
-      }
+    // Validate Polban domain
+    if (!email.toLowerCase().endsWith('@polban.ac.id')) {
+      _showErrorSnackBar(
+          'Only Polban email (@polban.ac.id) is allowed to register');
+      return;
+    }
+    // Check if email already exists
+    bool exists = await _registerController.isEmailExists(email);
+    if (exists) {
+      _showErrorSnackBar('Email already registered, please login');
+      return;
     }
 
     setState(() {
       _isLoading = true;
     });
 
-    Map<String, dynamic> result;
-    if (_isPhoneSelected) {
-      result = await _registerController.sendPhoneOTP(identity);
-    } else {
-      result = await _registerController.sendEmailOTP(identity);
-    }
+    // Send email OTP
+    Map<String, dynamic> result = await _registerController.sendEmailOTP(email);
 
     setState(() {
       _isLoading = false;
@@ -77,272 +66,33 @@ class _RegisterViewState extends State<RegisterView> {
 
     if (mounted) {
       if (result['success']) {
-        // Navigasi ke halaman verifikasi OTP
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => RegisterOTPVerificationView(
-              isPhone: _isPhoneSelected,
-              identity: identity,
+              isPhone: false,
+              identity: email,
               registerController: _registerController,
             ),
           ),
         );
       } else {
-        _showErrorDialog(result['message']);
+        _showErrorSnackBar(result['message'] ?? 'Failed to send OTP');
       }
     }
   }
 
-  // Mendaftar dengan Google
-  Future<void> _handleGoogleSignUp() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    Map<String, dynamic> result = await _registerController.signUpWithGoogle();
-
-    setState(() {
-      _isLoading = false;
-    });
-
-    if (mounted) {
-      if (result['success']) {
-        if (result['isNewUser']) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ProfileCompletionView(
-                userData: result['userData'],
-              ),
-            ),
-          );
-        } else {
-          _showSuccessDialog(result['message']);
-          Future.delayed(const Duration(seconds: 1), () {
-            if (mounted) {
-              Navigator.pop(context);
-            }
-          });
-        }
-      } else {
-        _showErrorDialog(result['message']);
-      }
-    }
-  }
-
-  // Tampilkan dialog error dengan design yang menarik
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => Center(
-        child: SingleChildScrollView(
-          child: AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            backgroundColor: Colors.white,
-            insetPadding: const EdgeInsets.symmetric(horizontal: 24),
-            contentPadding: const EdgeInsets.all(0),
-            content: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Header dengan background merah
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFF6B6B),
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(16),
-                        topRight: Radius.circular(16),
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 60,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.error_outline,
-                            color: Colors.white,
-                            size: 32,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Oops!',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Message
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Text(
-                      message,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF333333),
-                        height: 1.5,
-                      ),
-                    ),
-                  ),
-                  // Button
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFF6B6B),
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text(
-                          'OK',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: const Color(0xFFE53935),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
         ),
-      ),
-    );
-  }
-
-  // Tampilkan dialog success dengan design yang menarik
-  void _showSuccessDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => Center(
-        child: SingleChildScrollView(
-          child: AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            backgroundColor: Colors.white,
-            insetPadding: const EdgeInsets.symmetric(horizontal: 24),
-            contentPadding: const EdgeInsets.all(0),
-            content: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Header dengan background hijau
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF51CF66),
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(16),
-                        topRight: Radius.circular(16),
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 60,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.check_circle_outline,
-                            color: Colors.white,
-                            size: 32,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Success!',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Message
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Text(
-                      message,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF333333),
-                        height: 1.5,
-                      ),
-                    ),
-                  ),
-                  // Button
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF51CF66),
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text(
-                          'Close',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
+        duration: const Duration(seconds: 3),
       ),
     );
   }
@@ -373,14 +123,12 @@ class _RegisterViewState extends State<RegisterView> {
             left: 20.0,
             right: 20.0,
             top: 20.0,
-            // Dorong konten ke atas setinggi tombol navigasi HP
-            bottom: 20.0 + MediaQuery.of(context).padding.bottom, 
+            bottom: 20.0 + MediaQuery.of(context).padding.bottom,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 20),
-              // Judul Verify Your Identity
               const Text(
                 'Verify Your Identity',
                 style: TextStyle(
@@ -390,17 +138,15 @@ class _RegisterViewState extends State<RegisterView> {
                 ),
               ),
               const SizedBox(height: 8),
-              // Subtitle
-              Text(
-                'Enter your email address to receive verification code',
+              const Text(
+                'Enter your Polban email address to receive a verification code.',
                 style: TextStyle(
                   fontSize: 10,
-                  color: Colors.grey.shade600,
+                  color: Colors.grey,
                   height: 1.5,
                 ),
               ),
               const SizedBox(height: 25),
-              // Label Email Address
               const Text(
                 'Email Address',
                 style: TextStyle(
@@ -410,72 +156,47 @@ class _RegisterViewState extends State<RegisterView> {
                 ),
               ),
               const SizedBox(height: 8),
-              // Input Field
               TextField(
-                controller: _identityController,
+                controller: _emailController,
                 enabled: !_isLoading,
                 keyboardType: TextInputType.emailAddress,
                 style: const TextStyle(fontSize: 14),
                 decoration: InputDecoration(
-                  hintText: 'e.g., your@gmail.com',
-                  hintStyle: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade400,
-                  ),
-                  prefixIcon: Icon(
-                    Icons.email_outlined,
-                    color: Colors.grey.shade500,
-                    size: 20,
-                  ),
+                  hintText: 'yourEmail@polban.ac.id',
+                  hintStyle:
+                      TextStyle(fontSize: 12, color: Colors.grey.shade400),
+                  prefixIcon: const Icon(Icons.email_outlined,
+                      color: Colors.grey, size: 20),
                   filled: true,
                   fillColor: Colors.grey.shade50,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(
-                      color: Colors.grey.shade200,
-                    ),
-                  ),
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: Colors.grey.shade200)),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(
-                      color: Colors.grey.shade200,
-                    ),
-                  ),
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: Colors.grey.shade200)),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(
-                      color: primaryBlue,
-                      width: 1.5,
-                    ),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 14,
-                  ),
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: primaryBlue, width: 1.5)),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                 ),
               ),
               const SizedBox(height: 12),
-              // Info Box
+              // Info Box (orange, email icon)
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 10,
-                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 decoration: BoxDecoration(
                   color: Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: Colors.grey.shade200,
-                  ),
+                  border: Border.all(color: primaryOrange),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
-                      Icons.info_outline,
-                      color: Colors.grey.shade700,
-                      size: 18,
-                    ),
+                    const Icon(Icons.email_outlined,
+                        color: Colors.orange, size: 18),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
@@ -502,8 +223,7 @@ class _RegisterViewState extends State<RegisterView> {
                         : primaryOrange,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                        borderRadius: BorderRadius.circular(10)),
                   ),
                   onPressed: _isLoading ? null : _handleSendOTP,
                   child: _isLoading
@@ -511,33 +231,22 @@ class _RegisterViewState extends State<RegisterView> {
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white,
-                            ),
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : const Text(
-                          'Send Verification Code',
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                              strokeWidth: 2))
+                      : const Text('Send Verification Code',
                           style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white)),
                 ),
               ),
               const SizedBox(height: 20),
               // Divider
               Center(
-                child: Text(
-                  'or',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey.shade500,
-                  ),
-                ),
-              ),
+                  child: Text('or',
+                      style: TextStyle(
+                          fontSize: 13, color: Colors.grey.shade500))),
               const SizedBox(height: 20),
               // Google Sign Up Button
               SizedBox(
@@ -545,88 +254,86 @@ class _RegisterViewState extends State<RegisterView> {
                 height: 48,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    elevation: 1,
-                    side: BorderSide(
-                      color: Colors.grey.shade200,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  onPressed: _isLoading ? null : _handleGoogleSignUp,
+                      backgroundColor: Colors.white,
+                      elevation: 1,
+                      side: BorderSide(color: Colors.grey.shade200),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10))),
+                  onPressed: _isLoading
+                      ? null
+                      : () async {
+                          setState(() => _isLoading = true);
+                          var result =
+                              await _registerController.signUpWithGoogle();
+                          setState(() => _isLoading = false);
+                          if (mounted) {
+                            if (result['success'] &&
+                                result['isNewUser'] == true) {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => ProfileCompletionView(
+                                      userData: result['userData']),
+                                ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(result['message'] ??
+                                      'Google sign‑up failed'),
+                                  backgroundColor: result['success']
+                                      ? const Color(0xFF51CF66)
+                                      : const Color(0xFFE53935),
+                                  duration: const Duration(seconds: 3),
+                                ),
+                              );
+                            }
+                          }
+                        },
                   child: _isLoading
                       ? const SizedBox(
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Color(0xFF2A2C8F),
-                            ),
-                            strokeWidth: 2,
-                          ),
-                        )
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  Color(0xFF2A2C8F)),
+                              strokeWidth: 2))
                       : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: Image.asset(
-                                'assets/images/google_icon.png',
-                                errorBuilder: (context, error, stackTrace) {
-                                  return const Icon(
-                                    Icons.g_mobiledata,
-                                    size: 26,
-                                  );
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            const Text(
-                              'Sign up with Google',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFFF88031),
-                              ),
-                            ),
-                          ],
-                        ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              // Already have account link
-              Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Already have an account? ',
-                      style: TextStyle(
-                        color: Colors.grey.shade700,
-                        fontSize: 12,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: _isLoading
-                          ? null
-                          : () {
-                              Navigator.pop(context);
-                            },
-                      child: Text(
-                        'Login',
-                        style: TextStyle(
-                          color: Colors.blue,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ),
-                  ],
+                              SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: Image.asset(
+                                      'assets/images/google_icon.png',
+                                      errorBuilder: (_, __, ___) => const Icon(
+                                          Icons.g_mobiledata,
+                                          size: 26))),
+                              const SizedBox(width: 10),
+                              const Text('Sign up with Google',
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: Color(0xFFF88031))),
+                            ]),
                 ),
               ),
               const SizedBox(height: 30),
+              // Already have account link
+              Center(
+                child:
+                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  const Text('Already have an account? ',
+                      style: TextStyle(color: Colors.grey, fontSize: 12)),
+                  GestureDetector(
+                      onTap: _isLoading ? null : () => Navigator.pop(context),
+                      child: const Text('Login',
+                          style: TextStyle(
+                              color: Colors.blue,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13))),
+                ]),
+              ),
             ],
           ),
         ),

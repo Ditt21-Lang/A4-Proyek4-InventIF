@@ -1,4 +1,7 @@
+
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Added for input formatters
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import '../../controllers/auth/register_controller.dart';
@@ -197,7 +200,7 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
                           width: 60,
                           height: 60,
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
+                            color: Colors.white.withOpacity(0.2),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
@@ -306,7 +309,7 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
                           width: 60,
                           height: 60,
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
+                            color: Colors.white.withOpacity(0.2),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
@@ -476,6 +479,8 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
                     controller: _identifierController,
                     hintText: 'NIM/NIP',
                     enabled: !_isLoading,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   ),
                   const SizedBox(height: 16),
 
@@ -733,6 +738,7 @@ class _ProfileCompletionViewState extends State<ProfileCompletionView> {
     required String hintText,
     bool enabled = true,
     TextInputType keyboardType = TextInputType.text,
+    List<TextInputFormatter>? inputFormatters,
     VoidCallback? onTap,
   }) {
     return Column(
